@@ -17,7 +17,7 @@ Where $\mu_n$ and $\sigma_n^2$ are the mean and variance of item difficulties fa
 
 Let $\delta_i$ be the updated difficulty estimate of item $i$:
 
-$$ \delta_i = \mu_i - \sqrt{1+\frac{\sigma_i^2}{2.9}}\log{\left(\frac{R_i}{N_i-R_i}\right)}$$ 
+$$\delta_i = \mu_i - \sqrt{1+\frac{\sigma_i^2}{2.9}}\log{\left(\frac{R_i}{N_i-R_i}\right)}$$ 
 
 Where $\mu_i$ and $\sigma_i^2$ are the mean and variance of person abilities who attempted item $i$. Likewise, $\R_i$ is the the observed raw score of item $i$ and $\N_i$ is the maximum possible combined score of all persons for item $i$.
 
