@@ -1,11 +1,10 @@
-#ifndef JMLE_components
+#ifndef JMLE_H
 
-#define JMLE_components
-	#include <iostream>
-	#include <random>
-	#include <string>
-	#include <vector>
-	#include <future>
+#define JMLE_H
+#include <random>
+#include <string>
+#include <vector>
+#include <future>
 
 
 
