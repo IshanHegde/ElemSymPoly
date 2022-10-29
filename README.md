@@ -1,5 +1,5 @@
 # RaschModel
-A basic GUI application for Rasch Analysis
+A high performence python package for Rasch model analysis
 
 ## Algorithim Discription 
 
