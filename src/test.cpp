@@ -1,18 +1,19 @@
-#include "RunningStats.h"
+#include "Eigen/Dense"
 #include <iostream>
+
 
 int main()
     {
-        RunningStats rs;
-
-        rs.Push(1000.0);
-        rs.Push(-0.0000983);
 
 
-        std::cout<<rs.Mean()<<std::endl;
+        Eigen::MatrixXf mat(4,4);
+        mat << 1, 2, 6, 9,
+         3, 1, 7, 2,
+         5, 1, 9.02, 2,
+         3, 1, 75, 17;
 
-        std::cout<<rs.StandardDeviation()<<std::endl;
+        mat=mat.array()-1.0;
 
-
+        std::cout<<mat<<std::endl;
 
     }
