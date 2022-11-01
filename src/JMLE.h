@@ -5,7 +5,7 @@
 #include <string>
 #include "Eigen/Dense"
 #include <future>
-
+#include<iostream>
 
 
 	struct LUdcmp
@@ -22,10 +22,12 @@
 		void mprove(Eigen::VectorXd &b, Eigen::VectorXd &x);
 		Eigen::MatrixXd &aref;
 	};
-	LUdcmp::LUdcmp(Eigen::MatrixXd &a) : n(a.size()), lu(a), aref(a){
+	LUdcmp::LUdcmp(Eigen::MatrixXd &a):aref(a){
 
-		
-		indx(n);
+		n=a.rows();
+		lu = a;
+
+		indx = Eigen::VectorXd::Zero(n);
 		const double TINY=1.0e-40;
 		int i,imax,j,k;
 		double big,temp;
@@ -39,6 +41,7 @@
 			if (big == 0.0) throw("Singular matrix in LUdcmp");
 			vv(i)=1.0/big;
 		}
+		
 		for (k=0;k<n;k++) {
 			big=0.0;
 			imax=k;
@@ -49,21 +52,32 @@
 					imax=i;
 				}
 			}
+			
 			if (k != imax) {
 				for (j=0;j<n;j++) {
-					temp=lu.coeff(imax,j);
+					temp=lu(imax,j);
 					lu(imax,j)=lu.coeff(k,j);
 					lu(k,j)=temp;
 				}
 				d = -d;
 				vv(imax)=vv.coeff(k);
 			}
+			
 			indx(k)=imax;
+			
 			if (lu.coeff(k,k) == 0.0) lu(k,k)=TINY;
+			
 			for (i=k+1;i<n;i++) {
-				temp=lu(i,k) /= lu(i,k);
+				
+				temp=lu(i,k) /= lu(k,k);
+				
 				for (j=k+1;j<n;j++)
-					lu(i,j) -= temp*lu.coeff(k,j);
+					{
+						
+					
+						lu(i,j) -= temp*lu(k,j);
+					}
+					
 			}
 		}
 	}
@@ -159,7 +173,9 @@
 				xh(j)=temp;
 				
 				for (int i=0;i<n;i++)
-					df(j,i)=(f[i]-fvec[i])/h;
+					{
+						df(j,i)=(f[i]-fvec[i])/h;
+					}
 				
 			}
 			return df;
@@ -207,7 +223,7 @@
 			for (i=0;i<n;i++) x(i)=xold.coeff(i)+alam*p(i);
 			f=func(x);
 			if (alam < alamin) {
-				for (i=0;i<n;i++) x.coeff(i)=xold.coeff(i);
+				for (i=0;i<n;i++) x(i)=xold.coeff(i);
 				check=true;
 				return;
 			} else if (f <= fold+ALF*alam*slope) return;
@@ -241,15 +257,19 @@
 		const int MAXITS=200;
 		const double TOLF=1.0e-8,TOLMIN=1.0e-12,STPMX=100.0;
 		const double TOLX=std::numeric_limits<double>::epsilon();
-		int i,j,its,n=x.size();
+		int i,j,its,n=x.rows();
+
 		double den,f,fold,stpmax,sum,temp,test;
 		Eigen::VectorXd g(n),p(n),xold(n);
 		Eigen::MatrixXd fjac(n,n);
+
 		Vfmin<T> Vfmin(vecfunc);
 		Vfdjac<T> Vfdjac(vecfunc);
+
 		Eigen::VectorXd &fvec=Vfmin.fvec;
 		f=Vfmin(x);
 		test=0.0;
+
 		for (i=0;i<n;i++)
 			if (abs(fvec.coeff(i)) > test) test=abs(fvec.coeff(i));
 		if (test < 0.01*TOLF) {
@@ -257,21 +277,38 @@
 			return;
 		}
 		sum=0.0;
+
 		for (i=0;i<n;i++) sum += x.coeff(i)*x.coeff(i);
 		stpmax=STPMX*std::max(sqrt(sum),double(n));
 		for (its=0;its<MAXITS;its++) {
+
 			fjac=Vfdjac(x,fvec);
+
 			for (i=0;i<n;i++) {
 				sum=0.0;
-				for (j=0;j<n;j++) sum += fjac.coeff(j,i)*fvec.coeff(j);
+				for (j=0;j<n;j++)
+				{
+					sum += fjac(j,i)*fvec(j);
+				}
 				g(i)=sum;
 			}
-			for (i=0;i<n;i++) xold(i)=x.coeff(i);
+
+			for (i=0;i<n;i++) 
+				{
+					xold(i)=x(i);
+				}
 			fold=f;
-			for (i=0;i<n;i++) p(i) = -fvec.coeff(i);
+			for (i=0;i<n;i++)
+				{
+					p(i) = -fvec.coeff(i);
+				}
+
 			LUdcmp alu(fjac);
+
 			alu.solve(p,p);
+
 			lnsrch(xold,fold,g,p,x,f,stpmax,check,Vfmin);
+
 			test=0.0;
 			for (i=0;i<n;i++)
 				if (abs(fvec.coeff(i)) > test) test=abs(fvec.coeff(i));
@@ -290,9 +327,14 @@
 				return;
 			}
 			test=0.0;
+			
 			for (i=0;i<n;i++) {
 				temp=(abs(x.coeff(i)-xold.coeff(i)))/std::max(abs(x.coeff(i)),1.0);
-				if (temp > test) test=temp;
+				
+				if (temp > test) 
+					{
+						test=temp;
+					}
 			}
 			if (test < TOLX)
 				return;
