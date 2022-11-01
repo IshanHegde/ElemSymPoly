@@ -3,7 +3,7 @@
 #define JMLE_H
 #include <random>
 #include <string>
-#include <vector>
+#include "Eigen/Dense"
 #include <future>
 
 
@@ -11,39 +11,39 @@
 	struct LUdcmp
 	{
 		int n;
-		std::vector<std::vector<double>> lu;
-		std::vector<int> indx;
+		Eigen::MatrixXd lu;
+		Eigen::VectorXd indx;
 		double d;
-		LUdcmp(std::vector<std::vector<double>> &a);
-		void solve(std::vector<double> &b, std::vector<double> &x);
-		void solve(std::vector<std::vector<double>> &b, std::vector<std::vector<double>> &x);
-		void inverse(std::vector<std::vector<double>> &ainv);
+		LUdcmp(Eigen::MatrixXd &a);
+		void solve(Eigen::VectorXd &b, Eigen::VectorXd &x);
+		void solve(Eigen::MatrixXd &b, Eigen::MatrixXd &x);
+		void inverse(Eigen::MatrixXd &ainv);
 		double det();
-		void mprove(std::vector<double> &b, std::vector<double> &x);
-		std::vector<std::vector<double>> &aref;
+		void mprove(Eigen::VectorXd &b, Eigen::VectorXd &x);
+		Eigen::MatrixXd &aref;
 	};
-	LUdcmp::LUdcmp(std::vector<std::vector<double> > &a) : n(a.size()), lu(a), aref(a){
+	LUdcmp::LUdcmp(Eigen::MatrixXd &a) : n(a.size()), lu(a), aref(a){
 
 		
-		indx.reserve(n);
+		indx(n);
 		const double TINY=1.0e-40;
 		int i,imax,j,k;
 		double big,temp;
-		std::vector<double> vv(n);
+		Eigen::VectorXd vv(n);
 		d=1.0;
 
 		for (i=0;i<n;i++) {
 			big=0.0;
 			for (j=0;j<n;j++)
-				if ((temp=abs(lu[i][j])) > big) big=temp;
+				if ((temp=abs(lu.coeff(i,j)) > big)) big=temp;
 			if (big == 0.0) throw("Singular matrix in LUdcmp");
-			vv[i]=1.0/big;
+			vv(i)=1.0/big;
 		}
 		for (k=0;k<n;k++) {
 			big=0.0;
 			imax=k;
 			for (i=k;i<n;i++) {
-				temp=vv[i]*abs(lu[i][k]);
+				temp=vv.coeff(i)*abs(lu.coeff(i,j));
 				if (temp > big) {
 					big=temp;
 					imax=i;
@@ -51,23 +51,23 @@
 			}
 			if (k != imax) {
 				for (j=0;j<n;j++) {
-					temp=lu[imax][j];
-					lu[imax][j]=lu[k][j];
-					lu[k][j]=temp;
+					temp=lu.coeff(imax,j);
+					lu(imax,j)=lu.coeff(k,j);
+					lu(k,j)=temp;
 				}
 				d = -d;
-				vv[imax]=vv[k];
+				vv(imax)=vv.coeff(k);
 			}
-			indx[k]=imax;
-			if (lu[k][k] == 0.0) lu[k][k]=TINY;
+			indx(k)=imax;
+			if (lu.coeff(k,k) == 0.0) lu(k,k)=TINY;
 			for (i=k+1;i<n;i++) {
-				temp=lu[i][k] /= lu[k][k];
+				temp=lu(i,k) /= lu(i,k);
 				for (j=k+1;j<n;j++)
-					lu[i][j] -= temp*lu[k][j];
+					lu(i,j) -= temp*lu.coeff(k,j);
 			}
 		}
 	}
-	void LUdcmp::solve(std::vector<double> &b, std::vector<double> &x)
+	void LUdcmp::solve(Eigen::VectorXd &b, Eigen::VectorXd &x)
 	{
 		int i,ii=0,ip,j;
 		double sum;
@@ -77,67 +77,67 @@
 		for (i=0;i<n;i++) 
 			{
 				
-				x[i] = b[i];
+				x(i) = b(i);
 			}
 		for (i=0;i<n;i++) 
 		{
 			
-			ip=indx[i];
-			sum=x[ip];
-			x[ip]=x[i];
+			ip=indx(i);
+			sum=x(ip);
+			x(ip)=x(i);
 			if (ii != 0)
-				for (j=ii-1;j<i;j++) sum -= lu[i][j]*x[j];
+				for (j=ii-1;j<i;j++) sum -= lu.coeff(i,j)*x(j);
 			else if (sum != 0.0)
 				ii=i+1;
-			x[i]=sum;
+			x(i)=sum;
 		}
 		for (i=n-1;i>=0;i--) {
-			sum=x[i];
-			for (j=i+1;j<n;j++) sum -= lu[i][j]*x[j];
-			x[i]=sum/lu[i][i];
+			sum=x(i);
+			for (j=i+1;j<n;j++) sum -= lu.coeff(i,j)*x(j);
+			x(i)=sum/lu.coeff(i,i);
 		}
 		
 	}
-	void LUdcmp::solve(std::vector<std::vector<double> > &b, std::vector<std::vector<double> > &x)
+	void LUdcmp::solve(Eigen::MatrixXd &b, Eigen::MatrixXd &x)
 	{
-		int i,j,m=b[0].size();
-		if (b.size() != n || x.size() != n || b[0].size() != x[0].size())
+		int i,j,m=b.cols();
+		if (b.rows() != n || x.rows() != n || b.cols() != x.cols())
 			throw("LUdcmp::solve bad sizes");
-		std::vector<double> xx(n);
+		Eigen::VectorXd xx(n);
 		for (j=0;j<m;j++) {
-			for (i=0;i<n;i++) xx[i] = b[i][j];
+			for (i=0;i<n;i++) xx(i) = b.coeff(i,j);
 			solve(xx,xx);
-			for (i=0;i<n;i++) x[i][j] = xx[i];
+			for (i=0;i<n;i++) x(i,j) = xx.coeff(i);
 		}
 	}
-	void LUdcmp::inverse(std::vector<std::vector<double> > &ainv)
+	void LUdcmp::inverse(Eigen::MatrixXd &ainv)
 	{
 		int i,j;
-		ainv.resize(n,std::vector<double>(n));
+		ainv.resize(n,n);
 		for (i=0;i<n;i++) {
-			for (j=0;j<n;j++) ainv[i][j] = 0.;
-			ainv[i][i] = 1.;
+			for (j=0;j<n;j++) ainv(i,j) = 0.;
+			ainv(i,i) = 1.;
 		}
 		solve(ainv,ainv);
 	}
 	double LUdcmp::det()
 	{
 		double dd = d;
-		for (int i=0;i<n;i++) dd *= lu[i][i];
+		for (int i=0;i<n;i++) dd *= lu.coeff(i,i);
 		return dd;
 	}
-	void LUdcmp::mprove(std::vector<double> &b, std::vector<double> &x)
+	void LUdcmp::mprove(Eigen::VectorXd &b, Eigen::VectorXd &x)
 	{
 		int i,j;
-		std::vector<double> r(n);
+		Eigen::VectorXd r(n);
 		for (i=0;i<n;i++) {
-			double sdp = -b[i];
+			double sdp = -b.coeff(i);
 			for (j=0;j<n;j++)
-				sdp += (double)aref[i][j] * (double)x[j];
-			r[i]=sdp;
+				sdp += aref.coeff(i,j) * x.coeff(j);
+			r(i)=sdp;
 		}
 		solve(r,r);
-		for (i=0;i<n;i++) x[i] -= r[i];
+		for (i=0;i<n;i++) x(i) -= r.coeff(i);
 	}
 
 	template <class T>
@@ -145,72 +145,69 @@
 		const double EPS;
 		T &func;
 		Vfdjac(T &funcc) : EPS(1.0e-8),func(funcc) {}
-		std::vector<std::vector<double>> operator() (const std::vector<double> &x, const std::vector<double> &fvec) {
+		Eigen::MatrixXd  operator() (const Eigen::VectorXd &x, const Eigen::VectorXd &fvec) {
 			int n=x.size();
-			std::vector<std::vector<double>> df(n,std::vector<double>(n));
-			std::vector<double> xh=x;
+			Eigen::MatrixXd  df(n,n);
+			Eigen::VectorXd xh=x;
 			for (int j=0;j<n;j++) {
-				double temp=xh[j];
+				double temp=xh(j);
 				double h=EPS*abs(temp);
 				if (h == 0.0) h=EPS;
-				xh[j]=temp+h;
-				h=xh[j]-temp;
-				std::vector<double> f=func(xh);
-				xh[j]=temp;
-
-				std::vector<double> inner_store(n);
+				xh(j)=temp+h;
+				h=xh(j)-temp;
+				Eigen::VectorXd f=func(xh);
+				xh(j)=temp;
 				
 				for (int i=0;i<n;i++)
-					inner_store[i]=(f[i]-fvec[i])/h;
+					df(j,i)=(f[i]-fvec[i])/h;
 				
-				df[j]=inner_store;
 			}
 			return df;
 		}
 	};
 	template <class T>
 	struct Vfmin {
-		std::vector<double> fvec;
+		Eigen::VectorXd fvec;
 		T &func;
 		int n;
 		Vfmin(T &funcc) : func(funcc){}
-		double operator() (const std::vector<double> &x) {
+		double operator() (Eigen::VectorXd &x) {
 			n=x.size();
 			double sum=0;
 			fvec=func(x);
-			for (int i=0;i<n;i++) sum += fvec[i]*fvec[i];
+			for (int i=0;i<n;i++) sum += fvec(i)*fvec(i);
 			return 0.5*sum;
 		}
 	};
 
 	template <class T>
-	void lnsrch(const std::vector<double> &xold, const double fold, const std::vector<double> &g, std::vector<double> &p,
-	std::vector<double> &x, double &f, const double stpmax, bool &check, T &func) {
+	void lnsrch(const Eigen::VectorXd &xold, const double fold, const Eigen::VectorXd &g, Eigen::VectorXd &p,
+	Eigen::VectorXd &x, double &f, const double stpmax, bool &check, T &func) {
 		const double ALF=1.0e-4, TOLX=std::numeric_limits<double>::epsilon();
 		double a,alam,alam2=0.0,alamin,b,disc,f2=0.0;
 		double rhs1,rhs2,slope=0.0,sum=0.0,temp,test,tmplam;
 		int i,n=xold.size();
 		check=false;
-		for (i=0;i<n;i++) sum += p[i]*p[i];
+		for (i=0;i<n;i++) sum += p.coeff(i)*p.coeff(i);
 		sum=sqrt(sum);
 		if (sum > stpmax)
 			for (i=0;i<n;i++)
-				p[i] *= stpmax/sum;
+				p(i) *= stpmax/sum;
 		for (i=0;i<n;i++)
-			slope += g[i]*p[i];
+			slope += g.coeff(i)*p.coeff(i);
 		if (slope >= 0.0) throw("Roundoff problem in lnsrch.");
 		test=0.0;
 		for (i=0;i<n;i++) {
-			temp=abs(p[i])/std::max(abs(xold[i]),1.0);
+			temp=abs(p.coeff(i))/std::max(abs(xold.coeff(i)),1.0);
 			if (temp > test) test=temp;
 		}
 		alamin=TOLX/test;
 		alam=1.0;
 		for (;;) {
-			for (i=0;i<n;i++) x[i]=xold[i]+alam*p[i];
+			for (i=0;i<n;i++) x(i)=xold.coeff(i)+alam*p(i);
 			f=func(x);
 			if (alam < alamin) {
-				for (i=0;i<n;i++) x[i]=xold[i];
+				for (i=0;i<n;i++) x.coeff(i)=xold.coeff(i);
 				check=true;
 				return;
 			} else if (f <= fold+ALF*alam*slope) return;
@@ -240,44 +237,44 @@
 	}
 
 	template <class T>
-	void newt(std::vector<double> &x, bool &check, T &vecfunc) {
+	void newt(Eigen::VectorXd &x, bool &check, T &vecfunc) {
 		const int MAXITS=200;
 		const double TOLF=1.0e-8,TOLMIN=1.0e-12,STPMX=100.0;
 		const double TOLX=std::numeric_limits<double>::epsilon();
 		int i,j,its,n=x.size();
 		double den,f,fold,stpmax,sum,temp,test;
-		std::vector<double> g(n),p(n),xold(n);
-		std::vector<std::vector<double>> fjac(n,std::vector<double>(n));
+		Eigen::VectorXd g(n),p(n),xold(n);
+		Eigen::MatrixXd fjac(n,n);
 		Vfmin<T> Vfmin(vecfunc);
 		Vfdjac<T> Vfdjac(vecfunc);
-		std::vector<double> &fvec=Vfmin.fvec;
+		Eigen::VectorXd &fvec=Vfmin.fvec;
 		f=Vfmin(x);
 		test=0.0;
 		for (i=0;i<n;i++)
-			if (abs(fvec[i]) > test) test=abs(fvec[i]);
+			if (abs(fvec.coeff(i)) > test) test=abs(fvec.coeff(i));
 		if (test < 0.01*TOLF) {
 			check=false;
 			return;
 		}
 		sum=0.0;
-		for (i=0;i<n;i++) sum += x[i]*x[i];
+		for (i=0;i<n;i++) sum += x.coeff(i)*x.coeff(i);
 		stpmax=STPMX*std::max(sqrt(sum),double(n));
 		for (its=0;its<MAXITS;its++) {
 			fjac=Vfdjac(x,fvec);
 			for (i=0;i<n;i++) {
 				sum=0.0;
-				for (j=0;j<n;j++) sum += fjac[j][i]*fvec[j];
-				g[i]=sum;
+				for (j=0;j<n;j++) sum += fjac.coeff(j,i)*fvec.coeff(j);
+				g(i)=sum;
 			}
-			for (i=0;i<n;i++) xold[i]=x[i];
+			for (i=0;i<n;i++) xold(i)=x.coeff(i);
 			fold=f;
-			for (i=0;i<n;i++) p[i] = -fvec[i];
+			for (i=0;i<n;i++) p(i) = -fvec.coeff(i);
 			LUdcmp alu(fjac);
 			alu.solve(p,p);
 			lnsrch(xold,fold,g,p,x,f,stpmax,check,Vfmin);
 			test=0.0;
 			for (i=0;i<n;i++)
-				if (abs(fvec[i]) > test) test=abs(fvec[i]);
+				if (abs(fvec.coeff(i)) > test) test=abs(fvec.coeff(i));
 			if (test < TOLF) {
 				check=false;
 				return;
@@ -286,7 +283,7 @@
 				test=0.0;
 				den=std::max(f,0.5*n);
 				for (i=0;i<n;i++) {
-					temp=abs(g[i])*std::max(abs(x[i]),1.0)/den;
+					temp=abs(g.coeff(i))*std::max(abs(x.coeff(i)),1.0)/den;
 					if (temp > test) test=temp;
 				}
 				check=(test < TOLMIN);
@@ -294,7 +291,7 @@
 			}
 			test=0.0;
 			for (i=0;i<n;i++) {
-				temp=(abs(x[i]-xold[i]))/std::max(abs(x[i]),1.0);
+				temp=(abs(x.coeff(i)-xold.coeff(i)))/std::max(abs(x.coeff(i)),1.0);
 				if (temp > test) test=temp;
 			}
 			if (test < TOLX)
