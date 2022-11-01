@@ -1,8 +1,7 @@
 #ifndef RUNNINGSTATS_H
 #define RUNNINGSTATS_H
 #include <cmath>
-#include <vector>
-
+#include <pybind11/eigen.h>
 // creddit to Dr. John D. Cook 
 // link: https://www.johndcook.com/blog/skewness_kurtosis/
 
@@ -72,17 +71,15 @@ double RunningStats::StandardDeviation() const
     return sqrt( Variance() );
 }
 
-RunningStats get_stats_obj(const std::vector<double> & array) 
+RunningStats get_stats_obj(const Eigen::VectorXd & array) 
     {
         RunningStats obj;
 
-        const uint64_t size = array.size();
-
-        for(int i=0;i<size;i++)
+        for (auto x: array)
             {
-                obj.Push(array.at(i));
+                obj.Push(x);
             }
-        
+                
         return obj;
     }
 
