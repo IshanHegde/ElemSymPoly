@@ -1,5 +1,6 @@
 #include "RunningStats.h"
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <iostream>
 #include "Data.h"
 namespace py = pybind11;
@@ -112,6 +113,11 @@ PYBIND11_MODULE(pyrasch,m)
         py::class_<Rasch>(m,"Rasch")
         .def(py::init<const Eigen::MatrixXd &>())
         .def("PROX",&Rasch::PROX)
+        .def("estimate_thresholds",&Rasch::estimate_thresholds)
+        .def("estimate_counts",&Rasch::estimate_counts)
+        .def_readwrite("data_probability",&Rasch::data_probability,py::return_value_policy::reference_internal)
+        .def_readwrite("RA_Thresholds",&Rasch::RA_Thresholds,py::return_value_policy::reference_internal)
+        .def_readwrite("observed_counts",&Rasch::observed_counts,py::return_value_policy::reference_internal)
         .def_readwrite("ability",&Rasch::ability,py::return_value_policy::reference_internal)
         .def_readwrite("difficulty",&Rasch::difficulty,py::return_value_policy::reference_internal);
 
