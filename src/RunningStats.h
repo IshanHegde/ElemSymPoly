@@ -21,7 +21,7 @@ class RunningStats
 
     private:
         long long n;
-        double M1, M2;
+        double w_sum, w_sum2, mean, S;
 };
 
 RunningStats::RunningStats() 
@@ -32,20 +32,20 @@ RunningStats::RunningStats()
 void RunningStats::Clear()
 {
     n = 0;
-    M1 = M2 = 0.0;
+    w_sum = w_sum2 = mean = S = 0.0;
 }
 
-void RunningStats::Push(double x)
+void RunningStats::Push(double x,double w)
 {
-    double delta, delta_n, term1;
+    double mean_old;
 
-    long long n1 = n;
-    n++;
-    delta = x - M1;
-    delta_n = delta / n;
-    term1 = delta * delta_n * n1;
-    M1 += delta_n;
-    M2 += term1;
+    w_sum = w_sum + w;
+    w_sum2 = w_sum2 + w*w;
+    mean_old = mean;
+    mean = mean_old + (w / w_sum) * (x - mean_old);
+    S = S + w * (x - mean_old) * (x - mean)
+
+
 }
 
 long long RunningStats::NumDataValues() const
@@ -55,12 +55,12 @@ long long RunningStats::NumDataValues() const
 
 double RunningStats::Mean() const
 {
-    return M1;
+    return mean;
 }
 
 double RunningStats::Variance() const
 {
-    return M2/(n-1.0);
+    return S / (w_sum - 1)
 }
 
 double RunningStats::StandardDeviation() const
