@@ -105,6 +105,10 @@ void Rasch::PROX(int PROX_MAX)
     }
 
 
+void Rasch::JMLE(int JMLE_MAX)
+    {
+        
+    }
 
 PYBIND11_MODULE(pyrasch,m)
     {
@@ -115,6 +119,7 @@ PYBIND11_MODULE(pyrasch,m)
         .def("PROX",&Rasch::PROX)
         .def("estimate_thresholds",&Rasch::estimate_thresholds)
         .def("estimate_counts",&Rasch::estimate_counts)
+        .def("estimate_expected_values",&Rasch::estimate_expected_values)
         .def_readwrite("data_probability",&Rasch::data_probability,py::return_value_policy::reference_internal)
         .def_readwrite("RA_Thresholds",&Rasch::RA_Thresholds,py::return_value_policy::reference_internal)
         .def_readwrite("observed_counts",&Rasch::observed_counts,py::return_value_policy::reference_internal)

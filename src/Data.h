@@ -38,13 +38,13 @@ struct Rasch
 
         void PROX(int PROX_MAX);
 
+        void JMLE(int JMLE_MAX);
+
         Eigen::MatrixXd estimate_expected_values();
+        
+        Eigen::MatrixXd calculate_residuals();
 
-        double estimate_probability(const double & ability_n, const Eigen::VectorXd & RA_threshold_i, const int &val);
-
-        std::vector<std::vector<std::vector<double>>> estimate_full_probability();
-
-        double estimate_expected_frequency();        
+        std::vector<std::vector<std::vector<double>>> estimate_full_probability();      
 
     };
 
@@ -101,45 +101,9 @@ Rasch::Rasch(const Eigen::MatrixXd & t_data):data(t_data),N(data.rows()),I(data.
 
     }
 
-double Rasch::estimate_probability(const double & ability_n, const Eigen::VectorXd & RA_threshold_i, const int &val)
-    {
-        double neum =0.0;
-        double dnom =1.0;
-        double temp_dnom;
-        int k;
-        int j;
-        int m =RA_threshold_i.size();
-
-        for (k=0;k<val;k++)
-            {
-                neum+=ability_n-RA_threshold_i(k);
-                temp_dnom=0.0;
-                for (j=0;j<k;j++)
-                    {
-                        temp_dnom+=ability_n-RA_threshold_i(j);
-                    }
-                dnom+=exp(temp_dnom);
-
-            }
-        
-        for (k=val;k<m;k++)
-            {
-                temp_dnom=0.0;
-                for (j=0;j<k;j++)
-                    {
-                        temp_dnom+=ability_n-RA_threshold_i(j);
-                    }
-                dnom+=exp(temp_dnom);    
-            }
-        
-        neum= exp(neum);
-
-        return neum/dnom;
-    }
-
 Eigen::MatrixXd Rasch::estimate_expected_values()
     {
-        Eigen::MatrixXd out;
+        Eigen::MatrixXd out(N,I);
         int i;
         int j;
         int n;
@@ -305,4 +269,10 @@ std::vector<std::vector<double>> Rasch::estimate_thresholds()
         return out;
     }
 
+Eigen::MatrixXd Rasch::calculate_residuals()
+    {
+        Eigen::MatrixXd out(N,I);
+
+        return estimate_expected_values()-data;
+    }
 #endif
