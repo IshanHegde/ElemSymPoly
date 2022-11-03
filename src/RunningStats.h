@@ -21,7 +21,7 @@ class RunningStats
 
     private:
         long long n;
-        double M1, M2, M3, M4;
+        double M1, M2;
 };
 
 RunningStats::RunningStats() 
@@ -32,22 +32,19 @@ RunningStats::RunningStats()
 void RunningStats::Clear()
 {
     n = 0;
-    M1 = M2 = M3 = M4 = 0.0;
+    M1 = M2 = 0.0;
 }
 
 void RunningStats::Push(double x)
 {
-    double delta, delta_n, delta_n2, term1;
+    double delta, delta_n, term1;
 
     long long n1 = n;
     n++;
     delta = x - M1;
     delta_n = delta / n;
-    delta_n2 = delta_n * delta_n;
     term1 = delta * delta_n * n1;
     M1 += delta_n;
-    M4 += term1 * delta_n2 * (n*n - 3*n + 3) + 6 * delta_n2 * M2 - 4 * delta_n * M3;
-    M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
     M2 += term1;
 }
 
@@ -71,7 +68,8 @@ double RunningStats::StandardDeviation() const
     return sqrt( Variance() );
 }
 
-RunningStats get_stats_obj(const Eigen::VectorXd & array) 
+template <typename T>
+RunningStats get_stats_obj(const T & array) 
     {
         RunningStats obj;
 
