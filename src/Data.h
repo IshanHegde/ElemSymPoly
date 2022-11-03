@@ -22,6 +22,9 @@ struct Rasch
         Eigen::VectorXd difficulty;
         Eigen::VectorXd ability;
 
+        Eigen::MatrixXd expected_value;
+        Eigen::MatrixXd variance;
+
         std::vector<std::vector<std::vector<double>>> data_probability;
 
         Rasch(const Eigen::MatrixXd & t_data);
@@ -40,7 +43,7 @@ struct Rasch
 
         void JMLE(int JMLE_MAX);
 
-        Eigen::MatrixXd estimate_expected_values();
+        void estimate_model_moments();
         
         Eigen::MatrixXd calculate_residuals();
 
@@ -240,23 +243,14 @@ std::vector<std::vector<double>> Rasch::estimate_thresholds()
                 m_i=MAX_ITEM_SCORES.coeff(i);
                 std::vector<double> temp;
                 temp.reserve(m_i+1);
-                for (j=0;j<m_i+1;j++)
-                    {
-                        observed_lower=0.0;
-                        observed_higher=0.0;
-                        estimated_lower=0.0;
-                        estimated_higher=0.0;
 
-                        for (k=0;k<j;k++)
-                            {
-                                observed_lower+=observed_counts.at(i).at(k);
-                                estimated_lower+=estimated_counts.at(i).at(k);
-                            }
-                        for (k=j+1;k<m_i+1;k++)
-                            {
-                                observed_higher+=observed_counts.at(i).at(k);
-                                estimated_higher+=estimated_counts.at(i).at(k);
-                            }
+                temp.emplace_back(0.0);
+                for (j=1;j<m_i+1;j++)
+                    {
+                        observed_lower=observed_counts.at(i).at(j-1);
+                        observed_higher=observed_counts.at(i).at(j);
+                        estimated_lower=estimated_counts.at(i).at(j-1);
+                        estimated_higher=estimated_counts.at(i).at(j);
                             
                         temp.emplace_back(estimated_counts.at(i).at(j)+log(observed_lower/observed_higher)-log(estimated_lower/estimated_higher));
 
