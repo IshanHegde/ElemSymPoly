@@ -102,33 +102,8 @@ Rasch::Rasch(const Eigen::MatrixXd & t_data):data(t_data),N(data.rows()),I(data.
 
         data_probability=estimate_full_probability();
 
-    }
+        estimate_model_moments();
 
-Eigen::MatrixXd Rasch::estimate_expected_values()
-    {
-        Eigen::MatrixXd out(N,I);
-        int i;
-        int j;
-        int n;
-        int m_i;
-        double sum;
-        
-
-        for (n=0;n<N;n++)
-            {
-                for (i=0;i<I;i++)
-                    {
-                        m_i=MAX_ITEM_SCORES.coeff(i);
-                        sum=0.0;
-                        for (j=1;j<m_i+1;j++)
-                            {
-                                sum+=data_probability.at(n).at(i).at(j)*j;
-                            }
-                        out(n,i)=sum;
-                    }
-            }
-            
-        return out;
     }
 
 void Rasch::estimate_model_moments()
@@ -140,16 +115,23 @@ void Rasch::estimate_model_moments()
         int m_i;
 
         for (n=0;n<N;n++)
-            {
+            {   
+                
                 for(i=0;i<I;i++)
                     {
-                        m_i= MAX_ITEM_SCORES.at(i)
-                        RunningStats stats = get_stats_obj(data_probability.at(n).at(i),Eigen::VectorXd::setLinSpaced(m_i+1,0,m_i));
+                        m_i= MAX_ITEM_SCORES.coeff(i);
+                        Eigen::VectorXd scores;
+                        scores.setLinSpaced(m_i,1,m_i);
                         
+
+                        RunningStats stats = get_stats_obj(std::vector<double>(data_probability.at(n)[i].begin() + 1, data_probability.at(n)[i].end()),scores);
                         out_expected_value(n,i)=stats.Mean();
                         out_variance(n,i)=stats.Variance();
                     }
             }
+        
+        expected_value= out_expected_value;
+        variance = out_variance;
 
     }
 
@@ -289,6 +271,6 @@ Eigen::MatrixXd Rasch::calculate_residuals()
     {
         Eigen::MatrixXd out(N,I);
 
-        return estimate_expected_values()-data;
+        return expected_value-data;
     }
 #endif

@@ -1,7 +1,9 @@
 #ifndef RUNNINGSTATS_H
 #define RUNNINGSTATS_H
 #include <cmath>
+#include <iostream>
 #include <pybind11/eigen.h>
+//#include "Eigen/Dense"
 // creddit to Dr. John D. Cook 
 // link: https://www.johndcook.com/blog/skewness_kurtosis/
 
@@ -10,7 +12,7 @@ class RunningStats
     public:
         RunningStats();
         void Clear();
-        void Push(double x);
+        void Push(double x,double w);
         long long NumDataValues() const;
         double Mean() const;
         double Variance() const;
@@ -35,7 +37,7 @@ void RunningStats::Clear()
     w_sum = w_sum2 = mean = S = 0.0;
 }
 
-void RunningStats::Push(double x,double w=0)
+void RunningStats::Push(double x,double w)
 {
     double mean_old;
 
@@ -43,9 +45,10 @@ void RunningStats::Push(double x,double w=0)
     w_sum2 = w_sum2 + w*w;
     mean_old = mean;
     mean = mean_old + (w / w_sum) * (x - mean_old);
-    S = S + w * (x - mean_old) * (x - mean)
-
-
+    n++;
+    
+    S = S + w * (x - mean_old) * (x - mean);
+    
 }
 
 long long RunningStats::NumDataValues() const
@@ -60,7 +63,7 @@ double RunningStats::Mean() const
 
 double RunningStats::Variance() const
 {
-    return S / (w_sum - 1)
+    return S / (w_sum - 1);
 }
 
 double RunningStats::StandardDeviation() const
@@ -68,8 +71,8 @@ double RunningStats::StandardDeviation() const
     return sqrt( Variance() );
 }
 
-template <typename T>
-RunningStats get_stats_obj(const T & array, const T & weights) 
+
+RunningStats get_stats_obj(const std::vector<double> & array, const Eigen::VectorXd & weights) 
     {
         RunningStats obj;
         u_int64_t size = array.size();
@@ -77,7 +80,7 @@ RunningStats get_stats_obj(const T & array, const T & weights)
 
         for (i=0;i<size;i++)
             {
-                obj.Push(array.at(i),weights.at(i));
+                obj.Push(array.at(i),weights.coeff(i));
             }
                 
         return obj;

@@ -3,6 +3,7 @@
 #include <pybind11/stl.h>
 #include <iostream>
 #include "Data.h"
+#include <pybind11/eigen.h>
 namespace py = pybind11;
 
 
@@ -12,7 +13,7 @@ void Rasch::PROX(int PROX_MAX)
                 
         int iter = 0;
 
-        
+        /*
         for (iter;iter<PROX_MAX;iter++)
             {
                 int n =0;
@@ -101,7 +102,7 @@ void Rasch::PROX(int PROX_MAX)
                 difficulty = difficulty.array() -temp_difficulty_average;
                 
             }
-        
+        */
     }
 
 
@@ -119,7 +120,8 @@ PYBIND11_MODULE(pyrasch,m)
         .def("PROX",&Rasch::PROX)
         .def("estimate_thresholds",&Rasch::estimate_thresholds)
         .def("estimate_counts",&Rasch::estimate_counts)
-        .def("estimate_expected_values",&Rasch::estimate_expected_values)
+        .def_readwrite("expected_value",&Rasch::expected_value,py::return_value_policy::reference_internal)
+        .def_readwrite("variance",&Rasch::variance,py::return_value_policy::reference_internal)
         .def_readwrite("data_probability",&Rasch::data_probability,py::return_value_policy::reference_internal)
         .def_readwrite("RA_Thresholds",&Rasch::RA_Thresholds,py::return_value_policy::reference_internal)
         .def_readwrite("observed_counts",&Rasch::observed_counts,py::return_value_policy::reference_internal)
