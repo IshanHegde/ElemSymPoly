@@ -35,7 +35,7 @@ void RunningStats::Clear()
     w_sum = w_sum2 = mean = S = 0.0;
 }
 
-void RunningStats::Push(double x,double w)
+void RunningStats::Push(double x,double w=0)
 {
     double mean_old;
 
@@ -69,13 +69,15 @@ double RunningStats::StandardDeviation() const
 }
 
 template <typename T>
-RunningStats get_stats_obj(const T & array) 
+RunningStats get_stats_obj(const T & array, const T & weights) 
     {
         RunningStats obj;
+        u_int64_t size = array.size();
+        u_int64_t i;
 
-        for (auto x: array)
+        for (i=0;i<size;i++)
             {
-                obj.Push(x);
+                obj.Push(array.at(i),weights.at(i));
             }
                 
         return obj;

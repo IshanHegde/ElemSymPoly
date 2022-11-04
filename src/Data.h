@@ -4,7 +4,7 @@
 #include "Eigen/Dense"
 #include <vector>
 #include <iostream>
-
+#include "RunningStats.h"
 struct Rasch
     {
         const Eigen::MatrixXd data;
@@ -129,6 +129,28 @@ Eigen::MatrixXd Rasch::estimate_expected_values()
             }
             
         return out;
+    }
+
+void Rasch::estimate_model_moments()
+    {
+        Eigen::MatrixXd out_expected_value(N,I);
+        Eigen::MatrixXd out_variance(N,I);
+        int i;
+        int n;
+        int m_i;
+
+        for (n=0;n<N;n++)
+            {
+                for(i=0;i<I;i++)
+                    {
+                        m_i= MAX_ITEM_SCORES.at(i)
+                        RunningStats stats = get_stats_obj(data_probability.at(n).at(i),Eigen::VectorXd::setLinSpaced(m_i+1,0,m_i));
+                        
+                        out_expected_value(n,i)=stats.Mean();
+                        out_variance(n,i)=stats.Variance();
+                    }
+            }
+
     }
 
 std::vector<std::vector<std::vector<double>>> Rasch::estimate_full_probability()
