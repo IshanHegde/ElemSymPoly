@@ -71,8 +71,8 @@ double RunningStats::StandardDeviation() const
     return sqrt( Variance() );
 }
 
-
-RunningStats get_stats_obj(const std::vector<double> & array, const Eigen::VectorXd & weights) 
+template <typename T>
+RunningStats get_stats_obj(const T & array, const Eigen::VectorXd & weights) 
     {
         RunningStats obj;
         u_int64_t size = array.size();
@@ -80,7 +80,7 @@ RunningStats get_stats_obj(const std::vector<double> & array, const Eigen::Vecto
 
         for (i=0;i<size;i++)
             {
-                obj.Push(array.at(i),weights.coeff(i));
+                obj.Push(array[i],weights.coeff(i));
             }
                 
         return obj;

@@ -25,6 +25,8 @@ struct Rasch
         Eigen::MatrixXd expected_value;
         Eigen::MatrixXd variance;
 
+        Eigen::MatrixXd residuals;
+
         std::vector<std::vector<std::vector<double>>> data_probability;
 
         Rasch(const Eigen::MatrixXd & t_data);
@@ -35,19 +37,23 @@ struct Rasch
 
         const Eigen::VectorXi find_max_item_scores();
 
-        std::vector<std::vector<double>> estimate_thresholds();
+        void estimate_thresholds();
 
-        std::vector<std::vector<double>> estimate_counts();
+        void estimate_counts();
 
         void PROX(int PROX_MAX);
 
         void JMLE(int JMLE_MAX);
 
         void estimate_model_moments();
-        
-        Eigen::MatrixXd calculate_residuals();
 
-        std::vector<std::vector<std::vector<double>>> estimate_full_probability();      
+        void estimate_ability();
+
+        void estimate_difficulty();
+        
+        void calculate_residuals();
+
+        void estimate_full_probability();      
 
     };
 
@@ -100,9 +106,11 @@ Rasch::Rasch(const Eigen::MatrixXd & t_data):data(t_data),N(data.rows()),I(data.
 
         estimated_counts= observed_counts;
 
-        data_probability=estimate_full_probability();
+        estimate_full_probability();
 
         estimate_model_moments();
+
+        calculate_residuals();
 
     }
 
@@ -135,7 +143,7 @@ void Rasch::estimate_model_moments()
 
     }
 
-std::vector<std::vector<std::vector<double>>> Rasch::estimate_full_probability()
+void Rasch::estimate_full_probability()
     {
         std::vector<std::vector<std::vector<double>>> out;
         out.reserve(N);
@@ -197,10 +205,11 @@ std::vector<std::vector<std::vector<double>>> Rasch::estimate_full_probability()
                 out.emplace_back(person_n_probability);
             }
         
-        return out;
+        data_probability = out;
+        
     }
 
-std::vector<std::vector<double>> Rasch::estimate_counts()
+void Rasch::estimate_counts()
     {
         std::vector<std::vector<double>> out;
         out.reserve(I);
@@ -225,11 +234,11 @@ std::vector<std::vector<double>> Rasch::estimate_counts()
                 out.emplace_back(item_prob);
             }
         
-        return out;
+        estimated_counts =out;
         
     }
 
-std::vector<std::vector<double>> Rasch::estimate_thresholds()
+void Rasch::estimate_thresholds()
     {
         std::vector<std::vector<double>> out;
         out.reserve(I);
@@ -264,13 +273,23 @@ std::vector<std::vector<double>> Rasch::estimate_thresholds()
                 out.emplace_back(temp);
 
             }
-        return out;
+        RA_Thresholds =out;
     }
 
-Eigen::MatrixXd Rasch::calculate_residuals()
+void Rasch::calculate_residuals()
     {
-        Eigen::MatrixXd out(N,I);
-
-        return expected_value-data;
+        residuals= expected_value-data;
     }
+
+void Rasch::estimate_difficulty()
+    {
+        std::cout<<(residuals.colwise().sum().array()/variance.colwise().sum().array()).matrix().transpose()<<"   "<<difficulty<<std::endl;
+        difficulty = difficulty - (residuals.colwise().sum().array()/variance.colwise().sum().array()).matrix().transpose();
+    }
+
+void Rasch::estimate_ability()
+    {
+        ability = ability - (residuals.rowwise().sum().array()/variance.rowwise().sum().array()).matrix().transpose();
+    }
+
 #endif

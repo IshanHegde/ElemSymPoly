@@ -13,7 +13,10 @@ void Rasch::PROX(int PROX_MAX)
                 
         int iter = 0;
 
-        /*
+        Eigen::VectorXd x;
+        
+
+        
         for (iter;iter<PROX_MAX;iter++)
             {
                 int n =0;
@@ -28,20 +31,19 @@ void Rasch::PROX(int PROX_MAX)
                 }
                 else
                 {
-
-                    RunningStats stats  = get_stats_obj(difficulty);
+                    x.setLinSpaced(I,1,1);
+                    RunningStats stats  = get_stats_obj(difficulty,x);
                     difficulty_average = stats.Mean();
                     difficulty_std = stats.StandardDeviation();
                 }
 
-                //printf("iter: %d, res : %f",iter,difficulty_average);
-
+  
                 double ability_const= sqrt(1+(difficulty_std*difficulty_std)/2.9);
 
                 for (auto row : data.rowwise())
                 {
                     double person_n_raw_score = row.sum();
-                    //printf(" p score: %f",person_n_raw_score);
+                    
 
                     if (person_n_raw_score==0)
                     {
@@ -53,11 +55,12 @@ void Rasch::PROX(int PROX_MAX)
                     }
                     
                     ability(n)= difficulty_average+ability_const*log(person_n_raw_score/(MAX_PERSON_RAW_SCORE-person_n_raw_score));
-                    //printf(" p ablity: %f ",ability(n));
+                    
                     n++;
                 }
-
-                RunningStats ability_stats  = get_stats_obj(ability);
+                
+                x.setLinSpaced(N,1,1);
+                RunningStats ability_stats  = get_stats_obj(ability,x);
                 double temp_ability_average = ability_stats.Mean();
                 ability = ability.array()-temp_ability_average;
 
@@ -71,7 +74,8 @@ void Rasch::PROX(int PROX_MAX)
                 }
                 else
                 {
-                    RunningStats stats  = get_stats_obj(ability);
+                    x.setLinSpaced(N,1,1);
+                    RunningStats stats  = get_stats_obj(ability,x);
                     ability_average = stats.Mean();
                     ability_std = stats.StandardDeviation();
                 }
@@ -81,7 +85,6 @@ void Rasch::PROX(int PROX_MAX)
                 for (auto column : data.colwise())
                 {
                     double item_i_raw_score = column.sum();
-                    //printf(" i score: %f",item_i_raw_score);
 
                     if (item_i_raw_score==0)
                     {
@@ -93,22 +96,35 @@ void Rasch::PROX(int PROX_MAX)
                     }
                     
                     difficulty(i)= ability_average - difficulty_const*log(item_i_raw_score/(MAX_ITEM_RAW_SCORE(i)-item_i_raw_score));
-                    //printf(" i diff: %f",difficulty(i));
+
                     i++;
                 }
 
-                RunningStats diff_stats = get_stats_obj(difficulty);
+
+                x.setLinSpaced(I,1,1);
+                RunningStats diff_stats = get_stats_obj(difficulty,x);
                 double temp_difficulty_average = diff_stats.Mean();
                 difficulty = difficulty.array() -temp_difficulty_average;
                 
             }
-        */
+        
     }
 
 
 void Rasch::JMLE(int JMLE_MAX)
     {
-        
+        int iter=0;
+
+        for(iter; iter<JMLE_MAX;iter++)
+            {
+                estimate_difficulty();
+                estimate_ability();
+                estimate_thresholds();
+                estimate_counts();
+                estimate_model_moments();
+                estimate_full_probability();
+                calculate_residuals();
+            }
     }
 
 PYBIND11_MODULE(pyrasch,m)
@@ -118,6 +134,7 @@ PYBIND11_MODULE(pyrasch,m)
         py::class_<Rasch>(m,"Rasch")
         .def(py::init<const Eigen::MatrixXd &>())
         .def("PROX",&Rasch::PROX)
+        .def("JMLE",&Rasch::JMLE)
         .def("estimate_thresholds",&Rasch::estimate_thresholds)
         .def("estimate_counts",&Rasch::estimate_counts)
         .def_readwrite("expected_value",&Rasch::expected_value,py::return_value_policy::reference_internal)
