@@ -2,6 +2,5 @@
 *.txt
 /.vscode/
 __pycache__
-*.py
 Eigen
 pybind11
