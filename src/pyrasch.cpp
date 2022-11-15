@@ -115,15 +115,83 @@ void Rasch::JMLE(int JMLE_MAX)
     {
         int iter=0;
 
+        
+
         for(iter; iter<JMLE_MAX;iter++)
             {
+                std::cout<<exp(1.001)<<std::endl;
+                std::cout<<"_________________________"<<std::endl;
+                for (int n=0;n<N;n++)
+                    {
+                        for (int i=0;i<I;i++)
+                            {
+                                int m_i= MAX_ITEM_SCORES.coeff(i);
+                                for (int m=0;m<m_i+1;m++)
+                                    {
+                                        std::cout<<data_probability.at(n).at(i).at(m)<<" ";
+                                    }
+                                
+                                std::cout<<'\t';
+                            }
+                        
+                        std::cout<<'\n';
+                    }                
+                std::cout<<"-------------------------"<<iter<<"---------------------"<<std::endl;
+                for (int i=0;i<estimated_counts.size();i++)
+                    {
+                        for (int j=0;j<estimated_counts[i].size();j++)
+                            {
+                                std::cout<<estimated_counts[i][j]<<" ";
+                            }
+                        std::cout<<'\n';
+                    }
+                std::cout<<"--------"<<std::endl;
+                for (int i=0;i<observed_counts.size();i++)
+                    {
+                        for (int j=0;j<observed_counts[i].size();j++)
+                            {
+                                std::cout<<observed_counts[i][j]<<" ";
+                            }
+                        std::cout<<'\n';
+                    }
+                std::cout<<"--------"<<std::endl;
+                for (int i=0;i<RA_Thresholds.size();i++){
+                    for (int j=0;j<RA_Thresholds[i].size();j++)
+                        {
+                            std::cout<<RA_Thresholds[i][j]<<" ";
+                        }
+                    
+                    std::cout<<'\n';
+                }
+
+                std::cout<<"metric "<<residuals.rowwise().sum().colwise().sum()<<std::endl;
+                std::cout<<ability<<std::endl;
+                std::cout<<difficulty<<std::endl;
+                //std::cout<<"threshold "<<RA_Thresholds<<std::endl;
+
+
+                //std::cout<<"estimated_counts "<<estimated_counts<<std::endl;
+
+                
+                std::cout<<"EXPEc "<<expected_value<<std::endl;
+                std::cout<<"variance "<<variance<<std::endl;
+                //std::cout<<"probs "<<data_probability<<std::endl;
+                std::cout<<"resuduals "<<residuals<<std::endl;
+
+                estimate_counts();
+                estimate_thresholds();
+                estimate_full_probability();
+                estimate_model_moments();
+                calculate_residuals();
+
+                
                 estimate_difficulty();
                 estimate_ability();
-                estimate_thresholds();
-                estimate_counts();
-                estimate_model_moments();
-                estimate_full_probability();
-                calculate_residuals();
+
+                
+                
+                
+                
             }
     }
 
