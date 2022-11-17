@@ -8,7 +8,7 @@
 
 double LIMIT =2;
 double CORRECTION =0.3;
-double Minimim_Variance;
+double MINIMUM_VARIANCE=0.5;
 
 struct Rasch
     {
@@ -97,7 +97,7 @@ Rasch::Rasch(const Eigen::MatrixXd & t_data):data(t_data),N(data.rows()),I(data.
         for (auto col : data.colwise())
             {
                 m_i=int(MAX_ITEM_SCORES.coeff(i));
-                std::cout<<m_i<<std::endl;
+                //std::cout<<m_i<<std::endl;
                 std::vector<double> temp;
                 temp.reserve(m_i+1);
                 std::vector<double> temp_map(m_i+1,0.0);
@@ -213,7 +213,8 @@ void Rasch::estimate_full_probability()
                                     {
                                         aux_sum+=RA_Thresholds.at(i).at(l);
                                     }
-                                dnom+=exp(j*(ability_n-difficulty_i)-aux_sum);
+                                //dnom+=exp(j*(ability_n-difficulty_i)-aux_sum);
+                                dnom+=exp(j*(ability_n)-aux_sum);
                                 //std::cout<<"gere"<<std::endl;
                                 
                             }
@@ -228,7 +229,8 @@ void Rasch::estimate_full_probability()
                                         aux_neom+=RA_Thresholds.at(i).at(l);
                                         //neom+=l*(ability_n-RA_Thresholds.at(i).at(l));
                                     }
-                                neom=j*(ability_n-difficulty_i)-aux_neom;
+                                //neom=j*(ability_n-difficulty_i)-aux_neom;
+                                neom=j*(ability_n)-aux_neom;
                                 prob= exp(neom)/dnom;
                                 person_n_item_i_probability.emplace_back(prob);
                                 //std::cout<<"prob "<<n<<" "<<i<<" "<<j<<" "<<"ability: "<<ability_n<<" "<<prob<<std::endl;
@@ -274,8 +276,6 @@ void Rasch::estimate_counts()
             }
         
 
-        
-        
         estimated_counts =out;
         
     }
@@ -360,9 +360,14 @@ void Rasch::calculate_residuals()
 
 void Rasch::estimate_difficulty()
     {
+        //std::cout<<"diff"<<'\n';
         Eigen::VectorXd temp;
         double temp_mean;
-        temp =difficulty - (residuals.colwise().sum().array()/variance.colwise().sum().array()).matrix().transpose().unaryExpr([](double x) {return std::min(std::max(x,-LIMIT),LIMIT);});
+        Eigen::VectorXd temp_variance = variance.colwise().sum().unaryExpr([MINIMUM_VARIANCE](double x){return std::max(x,MINIMUM_VARIANCE);});
+        //std::cout<<temp_variance<<'\n';
+        //std::cout<<"w"<<residuals.colwise().sum()<<'\n';
+
+        temp =difficulty - (residuals.colwise().sum().array()/temp_variance.transpose().array()).matrix().transpose().unaryExpr([](double x) {return std::min(std::max(x,-LIMIT),LIMIT);});
         temp_mean = temp.mean();
         difficulty= temp.unaryExpr([&temp_mean](double x){return x-temp_mean;});
 
@@ -370,9 +375,12 @@ void Rasch::estimate_difficulty()
 
 void Rasch::estimate_ability()
     {
+        //std::cout<<"abil"<<'\n';
         Eigen::VectorXd temp;
         double temp_mean;
-        temp = ability + (residuals.rowwise().sum().array()/variance.rowwise().sum().array()).matrix().unaryExpr([](double x) {return std::min(std::max(x,-LIMIT),LIMIT);});
+        Eigen::VectorXd temp_variance = variance.rowwise().sum().unaryExpr([MINIMUM_VARIANCE](double x){return std::max(x,MINIMUM_VARIANCE);});
+
+        temp = ability + (residuals.rowwise().sum().array()/temp_variance.array()).matrix().unaryExpr([](double x) {return std::min(std::max(x,-LIMIT),LIMIT);});
         temp_mean= temp.mean();
         ability=temp.unaryExpr([&temp_mean](double x){return x-temp_mean;});
 
