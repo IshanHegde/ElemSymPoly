@@ -1,21 +1,19 @@
-#include "RunningStats.h"
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+//#include "RunningStats.h"
+//#include <pybind11/pybind11.h>
+//#include <pybind11/stl.h>
 #include <iostream>
 #include "Data.h"
-#include <pybind11/eigen.h>
-namespace py = pybind11;
+//#include <pybind11/eigen.h>
+//namespace py = pybind11;
 
 
-
+/*
 void Rasch::PROX(int PROX_MAX)
     {
                 
         int iter = 0;
 
         Eigen::VectorXd x;
-        
-
         
         for (iter;iter<PROX_MAX;iter++)
             {
@@ -109,7 +107,7 @@ void Rasch::PROX(int PROX_MAX)
             }
         
     }
-
+*/
 
 void Rasch::JMLE(int JMLE_MAX)
     {
@@ -119,13 +117,15 @@ void Rasch::JMLE(int JMLE_MAX)
 
         for(iter; iter<JMLE_MAX;iter++)
             {
-                std::cout<<exp(1.001)<<std::endl;
+                /*
+                std::cout<<data<<'/n';
+                std::cout<<"log"<<log(exp(1.001))<<std::endl;
                 std::cout<<"_________________________"<<std::endl;
                 for (int n=0;n<N;n++)
                     {
                         for (int i=0;i<I;i++)
                             {
-                                int m_i= MAX_ITEM_SCORES.coeff(i);
+                                int m_i= max_score;
                                 for (int m=0;m<m_i+1;m++)
                                     {
                                         std::cout<<data_probability.at(n).at(i).at(m)<<" ";
@@ -139,33 +139,32 @@ void Rasch::JMLE(int JMLE_MAX)
                 std::cout<<"-------------------------"<<iter<<"---------------------"<<std::endl;
                 for (int i=0;i<estimated_counts.size();i++)
                     {
-                        for (int j=0;j<estimated_counts[i].size();j++)
-                            {
-                                std::cout<<estimated_counts[i][j]<<" ";
-                            }
-                        std::cout<<'\n';
+
+                                std::cout<<estimated_counts[i]<<" ";
+
                     }
                 std::cout<<"--------"<<std::endl;
                 for (int i=0;i<observed_counts.size();i++)
                     {
-                        for (int j=0;j<observed_counts[i].size();j++)
-                            {
-                                std::cout<<observed_counts[i][j]<<" ";
-                            }
-                        std::cout<<'\n';
+
+                                std::cout<<observed_counts[i]<<" ";
+                            
+                        
                     }
                 std::cout<<"--------"<<std::endl;
                 for (int i=0;i<RA_Thresholds.size();i++){
-                    for (int j=0;j<RA_Thresholds[i].size();j++)
-                        {
-                            std::cout<<RA_Thresholds[i][j]<<" ";
-                        }
+
+                        
+                            std::cout<<RA_Thresholds[i]<<" ";
+                        
                     
-                    std::cout<<'\n';
+                    
                 }
 
                 std::cout<<"metric "<<residuals.rowwise().sum().colwise().sum()<<std::endl;
+                std::cout<<"abIl"<<std::endl;
                 std::cout<<ability<<std::endl;
+                std::cout<<"diff"<<std::endl;
                 std::cout<<difficulty<<std::endl;
                 //std::cout<<"threshold "<<RA_Thresholds<<std::endl;
 
@@ -177,7 +176,7 @@ void Rasch::JMLE(int JMLE_MAX)
                 std::cout<<"variance "<<variance<<std::endl;
                 //std::cout<<"probs "<<data_probability<<std::endl;
                 std::cout<<"resuduals "<<residuals<<std::endl;
-
+                */
                 estimate_counts();
                 estimate_thresholds();
                 estimate_full_probability();
@@ -189,12 +188,10 @@ void Rasch::JMLE(int JMLE_MAX)
                 estimate_ability();
 
                 
-                
-                
-                
+
             }
     }
-
+/*
 PYBIND11_MODULE(pyrasch,m)
     {
         m.doc() = "pybind11 example plugin";
@@ -214,3 +211,4 @@ PYBIND11_MODULE(pyrasch,m)
         .def_readwrite("difficulty",&Rasch::difficulty,py::return_value_policy::reference_internal);
 
     }
+*/
