@@ -1,7 +1,9 @@
 #ifndef RUNNINGSTATS_H
 #define RUNNINGSTATS_H
 #include <cmath>
+#include <iostream>
 #include <pybind11/eigen.h>
+//#include "Eigen/Dense"
 // creddit to Dr. John D. Cook 
 // link: https://www.johndcook.com/blog/skewness_kurtosis/
 
@@ -10,7 +12,7 @@ class RunningStats
     public:
         RunningStats();
         void Clear();
-        void Push(double x);
+        void Push(double x,double w);
         long long NumDataValues() const;
         double Mean() const;
         double Variance() const;
@@ -21,7 +23,7 @@ class RunningStats
 
     private:
         long long n;
-        double M1, M2, M3, M4;
+        double w_sum, w_sum2, mean, S;
 };
 
 RunningStats::RunningStats() 
@@ -32,23 +34,21 @@ RunningStats::RunningStats()
 void RunningStats::Clear()
 {
     n = 0;
-    M1 = M2 = M3 = M4 = 0.0;
+    w_sum = w_sum2 = mean = S = 0.0;
 }
 
-void RunningStats::Push(double x)
+void RunningStats::Push(double x,double w)
 {
-    double delta, delta_n, delta_n2, term1;
+    double mean_old;
 
-    long long n1 = n;
+    w_sum = w_sum + w;
+    w_sum2 = w_sum2 + w*w;
+    mean_old = mean;
+    mean = mean_old + (w / w_sum) * (x - mean_old);
     n++;
-    delta = x - M1;
-    delta_n = delta / n;
-    delta_n2 = delta_n * delta_n;
-    term1 = delta * delta_n * n1;
-    M1 += delta_n;
-    M4 += term1 * delta_n2 * (n*n - 3*n + 3) + 6 * delta_n2 * M2 - 4 * delta_n * M3;
-    M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
-    M2 += term1;
+    
+    S = S + w * (x - mean_old) * (x - mean);
+    
 }
 
 long long RunningStats::NumDataValues() const
@@ -58,12 +58,12 @@ long long RunningStats::NumDataValues() const
 
 double RunningStats::Mean() const
 {
-    return M1;
+    return mean;
 }
 
 double RunningStats::Variance() const
 {
-    return M2/(n-1.0);
+    return S / (w_sum - 1);
 }
 
 double RunningStats::StandardDeviation() const
@@ -71,13 +71,16 @@ double RunningStats::StandardDeviation() const
     return sqrt( Variance() );
 }
 
-RunningStats get_stats_obj(const Eigen::VectorXd & array) 
+template <typename T>
+RunningStats get_stats_obj(const T & array, const Eigen::VectorXd & weights) 
     {
         RunningStats obj;
+        u_int64_t size = array.size();
+        u_int64_t i;
 
-        for (auto x: array)
+        for (i=0;i<size;i++)
             {
-                obj.Push(x);
+                obj.Push(array[i],weights.coeff(i));
             }
                 
         return obj;

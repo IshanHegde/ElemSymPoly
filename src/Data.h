@@ -3,24 +3,39 @@
 #define DATA_H
 #include "Eigen/Dense"
 #include <vector>
+#include <map>
 #include <iostream>
+//#include "RunningStats.h"
+
+double LIMIT =2;
+double CORRECTION =0.3;
+double MINIMUM_VARIANCE=0;
 
 struct Rasch
     {
-        const Eigen::MatrixXd data;
-        const int N;
-        const int I;
+        Eigen::MatrixXd data;
+        const unsigned long long N;
+        const unsigned long long I;
 
-        const int MAX_PERSON_RAW_SCORE;
+        const unsigned int MAX_PERSON_RAW_SCORE;
         const Eigen::VectorXd MAX_ITEM_RAW_SCORE;
         const Eigen::VectorXi MAX_ITEM_SCORES;
 
-        std::vector<std::vector<double>> RA_Thresholds;
-        std::vector<std::vector<double>> observed_counts;
-        std::vector<std::vector<double>> estimated_counts;
+        std::map<double,double> RA_Thresholds;
+        std::map<double,double> observed_counts;
+        std::map<double,double> estimated_counts;
+
+        unsigned int max_score;
+
+        
 
         Eigen::VectorXd difficulty;
         Eigen::VectorXd ability;
+
+        Eigen::MatrixXd expected_value;
+        Eigen::MatrixXd variance;
+
+        Eigen::MatrixXd residuals;
 
         std::vector<std::vector<std::vector<double>>> data_probability;
 
@@ -32,19 +47,23 @@ struct Rasch
 
         const Eigen::VectorXi find_max_item_scores();
 
-        std::vector<std::vector<double>> estimate_thresholds();
+        void estimate_thresholds();
 
-        std::vector<std::vector<double>> estimate_counts();
+        void estimate_counts();
 
         void PROX(int PROX_MAX);
 
         void JMLE(int JMLE_MAX);
 
-        Eigen::MatrixXd estimate_expected_values();
-        
-        Eigen::MatrixXd calculate_residuals();
+        void estimate_model_moments();
 
-        std::vector<std::vector<std::vector<double>>> estimate_full_probability();      
+        void estimate_ability();
+
+        void estimate_difficulty();
+        
+        void calculate_residuals();
+
+        void estimate_full_probability();      
 
     };
 
@@ -69,82 +88,97 @@ Rasch::Rasch(const Eigen::MatrixXd & t_data):data(t_data),N(data.rows()),I(data.
         difficulty = Eigen::VectorXd::Constant(I,0.0);
         ability = Eigen::VectorXd::Constant(N,0.0);
 
-        RA_Thresholds.reserve(I);
-        observed_counts.reserve(I);
-        
-        int j;
-        int i=0;
-        int m_i;
+        size_t i;
+        size_t n;
 
-        
-        for (auto col : data.colwise())
+        max_score= MAX_ITEM_SCORES.maxCoeff();
+        std::map<double,double> counts;
+        std::map<double,double> estimated_counts;
+
+        for ( i=0;i<max_score+1;i++)
             {
-                m_i=int(MAX_ITEM_SCORES.coeff(i));
-                std::cout<<m_i<<std::endl;
-                std::vector<double> temp;
-                temp.reserve(m_i+1);
-                std::vector<double> temp_map(m_i+1,0.0);
-                for (j=0;j<N;j++)
-                    {
-                        int val= temp_map.at(int(col.coeff(j)));
-                        val++;
-                        temp_map[int(col.coeff(j))]=val;
-                    }
-                observed_counts.emplace_back(temp_map);
-                RA_Thresholds.emplace_back(std::vector<double>(m_i+1,0.0));
-                i++;
+                counts[i]=0;
+                RA_Thresholds[i]=0;
+                estimated_counts[i]=0;
             }
 
-        estimated_counts= observed_counts;
+        for (i=0;i<data.cols();i++)
+            {
+                for (n=0; n<data.rows();n++)
+                    {
+                        counts[data.coeff(n,i)]+=1;
+                    }
+            }
 
-        data_probability=estimate_full_probability();
+        observed_counts=counts;
+
+        estimate_full_probability();
+        estimate_counts();
+
+
+        estimate_thresholds();
+
+        estimate_model_moments();
+
+        calculate_residuals();
 
     }
 
-Eigen::MatrixXd Rasch::estimate_expected_values()
+void Rasch::estimate_model_moments()
     {
-        Eigen::MatrixXd out(N,I);
-        int i;
-        int j;
-        int n;
-        int m_i;
-        double sum;
-        
+        Eigen::MatrixXd out_expected_value(N,I);
+        Eigen::MatrixXd out_variance(N,I);
+        size_t i;
+        size_t n;
+        size_t j;
+        double mean;
+        double var;
 
         for (n=0;n<N;n++)
             {
                 for (i=0;i<I;i++)
                     {
-                        m_i=MAX_ITEM_SCORES.coeff(i);
-                        sum=0.0;
-                        for (j=1;j<m_i+1;j++)
+
+                        mean=0.0;
+                        for (j=0;j<max_score+1;j++)
                             {
-                                sum+=data_probability.at(n).at(i).at(j)*j;
+                                mean+=data_probability.at(n).at(i).at(j)*j;
                             }
-                        out(n,i)=sum;
+                        var=0.0;
+                        for (j=0;j<max_score+1;j++)
+                            {
+                                var+=data_probability.at(n).at(i).at(j)*j*j;
+                            }
+
+                        var-=mean*mean;
+
+                        out_expected_value(n,i)=mean;
+                        out_variance(n,i)=var;
                     }
             }
-            
-        return out;
+
+        
+        
+        expected_value= out_expected_value;
+        variance = out_variance;
+
     }
 
-std::vector<std::vector<std::vector<double>>> Rasch::estimate_full_probability()
+void Rasch::estimate_full_probability()
     {
         std::vector<std::vector<std::vector<double>>> out;
         out.reserve(N);
-        int n;
-        int i;
-        int j;
-        int k;
-        int l;
+        size_t n;
+        size_t i;
+        size_t j;
+        size_t l;
 
         double ability_n;
-        std::vector<double> RA_threshold_i;
-        int m_i;
+        double difficulty_i;
+        
 
         double dnom;
         double neom;
-        double temp_dnom;
         double prob;
 
         for (n=0;n<N;n++)
@@ -155,124 +189,185 @@ std::vector<std::vector<std::vector<double>>> Rasch::estimate_full_probability()
 
                 for(i=0;i<I;i++)
                     {
-                        RA_threshold_i = RA_Thresholds[i];
-                        m_i=MAX_ITEM_SCORES.coeff(i);
+                        
+                        difficulty_i=difficulty.coeff(i);
 
                         std::vector<double> person_n_item_i_probability;
-                        person_n_item_i_probability.reserve(m_i+1);
+                        person_n_item_i_probability.reserve(int(max_score)+1);
 
-                        dnom=1.0;
-                        for(j=0;j<m_i+1;j++)
+                        dnom=0.0;
+                        
+                        for (j =0;j<max_score+1;j++)
                             {
-                                temp_dnom=0.0;
-                                for (k=0;k<j+1;k++)
+                                double aux_sum=0.0;
+                                for (l=0;l<j+1;l++)
                                     {
-                                        temp_dnom+=ability_n-RA_threshold_i[k];
+                                        aux_sum+=RA_Thresholds.at(l);
                                     }
-                                dnom+=exp(temp_dnom);
+                                
+                                dnom+=exp(j*(ability_n-difficulty_i)-aux_sum);
+                                
                                 
                             }
                         
-                        for(j=0;j<m_i+1;j++)
+
+                        for(j=0;j<max_score+1;j++)
                             {
-                                neom=0.0;
-                                for(l=0;l<j;l++)
+                                double aux_neom;
+                                aux_neom=0.0;
+                                for(l=0;l<j+1;l++)
                                     {
-                                        neom+=ability_n-RA_threshold_i[l];
+                                        aux_neom+=RA_Thresholds.at(l);
+                                        
                                     }
+                                
+                                neom=j*(ability_n-difficulty_i)-aux_neom;
                                 prob= exp(neom)/dnom;
                                 person_n_item_i_probability.emplace_back(prob);
+                                
                             }
-
-                        person_n_probability.emplace_back(person_n_item_i_probability);                        
+                        
+                        person_n_probability.emplace_back(person_n_item_i_probability); 
+                        person_n_item_i_probability.clear();                      
 
                     }
+                
                 out.emplace_back(person_n_probability);
+                person_n_probability.clear();
             }
         
-        return out;
+        data_probability = out;
+        out.clear();
+        
     }
 
-std::vector<std::vector<double>> Rasch::estimate_counts()
+void Rasch::estimate_counts()
     {
-        std::vector<std::vector<double>> out;
-        out.reserve(I);
-        int i;
-        int j;
-        int n;
+        std::map<double,double> out;
+        
+        size_t i;
+        size_t j;
+        size_t n;
         double sum;
 
-        for (i=0;i<I;i++)
+        for (i=0;i<max_score+1;i++)
             {
-                std::vector<double> item_prob;
-                item_prob.reserve(MAX_ITEM_SCORES.coeff(i)+1);
-                for (j=0;j<MAX_ITEM_SCORES.coeff(i)+1;j++)
-                    {
-                        sum=0;
-                        for (n=0;n<N;n++)
-                            {
-                                sum+=data_probability.at(n).at(i).at(j);
-                            }
-                        item_prob.emplace_back(sum);
-                    }
-                out.emplace_back(item_prob);
+                out[i]=0;
             }
         
-        return out;
+
+                
+        for (j=0;j<max_score+1;j++)
+            {
+                sum=0;
+                for (i=0;i<I;i++)
+                    {
+                        for (n=0;n<N;n++)
+                        {
+                            sum+=data_probability.at(n).at(i).at(j);
+                        }
+                    }
+
+                
+                out[j]=sum;
+            }
+                
+            
+        
+
+        estimated_counts =out;
         
     }
 
-std::vector<std::vector<double>> Rasch::estimate_thresholds()
+void Rasch::estimate_thresholds()
     {
-        std::vector<std::vector<double>> out;
-        out.reserve(I);
-        int i;
-        int j;
-        int k;
-        int m_i;
+        std::vector<double> out;
+        out.reserve(max_score+1);
+        out.emplace_back(0.0);
+        size_t i;
+        size_t j;
         double observed_lower;
         double observed_higher;
         double estimated_lower;
         double estimated_higher;
+        double temp_val;
+        double temp_average;
+        double temp_sum;
 
-        for (i=0;i<I;i++)
+        temp_sum=0.0;
+        for (j=1;j<max_score+1;j++)
             {
-                m_i=MAX_ITEM_SCORES.coeff(i);
-                std::vector<double> temp;
-                temp.reserve(m_i+1);
-                for (j=0;j<m_i+1;j++)
+                observed_lower=observed_counts.at(j-1);
+                observed_higher=observed_counts.at(j);
+                estimated_lower=estimated_counts.at(j-1);
+                estimated_higher=estimated_counts.at(j);
+                
+                if (observed_lower==0.0)
                     {
-                        observed_lower=0.0;
-                        observed_higher=0.0;
-                        estimated_lower=0.0;
-                        estimated_higher=0.0;
-
-                        for (k=0;k<j;k++)
-                            {
-                                observed_lower+=observed_counts.at(i).at(k);
-                                estimated_lower+=estimated_counts.at(i).at(k);
-                            }
-                        for (k=j+1;k<m_i+1;k++)
-                            {
-                                observed_higher+=observed_counts.at(i).at(k);
-                                estimated_higher+=estimated_counts.at(i).at(k);
-                            }
-                            
-                        temp.emplace_back(estimated_counts.at(i).at(j)+log(observed_lower/observed_higher)-log(estimated_lower/estimated_higher));
-
-
+                        observed_lower=0.3;
                     }
                 
-                out.emplace_back(temp);
+                if (observed_higher==0.0)
+                    {
+                        observed_higher=1;
+                    }
 
+                if (estimated_lower==0.0)
+                    {
+                        estimated_lower=0.3;
+                    }
+                if (estimated_higher==0.0)
+                    {
+                        estimated_higher=1;
+                    }
+                
+                temp_val=RA_Thresholds.at(j)+log(observed_lower/observed_higher)-log(estimated_lower/estimated_higher);
+                    
+                out.emplace_back(temp_val);
+                temp_sum+=temp_val;
             }
-        return out;
+        temp_average=temp_sum/(out.size()-1);
+        for (i=1;i<max_score+1;i++)
+            {
+                
+                RA_Thresholds[i]=out.at(i)-temp_average;
+                
+            }
+
+        
+        
     }
 
-Eigen::MatrixXd Rasch::calculate_residuals()
+void Rasch::calculate_residuals()
     {
-        Eigen::MatrixXd out(N,I);
-
-        return estimate_expected_values()-data;
+        residuals= data-expected_value;
     }
+
+void Rasch::estimate_difficulty()
+    {
+
+        Eigen::VectorXd temp;
+        double temp_mean;
+        Eigen::VectorXd temp_variance = variance.colwise().sum().unaryExpr([MINIMUM_VARIANCE](double x){return std::max(x,MINIMUM_VARIANCE);});
+
+
+        temp =difficulty - (residuals.colwise().sum().array()/temp_variance.transpose().array()).matrix().transpose().unaryExpr([](double x) {return std::min(std::max(x,-LIMIT),LIMIT);});
+        temp_mean = temp.mean();
+        difficulty= temp.unaryExpr([&temp_mean](double x){return x-temp_mean;});
+
+    }
+
+void Rasch::estimate_ability()
+    {
+
+        Eigen::VectorXd temp;
+        double temp_mean;
+        Eigen::VectorXd temp_variance = variance.rowwise().sum().unaryExpr([MINIMUM_VARIANCE](double x){return std::max(x,MINIMUM_VARIANCE);});
+
+        temp = ability + (residuals.rowwise().sum().array()/temp_variance.array()).matrix().unaryExpr([](double x) {return std::min(std::max(x,-LIMIT),LIMIT);});
+        temp_mean= temp.mean();
+        ability=temp.unaryExpr([&temp_mean](double x){return x-temp_mean;});
+
+    }
+
 #endif

@@ -1,6 +1,7 @@
-#include "Jmle.h"
+#include "Newton.h"
 #include <iostream>
-
+#include <vector>
+#include "Eigen/Dense"
 
 struct function
     {
@@ -20,23 +21,16 @@ int main()
     {
 
         Eigen::VectorXd x(10);
-
-        Eigen::MatrixXd y = Eigen::MatrixXd::Identity(10,10);
+        Eigen::VectorXd y(10);
 
         for (int i=0;i<10;i++)
             {
-                x(i)=i/18+i*i*0.189+89;
+                x(i)=i;
+                y(i)=2;
             }
+        
+        std::cout<<y.colwise().sum()<<std::endl;
 
-        function f;
-        bool check;
-        check=true;
-        newt(x,check,f);
-
-        //LUdcmp obj = LUdcmp(y);
-
-
-
-        std::cout<<x<<std::endl;
+        
 
     }

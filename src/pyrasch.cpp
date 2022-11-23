@@ -1,17 +1,19 @@
-#include "RunningStats.h"
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+//#include "RunningStats.h"
+//#include <pybind11/pybind11.h>
+//#include <pybind11/stl.h>
 #include <iostream>
 #include "Data.h"
-namespace py = pybind11;
+//#include <pybind11/eigen.h>
+//namespace py = pybind11;
 
 
-
+/*
 void Rasch::PROX(int PROX_MAX)
     {
                 
         int iter = 0;
 
+        Eigen::VectorXd x;
         
         for (iter;iter<PROX_MAX;iter++)
             {
@@ -27,20 +29,19 @@ void Rasch::PROX(int PROX_MAX)
                 }
                 else
                 {
-
-                    RunningStats stats  = get_stats_obj(difficulty);
+                    x.setLinSpaced(I,1,1);
+                    RunningStats stats  = get_stats_obj(difficulty,x);
                     difficulty_average = stats.Mean();
                     difficulty_std = stats.StandardDeviation();
                 }
 
-                //printf("iter: %d, res : %f",iter,difficulty_average);
-
+  
                 double ability_const= sqrt(1+(difficulty_std*difficulty_std)/2.9);
 
                 for (auto row : data.rowwise())
                 {
                     double person_n_raw_score = row.sum();
-                    //printf(" p score: %f",person_n_raw_score);
+                    
 
                     if (person_n_raw_score==0)
                     {
@@ -52,11 +53,12 @@ void Rasch::PROX(int PROX_MAX)
                     }
                     
                     ability(n)= difficulty_average+ability_const*log(person_n_raw_score/(MAX_PERSON_RAW_SCORE-person_n_raw_score));
-                    //printf(" p ablity: %f ",ability(n));
+                    
                     n++;
                 }
-
-                RunningStats ability_stats  = get_stats_obj(ability);
+                
+                x.setLinSpaced(N,1,1);
+                RunningStats ability_stats  = get_stats_obj(ability,x);
                 double temp_ability_average = ability_stats.Mean();
                 ability = ability.array()-temp_ability_average;
 
@@ -70,7 +72,8 @@ void Rasch::PROX(int PROX_MAX)
                 }
                 else
                 {
-                    RunningStats stats  = get_stats_obj(ability);
+                    x.setLinSpaced(N,1,1);
+                    RunningStats stats  = get_stats_obj(ability,x);
                     ability_average = stats.Mean();
                     ability_std = stats.StandardDeviation();
                 }
@@ -80,7 +83,6 @@ void Rasch::PROX(int PROX_MAX)
                 for (auto column : data.colwise())
                 {
                     double item_i_raw_score = column.sum();
-                    //printf(" i score: %f",item_i_raw_score);
 
                     if (item_i_raw_score==0)
                     {
@@ -92,24 +94,104 @@ void Rasch::PROX(int PROX_MAX)
                     }
                     
                     difficulty(i)= ability_average - difficulty_const*log(item_i_raw_score/(MAX_ITEM_RAW_SCORE(i)-item_i_raw_score));
-                    //printf(" i diff: %f",difficulty(i));
+
                     i++;
                 }
 
-                RunningStats diff_stats = get_stats_obj(difficulty);
+
+                x.setLinSpaced(I,1,1);
+                RunningStats diff_stats = get_stats_obj(difficulty,x);
                 double temp_difficulty_average = diff_stats.Mean();
                 difficulty = difficulty.array() -temp_difficulty_average;
                 
             }
         
     }
-
+*/
 
 void Rasch::JMLE(int JMLE_MAX)
     {
-        
-    }
+        int iter=0;
 
+        
+
+        for(iter; iter<JMLE_MAX;iter++)
+            {
+                /*
+                std::cout<<data<<'/n';
+                std::cout<<"log"<<log(exp(1.001))<<std::endl;
+                std::cout<<"_________________________"<<std::endl;
+                for (int n=0;n<N;n++)
+                    {
+                        for (int i=0;i<I;i++)
+                            {
+                                int m_i= max_score;
+                                for (int m=0;m<m_i+1;m++)
+                                    {
+                                        std::cout<<data_probability.at(n).at(i).at(m)<<" ";
+                                    }
+                                
+                                std::cout<<'\t';
+                            }
+                        
+                        std::cout<<'\n';
+                    }                
+                std::cout<<"-------------------------"<<iter<<"---------------------"<<std::endl;
+                for (int i=0;i<estimated_counts.size();i++)
+                    {
+
+                                std::cout<<estimated_counts[i]<<" ";
+
+                    }
+                std::cout<<"--------"<<std::endl;
+                for (int i=0;i<observed_counts.size();i++)
+                    {
+
+                                std::cout<<observed_counts[i]<<" ";
+                            
+                        
+                    }
+                std::cout<<"--------"<<std::endl;
+                for (int i=0;i<RA_Thresholds.size();i++){
+
+                        
+                            std::cout<<RA_Thresholds[i]<<" ";
+                        
+                    
+                    
+                }
+
+                std::cout<<"metric "<<residuals.rowwise().sum().colwise().sum()<<std::endl;
+                std::cout<<"abIl"<<std::endl;
+                std::cout<<ability<<std::endl;
+                std::cout<<"diff"<<std::endl;
+                std::cout<<difficulty<<std::endl;
+                //std::cout<<"threshold "<<RA_Thresholds<<std::endl;
+
+
+                //std::cout<<"estimated_counts "<<estimated_counts<<std::endl;
+
+                
+                std::cout<<"EXPEc "<<expected_value<<std::endl;
+                std::cout<<"variance "<<variance<<std::endl;
+                //std::cout<<"probs "<<data_probability<<std::endl;
+                std::cout<<"resuduals "<<residuals<<std::endl;
+                */
+                estimate_counts();
+                estimate_thresholds();
+                estimate_full_probability();
+                estimate_model_moments();
+                calculate_residuals();
+
+                
+                estimate_difficulty();
+                estimate_ability();
+
+                
+
+            }
+    }
+/*
 PYBIND11_MODULE(pyrasch,m)
     {
         m.doc() = "pybind11 example plugin";
@@ -117,9 +199,11 @@ PYBIND11_MODULE(pyrasch,m)
         py::class_<Rasch>(m,"Rasch")
         .def(py::init<const Eigen::MatrixXd &>())
         .def("PROX",&Rasch::PROX)
+        .def("JMLE",&Rasch::JMLE)
         .def("estimate_thresholds",&Rasch::estimate_thresholds)
         .def("estimate_counts",&Rasch::estimate_counts)
-        .def("estimate_expected_values",&Rasch::estimate_expected_values)
+        .def_readwrite("expected_value",&Rasch::expected_value,py::return_value_policy::reference_internal)
+        .def_readwrite("variance",&Rasch::variance,py::return_value_policy::reference_internal)
         .def_readwrite("data_probability",&Rasch::data_probability,py::return_value_policy::reference_internal)
         .def_readwrite("RA_Thresholds",&Rasch::RA_Thresholds,py::return_value_policy::reference_internal)
         .def_readwrite("observed_counts",&Rasch::observed_counts,py::return_value_policy::reference_internal)
@@ -127,3 +211,4 @@ PYBIND11_MODULE(pyrasch,m)
         .def_readwrite("difficulty",&Rasch::difficulty,py::return_value_policy::reference_internal);
 
     }
+*/
