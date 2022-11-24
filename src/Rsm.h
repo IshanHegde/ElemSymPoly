@@ -1,17 +1,17 @@
-#ifndef DATA_H
+#ifndef RSM_H
 
-#define DATA_H
+#define RSM_H
 #include "Eigen/Dense"
 #include <vector>
 #include <map>
 #include <iostream>
-//#include "RunningStats.h"
 
 double LIMIT =2;
 double CORRECTION =0.3;
 double MINIMUM_VARIANCE=0;
 
-struct Rasch
+// rating scale model
+struct RSM
     {
         Eigen::MatrixXd data;
         const unsigned long long N;
@@ -28,7 +28,6 @@ struct Rasch
         unsigned int max_score;
 
         
-
         Eigen::VectorXd difficulty;
         Eigen::VectorXd ability;
 
@@ -67,22 +66,22 @@ struct Rasch
 
     };
 
-const int Rasch::find_max_person_score()
+const int RSM::find_max_person_score()
     {
         return int(data.rowwise().sum().maxCoeff());
     }
 
-const Eigen::VectorXd Rasch::find_max_item_raw_scores()
+const Eigen::VectorXd RSM::find_max_item_raw_scores()
     {
         return data.colwise().maxCoeff()*N;
     }
 
-const Eigen::VectorXi Rasch::find_max_item_scores()
+const Eigen::VectorXi RSM::find_max_item_scores()
     {
         return data.cast<int>().colwise().maxCoeff();
     }
 
-Rasch::Rasch(const Eigen::MatrixXd & t_data):data(t_data),N(data.rows()),I(data.cols()),MAX_PERSON_RAW_SCORE(find_max_person_score()),MAX_ITEM_RAW_SCORE(find_max_item_raw_scores()),MAX_ITEM_SCORES(find_max_item_scores())
+RSM::RSM(const Eigen::MatrixXd & t_data):data(t_data),N(data.rows()),I(data.cols()),MAX_PERSON_RAW_SCORE(find_max_person_score()),MAX_ITEM_RAW_SCORE(find_max_item_raw_scores()),MAX_ITEM_SCORES(find_max_item_scores())
     {
 
         difficulty = Eigen::VectorXd::Constant(I,0.0);
@@ -124,7 +123,7 @@ Rasch::Rasch(const Eigen::MatrixXd & t_data):data(t_data),N(data.rows()),I(data.
 
     }
 
-void Rasch::estimate_model_moments()
+void RSM::estimate_model_moments()
     {
         Eigen::MatrixXd out_expected_value(N,I);
         Eigen::MatrixXd out_variance(N,I);
@@ -164,7 +163,7 @@ void Rasch::estimate_model_moments()
 
     }
 
-void Rasch::estimate_full_probability()
+void RSM::estimate_full_probability()
     {
         std::vector<std::vector<std::vector<double>>> out;
         out.reserve(N);
@@ -241,7 +240,7 @@ void Rasch::estimate_full_probability()
         
     }
 
-void Rasch::estimate_counts()
+void RSM::estimate_counts()
     {
         std::map<double,double> out;
         
@@ -279,7 +278,7 @@ void Rasch::estimate_counts()
         
     }
 
-void Rasch::estimate_thresholds()
+void RSM::estimate_thresholds()
     {
         std::vector<double> out;
         out.reserve(max_score+1);
@@ -338,12 +337,12 @@ void Rasch::estimate_thresholds()
         
     }
 
-void Rasch::calculate_residuals()
+void RSM::calculate_residuals()
     {
         residuals= data-expected_value;
     }
 
-void Rasch::estimate_difficulty()
+void RSM::estimate_difficulty()
     {
 
         Eigen::VectorXd temp;
@@ -357,9 +356,8 @@ void Rasch::estimate_difficulty()
 
     }
 
-void Rasch::estimate_ability()
+void RSM::estimate_ability()
     {
-
         Eigen::VectorXd temp;
         double temp_mean;
         Eigen::VectorXd temp_variance = variance.rowwise().sum().unaryExpr([MINIMUM_VARIANCE](double x){return std::max(x,MINIMUM_VARIANCE);});
