@@ -2,15 +2,15 @@
 
 
 
-void RSM::PROX(int PROX_MAX)
+void RSM::PROX(u_int16_t PROX_MAX)
     {
                         
     }
 
 
-void RSM::JMLE(int JMLE_MAX)
+void RSM::JMLE(u_int16_t JMLE_MAX)
     {
-        int iter=0;
+        u_int16_t iter=0;
 
         
         for(iter; iter<JMLE_MAX;iter++)

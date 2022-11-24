@@ -14,10 +14,10 @@ double MINIMUM_VARIANCE=0;
 struct RSM
     {
         Eigen::MatrixXd data;
-        const unsigned long long N;
-        const unsigned long long I;
+        const u_int32_t N;
+        const u_int32_t I;
 
-        const unsigned int MAX_PERSON_RAW_SCORE;
+        const u_int16_t MAX_PERSON_RAW_SCORE;
         const Eigen::VectorXd MAX_ITEM_RAW_SCORE;
         const Eigen::VectorXi MAX_ITEM_SCORES;
 
@@ -50,9 +50,9 @@ struct RSM
 
         void estimate_counts();
 
-        void PROX(int PROX_MAX);
+        void PROX(u_int16_t PROX_MAX);
 
-        void JMLE(int JMLE_MAX);
+        void JMLE(u_int16_t JMLE_MAX);
 
         void estimate_model_moments();
 
@@ -66,7 +66,7 @@ struct RSM
 
     };
 
-const int RSM::find_max_person_score()
+const u_int16_t RSM::find_max_person_score()
     {
         return int(data.rowwise().sum().maxCoeff());
     }
@@ -87,8 +87,8 @@ RSM::RSM(const Eigen::MatrixXd & t_data):data(t_data),N(data.rows()),I(data.cols
         difficulty = Eigen::VectorXd::Constant(I,0.0);
         ability = Eigen::VectorXd::Constant(N,0.0);
 
-        size_t i;
-        size_t n;
+        u_int32_t i;
+        u_int32_t n;
 
         max_score= MAX_ITEM_SCORES.maxCoeff();
         std::map<double,double> counts;
@@ -127,9 +127,9 @@ void RSM::estimate_model_moments()
     {
         Eigen::MatrixXd out_expected_value(N,I);
         Eigen::MatrixXd out_variance(N,I);
-        size_t i;
-        size_t n;
-        size_t j;
+        u_int32_t i;
+        u_int32_t n;
+        u_int32_t j;
         double mean;
         double var;
 
@@ -167,10 +167,10 @@ void RSM::estimate_full_probability()
     {
         std::vector<std::vector<std::vector<double>>> out;
         out.reserve(N);
-        size_t n;
-        size_t i;
-        size_t j;
-        size_t l;
+        u_int32_t n;
+        u_int32_t i;
+        u_int32_t j;
+        u_int32_t l;
 
         double ability_n;
         double difficulty_i;
@@ -244,9 +244,9 @@ void RSM::estimate_counts()
     {
         std::map<double,double> out;
         
-        size_t i;
-        size_t j;
-        size_t n;
+        u_int32_t i;
+        u_int32_t j;
+        u_int32_t n;
         double sum;
 
         for (i=0;i<max_score+1;i++)
@@ -283,8 +283,8 @@ void RSM::estimate_thresholds()
         std::vector<double> out;
         out.reserve(max_score+1);
         out.emplace_back(0.0);
-        size_t i;
-        size_t j;
+        u_int32_t i;
+        u_int32_t j;
         double observed_lower;
         double observed_higher;
         double estimated_lower;
