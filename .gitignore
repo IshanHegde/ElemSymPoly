@@ -4,3 +4,7 @@
 __pycache__
 Eigen
 pybind11
+build
+include
+pyrasch.egg-info
+!CMakeLists.txt

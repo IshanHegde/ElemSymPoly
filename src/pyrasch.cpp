@@ -17,7 +17,7 @@ PYBIND11_MODULE(pyrasch,m)
     {
         m.doc() = "pyrasch";
         
-        py::class_<RSM>(m,"Rating Scale Model")
+        py::class_<RSM>(m,"RSM")
         .def(py::init<const Eigen::MatrixXd &>())
         .def("PROX",&RSM::PROX)
         .def("JMLE",&RSM::JMLE)

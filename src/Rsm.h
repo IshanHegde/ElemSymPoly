@@ -1,7 +1,7 @@
 #ifndef RSM_H
 
 #define RSM_H
-#include "Eigen/Dense"
+#include <Eigen/Dense>
 #include <vector>
 #include <map>
 #include <iostream>
@@ -38,9 +38,9 @@ struct RSM
 
         std::vector<std::vector<std::vector<double>>> data_probability;
 
-        Rasch(const Eigen::MatrixXd & t_data);
+        RSM(const Eigen::MatrixXd & t_data);
 
-        const int find_max_person_score();
+        const u_int16_t find_max_person_score();
 
         const Eigen::VectorXd find_max_item_raw_scores();
 
@@ -344,10 +344,10 @@ void RSM::calculate_residuals()
 
 void RSM::estimate_difficulty()
     {
-
+        double MINIMUM_VARIANCE_=MINIMUM_VARIANCE;
         Eigen::VectorXd temp;
         double temp_mean;
-        Eigen::VectorXd temp_variance = variance.colwise().sum().unaryExpr([MINIMUM_VARIANCE](double x){return std::max(x,MINIMUM_VARIANCE);});
+        Eigen::VectorXd temp_variance = variance.colwise().sum().unaryExpr([MINIMUM_VARIANCE_](double x){return std::max(x,MINIMUM_VARIANCE_);});
 
 
         temp =difficulty - (residuals.colwise().sum().array()/temp_variance.transpose().array()).matrix().transpose().unaryExpr([](double x) {return std::min(std::max(x,-LIMIT),LIMIT);});
@@ -358,9 +358,10 @@ void RSM::estimate_difficulty()
 
 void RSM::estimate_ability()
     {
+        double MINIMUM_VARIANCE_=MINIMUM_VARIANCE;
         Eigen::VectorXd temp;
         double temp_mean;
-        Eigen::VectorXd temp_variance = variance.rowwise().sum().unaryExpr([MINIMUM_VARIANCE](double x){return std::max(x,MINIMUM_VARIANCE);});
+        Eigen::VectorXd temp_variance = variance.rowwise().sum().unaryExpr([MINIMUM_VARIANCE_](double x){return std::max(x,MINIMUM_VARIANCE_);});
 
         temp = ability + (residuals.rowwise().sum().array()/temp_variance.array()).matrix().unaryExpr([](double x) {return std::min(std::max(x,-LIMIT),LIMIT);});
         temp_mean= temp.mean();

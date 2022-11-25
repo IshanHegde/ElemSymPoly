@@ -1,7 +1,7 @@
 #include "Newton.h"
 #include <iostream>
 #include <vector>
-#include "Eigen/Dense"
+#include <Eigen/Dense>
 
 struct function
     {
