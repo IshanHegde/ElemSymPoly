@@ -31,7 +31,7 @@ include_directories(${source_dir}/include)
 
 
 
-find_package(Eigen3 REQUIRED NO_MODULE)
+#find_package(Eigen3 REQUIRED NO_MODULE)
 find_package(pybind11 REQUIRED)
 
 pybind11_add_module(pyrasch src/pyrasch.cpp)
