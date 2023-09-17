@@ -18,14 +18,16 @@ struct vector * alloc_vector(size_t size);
 
 struct vector * calloc_vector(size_t size);
 
-extern inline double get_vector_element(struct vector * vec, int i){
+inline double get_vector_element(struct vector * vec, int i){
     return vec->data[i];
 }
 
 
-extern inline void set_vector_element(struct vector * vec, int i, double value){
+inline void set_vector_element(struct vector * vec, int i, double value){
     vec->data[i] = value;
 }
+
+void standardize_vector_Zscore( struct vector * vec);
 
 void print_vector(struct vector * vec);
 

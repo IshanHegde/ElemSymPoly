@@ -2,6 +2,7 @@
 #include "vector.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 extern double get_vector_element(struct vector * vec, int i);
 
@@ -64,6 +65,34 @@ void print_vector(struct vector * vec){
         printf("%lf ", get_vector_element(vec, i));
     }
     printf("\n");
+}
+void standardize_vector_Zscore( struct vector * vec){
+
+    double sum = 0.0;
+    double diff, mean, std, vec_i;
+
+    int vec_size = vec->size;
+
+    for (int i =0; i<vec_size; i++){
+        sum += get_vector_element(vec,i);
+    }
+
+    mean = sum/vec_size;
+
+    sum = 0.0;
+
+    for (int i = 0; i<vec_size;i++){
+        diff = get_vector_element(vec,i) - mean;
+        sum += diff * diff;
+    }
+
+    std = sqrt(sum / vec_size);
+
+    for (int i = 0; i<vec_size; i++){
+        vec_i = get_vector_element(vec,i);
+        set_vector_element(vec, i, (vec_i - mean) / (std));
+    }
+
 }
 
 void free_vector(struct vector * vec){
