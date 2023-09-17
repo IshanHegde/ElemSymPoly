@@ -33,4 +33,5 @@ void print_vector(struct vector * vec);
 
 void free_vector(struct vector * vec);
 
+
 #endif // _VECTOR_H_

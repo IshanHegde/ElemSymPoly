@@ -11,14 +11,26 @@ struct dichotomus_model{
 
     struct matrix * data;
 
+    struct matrix * jacobian;
+
     struct vector * item_difficulty;
 
     struct vector * person_ability;
+
+    struct vector * item_i_total_scores;
+
+    struct vector * person_v_total_scores;
 
     int num_items;
     int num_persons;
 
 };
+
+
+
+void update_item_parameters(struct dichotomus_model * model);
+
+void update_person_parameters(struct dichotomus_model * model);
 
 inline double person_v_estimator(struct dichotomus_model * model, double person_v_ability_estimate){
 
@@ -51,7 +63,7 @@ inline double person_v_estimator_differential(struct dichotomus_model * model, d
     for (int i = 0; i< model->num_items; i++){
         item_i_difficulty = get_vector_element(model->item_difficulty, i);
         exp_value = exp(item_i_difficulty - person_v_ability_estimate );
-        value += exp_value / (( exp_value + 1.0 ) * ( exp_value + 1.0 )); 
+        value -= exp_value / (( exp_value + 1.0 ) * ( exp_value + 1.0 )); 
     }
     return value;
 }
