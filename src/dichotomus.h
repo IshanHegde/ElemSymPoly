@@ -63,7 +63,7 @@ inline double person_v_estimator_differential(struct dichotomus_model * model, d
     for (int i = 0; i< model->num_items; i++){
         item_i_difficulty = get_vector_element(model->item_difficulty, i);
         exp_value = exp(item_i_difficulty - person_v_ability_estimate );
-        value -= exp_value / (( exp_value + 1.0 ) * ( exp_value + 1.0 )); 
+        value += exp_value / (( exp_value + 1.0 ) * ( exp_value + 1.0 )); 
     }
     return value;
 }
@@ -76,7 +76,7 @@ inline double item_i_estimator_differential(struct dichotomus_model * model, dou
     for (int v = 0; v< model->num_persons; v++){
         person_v_ability = get_vector_element(model->person_ability, v);
         exp_value = exp(item_i_difficulty_estimate - person_v_ability);
-        value += exp_value / (( exp_value + 1.0 ) * ( exp_value + 1.0 )); 
+        value -= exp_value / (( exp_value + 1.0 ) * ( exp_value + 1.0 )); 
     }
     return value;
 }
