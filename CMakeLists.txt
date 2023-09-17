@@ -18,9 +18,11 @@ add_executable(PyRasch
         src/vector.h
         src/matrix.c
         src/matrix.h
+        src/dichotomus.c
+        src/dichotomus.h
         src/test.c)
 
-target_link_libraries(PyRasch openblas)
+target_link_libraries(PyRasch openblas m)
 
 target_compile_options(PyRasch PRIVATE
         -march=native
