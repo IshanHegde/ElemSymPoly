@@ -44,6 +44,29 @@ struct matrix * alloc_matrix(size_t size_1, size_t size_2){
     return mat;
 }
 
+struct matrix * calloc_matrix(size_t size_1, size_t size_2){
+
+    struct matrix * mat = (struct matrix *) malloc(sizeof(struct matrix));
+
+    if (mat == NULL) return NULL;
+
+    struct mem_block * block = calloc_mem_block(size_1* size_2);
+
+    if (block == NULL){
+        free(mat);
+        fprintf(stderr, "Failed to allocate memory for matrix. \n");
+        return NULL;
+    }
+
+    mat->block = block;
+    mat->rows = size_1;
+    mat->cols = size_2;
+    mat->data = block->data;
+    mat->owner = 1;
+    mat->tda = size_2;
+
+    return mat;
+}
 
 void print_matrix(struct matrix * mat){
 

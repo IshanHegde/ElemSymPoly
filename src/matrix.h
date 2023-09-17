@@ -24,7 +24,7 @@ struct matrix{
 
 struct matrix * alloc_matrix(size_t size_1, size_t size_2);
 
-
+struct matrix * calloc_matrix(size_t size_1, size_t size_2);
 
 
 inline double get_matrix_element(struct matrix * mat, int row, int col){
