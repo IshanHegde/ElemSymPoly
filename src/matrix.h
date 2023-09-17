@@ -6,13 +6,10 @@
 #define ITEM_MATRIX_H
 
 
-#include <stddef.h>
+#include "block.h"
 
 
-struct mem_block{
-    size_t size;
-    double * data;
-};
+
 
 struct mat{
     int rows;
@@ -23,21 +20,21 @@ struct mat{
     int owner;
 };
 
-struct mem_block * alloc_mem_block(size_t size);
+
 
 struct mat * alloc_mat(size_t size_1, size_t size_2);
 
-inline double get_element(struct mat * matrix, int row, int col){
+inline double get_mat_element(struct mat * matrix, int row, int col){
     return matrix->data[matrix->tda*row + col];
 }
 
-inline  void set_element(struct mat * matrix, int row, int col, double val){
+inline  void set_mat_element(struct mat * matrix, int row, int col, double val){
 
     matrix->data[matrix->tda * row + col] = val;
 
 }
 
-void free_block(struct mem_block * block);
+
 
 void free_mat(struct mat * matrix);
 
