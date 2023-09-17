@@ -48,7 +48,7 @@ void set_identity(struct matrix * mat);
 
 void set_rand(struct matrix * mat);
 
-void set_binary_rand(struct matrix * mat);
+
 
 void matrix_multiply(const struct matrix * restrict A, const struct matrix * restrict B, const struct matrix * restrict C);
 
