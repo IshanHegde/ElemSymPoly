@@ -20,6 +20,8 @@ add_executable(PyRasch
         src/matrix.h
         src/dichotomus.c
         src/dichotomus.h
+        src/utils.c
+        src/utils.h
         src/test.c)
 
 target_link_libraries(PyRasch openblas m)
