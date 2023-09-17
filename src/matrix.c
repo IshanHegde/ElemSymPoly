@@ -4,120 +4,123 @@
 #include <stdio.h>
 #include <cblas.h>
 
-void free_block(struct mem_block * block){
 
-    free(block->data);
-    free(block);
-}
 
-void free_mat(struct mat * matrix){
-    if (matrix->owner){
-        free_block(matrix->block);
+extern void set_matrix_element(struct matrix * mat, int row, int col, double val);
+
+extern double get_matrix_element(struct matrix * mat, int row, int col);
+
+void free_matrix(struct matrix * mat){
+    if (mat->owner){
+        free_block(mat->block);
     }
 
-    free(matrix);
+    free(mat);
 }
 
-struct mem_block * alloc_mem_block(size_t size){
 
-    struct mem_block * block = (struct mem_block *) malloc(sizeof(struct mem_block));
 
-    if (block == NULL){
-        fprintf(stderr, "Failed to allocate memory for mem_block structure.\n");
-        return NULL;
-    }
+struct matrix * alloc_matrix(size_t size_1, size_t size_2){
 
-    block->data = (double *) malloc(sizeof(double) * size);
+    struct matrix * mat = (struct matrix *) malloc(sizeof(struct matrix));
 
-    if (block->data == NULL){
-        fprintf(stderr, "Failed to allocate memory for data array.\n");
-        free(block);
-        return NULL;
-    }
-
-    return block;
-}
-
-struct mat * alloc_mat(size_t size_1, size_t size_2){
-
-    struct mat * matrix = (struct mat *) malloc(sizeof(struct mat));
-
-    if (matrix == NULL) return NULL;
+    if (mat == NULL) return NULL;
 
     struct mem_block * block = alloc_mem_block(size_1* size_2);
 
     if (block == NULL){
-        free(matrix);
+        free(mat);
         fprintf(stderr, "Failed to allocate memory for matrix. \n");
         return NULL;
     }
 
-    matrix->block = block;
-    matrix->rows = size_1;
-    matrix->cols = size_2;
-    matrix->data = block->data;
-    matrix->owner = 1;
-    matrix->tda = size_2;
+    mat->block = block;
+    mat->rows = size_1;
+    mat->cols = size_2;
+    mat->data = block->data;
+    mat->owner = 1;
+    mat->tda = size_2;
 
-    return matrix;
+    return mat;
 }
 
 
-void print_mat(struct mat * matrix){
+void print_matrix(struct matrix * mat){
 
-    if (matrix == NULL) {
+    if (mat == NULL) {
         fprintf(stderr, "Invalid matrix.\n");
         return;
     }
 
-    int rows = matrix->rows;
-    int cols = matrix->cols;
+    int rows = mat->rows;
+    int cols = mat->cols;
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            printf("%lf ", get_element(matrix, i, j));
+            printf("%lf ", get_matrix_element(mat, i, j));
         }
         printf("\n");
     }
 }
 
-void set_identity(struct mat * matrix){
+void set_identity(struct matrix * mat){
 
-    if (matrix == NULL) {
+    if (mat == NULL) {
         fprintf(stderr, "Invalid matrix.\n");
         return;
     }
 
-    int rows = matrix->rows;
-    int cols = matrix->cols;
+    int rows = mat->rows;
+    int cols = mat->cols;
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            set_element(matrix, i, j, 1.0);
+            set_matrix_element(mat, i, j, 1.0);
         }
 
     }
 
 }
 
-void set_rand(struct mat * matrix){
-    if (matrix == NULL) {
+void set_rand(struct matrix * mat){
+    if (mat == NULL) {
         fprintf(stderr, "Invalid matrix.\n");
         return;
     }
 
-    int rows = matrix->rows;
-    int cols = matrix->cols;
+    int rows = mat->rows;
+    int cols = mat->cols;
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            set_element(matrix, i, j, (double)rand() / RAND_MAX);
+            set_matrix_element(mat, i, j, (double)rand() / RAND_MAX);
         }
 
     }
 }
 
-void matrix_multiply(const struct mat* restrict A, const struct mat* restrict B, const struct mat * restrict C){
+void set_binary_rand(struct matrix * mat){
+
+    if (mat == NULL) {
+        fprintf(stderr, "Invalid matrix.\n");
+        return;
+    }
+
+    int rows = mat->rows;
+    int cols = mat->cols;
+    double val;
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            val = (double)rand() / RAND_MAX;
+            val = val >= 0.5 ? 1.0 : 0.0;
+            set_matrix_element(mat, i, j, val);
+        }
+
+    }
+}
+
+void matrix_multiply(const struct matrix* restrict A, const struct matrix* restrict B, const struct matrix * restrict C){
 
 
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A->rows, B->cols, A->cols, 1.0, A->data, A->tda, B->data, B->tda, 0.0, C->data, C->tda);
