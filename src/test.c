@@ -8,11 +8,10 @@
 #include <cblas.h>
 #include <lapacke.h>
 #include "utils.h"
-#include "panopticon.h"
+
 
 int main(){
 
-    GLOBAL_TIMER(MILLISECONDS,CLOCK_MONOTONIC_RAW)
 
     srand(time(NULL));
     goto_set_num_threads( 16);

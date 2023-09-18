@@ -7,7 +7,6 @@
 #include "vector.h"
 #include <math.h>
 #include <stdio.h>
-#include "panopticon.h"
 #include <omp.h>
 
 struct dichotomus_model{
