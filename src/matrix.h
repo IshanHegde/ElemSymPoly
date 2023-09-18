@@ -24,7 +24,7 @@ struct matrix{
 
 struct matrix * alloc_matrix(size_t size_1, size_t size_2);
 
-
+struct matrix * calloc_matrix(size_t size_1, size_t size_2);
 
 
 inline double get_matrix_element(struct matrix * mat, int row, int col){
@@ -48,7 +48,7 @@ void set_identity(struct matrix * mat);
 
 void set_rand(struct matrix * mat);
 
-void set_binary_rand(struct matrix * mat);
+
 
 void matrix_multiply(const struct matrix * restrict A, const struct matrix * restrict B, const struct matrix * restrict C);
 

@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <cblas.h>
-
+#include <math.h>
+#include "vector.h"
 
 
 extern void set_matrix_element(struct matrix * mat, int row, int col, double val);
@@ -44,6 +45,29 @@ struct matrix * alloc_matrix(size_t size_1, size_t size_2){
     return mat;
 }
 
+struct matrix * calloc_matrix(size_t size_1, size_t size_2){
+
+    struct matrix * mat = (struct matrix *) malloc(sizeof(struct matrix));
+
+    if (mat == NULL) return NULL;
+
+    struct mem_block * block = calloc_mem_block(size_1* size_2);
+
+    if (block == NULL){
+        free(mat);
+        fprintf(stderr, "Failed to allocate memory for matrix. \n");
+        return NULL;
+    }
+
+    mat->block = block;
+    mat->rows = size_1;
+    mat->cols = size_2;
+    mat->data = block->data;
+    mat->owner = 1;
+    mat->tda = size_2;
+
+    return mat;
+}
 
 void print_matrix(struct matrix * mat){
 
@@ -99,26 +123,6 @@ void set_rand(struct matrix * mat){
     }
 }
 
-void set_binary_rand(struct matrix * mat){
-
-    if (mat == NULL) {
-        fprintf(stderr, "Invalid matrix.\n");
-        return;
-    }
-
-    int rows = mat->rows;
-    int cols = mat->cols;
-    double val;
-
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            val = (double)rand() / RAND_MAX;
-            val = val >= 0.5 ? 1.0 : 0.0;
-            set_matrix_element(mat, i, j, val);
-        }
-
-    }
-}
 
 void matrix_multiply(const struct matrix* restrict A, const struct matrix* restrict B, const struct matrix * restrict C){
 
