@@ -1,6 +1,7 @@
 #include "dichotomus.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 extern double person_v_estimator(struct dichotomus_model * model, double person_v_ability_estimate);
 
@@ -24,8 +25,11 @@ void update_item_parameters(struct dichotomus_model * model){
         item_i_estimator_value = item_i_estimator(model,item_i_difficulty_estimate);
         item_i_estimator_derivative = item_i_estimator_differential(model, item_i_difficulty_estimate);
 
+        if (item_i_estimator_derivative < 0.02) continue;
+
         item_i_difficulty_estimate_new = item_i_difficulty_estimate - 1.0 / item_i_estimator_derivative * (item_i_estimator_value - item_i_total_score);
 
+        //set_vector_element(model->item_difficulty, i, item_i_difficulty_estimate_new * ((double)model->num_items -1.0) / ((double) model->num_items) );
         set_vector_element(model->item_difficulty, i, item_i_difficulty_estimate_new);
     }
 
@@ -34,9 +38,11 @@ void update_item_parameters(struct dichotomus_model * model){
 
 void update_person_parameters(struct dichotomus_model * model){
 
+
     double person_v_estimator_derivative, person_v_ability_estimate, person_v_ability_estimate_new, person_v_estimator_value, person_v_total_score;
     int num_of_persons = model->num_persons;
 
+    
     for (int v = 0; v < num_of_persons; v++){
 
         person_v_ability_estimate = get_vector_element(model->person_ability, v);
@@ -44,6 +50,8 @@ void update_person_parameters(struct dichotomus_model * model){
 
         person_v_estimator_value = person_v_estimator(model, person_v_ability_estimate);
         person_v_estimator_derivative = person_v_estimator_differential(model, person_v_ability_estimate);
+
+        if (person_v_estimator_derivative < 0.02) continue;
         
         person_v_ability_estimate_new = person_v_ability_estimate - 1.0 / person_v_estimator_derivative * (person_v_estimator_value - person_v_total_score);
 
@@ -51,6 +59,31 @@ void update_person_parameters(struct dichotomus_model * model){
         
     }
 
+}
+
+double calculate_likelihood(struct dichotomus_model * model){
+
+    WATCH("L")
+    double expression_1 = 0.0;
+    double expression_2 = 0.0;
+    double expression_3 = 0.0;
+
+    for (int v = 0; v < model->num_persons; v++){
+        expression_1 += get_vector_element(model->person_v_total_scores, v) * get_vector_element(model->person_ability, v);
+
+    }
+
+    for (int i = 0; i < model->num_items; i++){
+        expression_2 += get_vector_element(model->item_i_total_scores, i) * get_vector_element(model->item_difficulty, i);
+    }
+
+    for (int v = 0; v < model->num_persons; v++){
+        for (int i = 0; i < model->num_items; i++){
+            expression_3 += log(1.0 + exp(get_vector_element(model->person_ability, v) - get_vector_element(model->item_difficulty, i) ));
+        }
+    }
+    STOP_WATCH("L")
+    return expression_1 - expression_2 - expression_3;
 }
 
 struct dichotomus_model * dichotomus_model_create_alloc(struct matrix * data){
@@ -67,30 +100,18 @@ struct dichotomus_model * dichotomus_model_create_alloc(struct matrix * data){
     struct vector * item_i_total_scores = calloc_vector(num_cols);
     struct vector * person_v_total_scores = calloc_vector(num_rows);
 
-    struct matrix * jacobian = calloc_matrix(num_rows, num_cols);
 
     if (item_difficulty == NULL){
 
         if (person_ability != NULL) free_vector(person_ability);
         if (item_i_total_scores != NULL) free_vector(item_i_total_scores);
         if (person_v_total_scores != NULL) free_vector(person_v_total_scores);
-        if (jacobian != NULL) free_matrix(jacobian);
         free(model);
         return NULL;
     }
     if (person_ability == NULL){
 
         if (item_difficulty != NULL) free_vector(item_difficulty);
-        if (item_i_total_scores != NULL) free_vector(item_i_total_scores);
-        if (person_v_total_scores != NULL) free_vector(person_v_total_scores);
-        if (jacobian != NULL) free_matrix(jacobian);
-        free(model);
-        return NULL;
-    }
-    if (jacobian == NULL){
-
-        if (item_difficulty != NULL) free_vector(item_difficulty);
-        if (person_ability != NULL) free_vector(person_ability);
         if (item_i_total_scores != NULL) free_vector(item_i_total_scores);
         if (person_v_total_scores != NULL) free_vector(person_v_total_scores);
         free(model);
@@ -100,7 +121,6 @@ struct dichotomus_model * dichotomus_model_create_alloc(struct matrix * data){
         if (item_difficulty != NULL) free_vector(item_difficulty);
         if (person_ability != NULL) free_vector(person_ability);
         if (person_v_total_scores != NULL) free_vector(person_v_total_scores);
-        if (jacobian != NULL) free_matrix(jacobian);
         free(model);
         return NULL;
     }
@@ -108,7 +128,6 @@ struct dichotomus_model * dichotomus_model_create_alloc(struct matrix * data){
         if (item_difficulty != NULL) free_vector(item_difficulty);
         if (person_ability != NULL) free_vector(person_ability);
         if (item_i_total_scores != NULL) free_vector(item_i_total_scores);
-        if (jacobian != NULL) free_matrix(jacobian);
         free(model);
         return NULL;
     }
@@ -144,7 +163,5 @@ struct dichotomus_model * dichotomus_model_create_alloc(struct matrix * data){
     model->num_items = num_cols;
     model->num_persons = num_rows;
     
-    model->jacobian = jacobian;
-
     return model;
 }

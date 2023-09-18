@@ -26,6 +26,11 @@ void generate_simulated_data(struct matrix * mat, double min_difficulty, double 
     struct vector * ability = calloc_vector(rows);
 
     for (int i = 0; i < cols; i++){
+
+        if (i == 0){
+            set_vector_element(difficulty,i, 0);
+            continue;
+        }
         double diff_val =  min_difficulty + ( (double) i*difficulty_increment);
        
         set_vector_element(difficulty,i, diff_val);
