@@ -63,7 +63,7 @@ void update_person_parameters(struct dichotomus_model * model){
 
 double calculate_likelihood(struct dichotomus_model * model){
 
-    WATCH("L")
+
     double expression_1 = 0.0;
     double expression_2 = 0.0;
     double expression_3 = 0.0;
@@ -82,7 +82,7 @@ double calculate_likelihood(struct dichotomus_model * model){
             expression_3 += log(1.0 + exp(get_vector_element(model->person_ability, v) - get_vector_element(model->item_difficulty, i) ));
         }
     }
-    STOP_WATCH("L")
+
     return expression_1 - expression_2 - expression_3;
 }
 

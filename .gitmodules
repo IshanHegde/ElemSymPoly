@@ -1,0 +1,3 @@
+[submodule "panopticon"]
+	path = panopticon
+	url = https://github.com/IshanHegde/panopticon.git
