@@ -2,6 +2,6 @@
 *.txt
 /.vscode/
 build
-include
 !CMakeLists.txt
 *test*
+src/test.c

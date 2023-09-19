@@ -28,7 +28,6 @@ void update_item_parameters(struct dichotomus_model * model){
 
         item_i_difficulty_estimate_new = item_i_difficulty_estimate - 1.0 / item_i_estimator_derivative * (item_i_estimator_value - item_i_total_score);
 
-        //set_vector_element(model->item_difficulty, i, item_i_difficulty_estimate_new * ((double)model->num_items -1.0) / ((double) model->num_items) );
         set_vector_element(model->item_difficulty, i, item_i_difficulty_estimate_new);
     }
 

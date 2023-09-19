@@ -9,6 +9,7 @@
 #include <utils.h>
 #include <panopticon.h>
 
+
 int main(){
 
     GLOBAL_TIMER(NANOSECONDS, CLOCK_MONOTONIC_RAW)
