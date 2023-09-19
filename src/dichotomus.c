@@ -1,5 +1,4 @@
-#include "dichotomus.h"
-
+#include <dichotomus.h>
 #include <stdlib.h>
 #include <stdio.h>
 
