@@ -1,17 +1,18 @@
 //
 // Created by ishan on 9/7/23.
 //
-#include "dichotomus.h"
 #include <stdio.h>
-
 #include <time.h>
 #include <cblas.h>
 #include <lapacke.h>
-#include "utils.h"
+#include <dichotomus.h>
+#include <utils.h>
+#include <panopticon.h>
 
 
 int main(){
 
+    GLOBAL_TIMER(NANOSECONDS, CLOCK_MONOTONIC_RAW)
 
     srand(time(NULL));
     goto_set_num_threads( 16);

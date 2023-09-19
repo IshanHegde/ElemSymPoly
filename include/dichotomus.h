@@ -3,8 +3,8 @@
 
 #define _DICOTOMUS_H_
 
-#include "matrix.h"
-#include "vector.h"
+#include <matrix.h>
+#include <vector.h>
 #include <math.h>
 #include <stdio.h>
 #include <omp.h>

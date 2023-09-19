@@ -1,10 +1,8 @@
-
-#include "matrix.h"
+#include <matrix.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <cblas.h>
 #include <math.h>
-#include "vector.h"
 
 
 extern void set_matrix_element(struct matrix * mat, int row, int col, double val);
