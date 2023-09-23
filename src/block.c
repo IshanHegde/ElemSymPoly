@@ -1,17 +1,21 @@
 #include <block.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-struct mem_block * alloc_mem_block(size_t size){
+struct block * alloc_block(size_t size){
 
-    struct mem_block * block = (struct mem_block *) malloc(sizeof(struct mem_block));
+    struct block * block = (struct block *) malloc(sizeof(struct block));
 
     if (block == NULL){
         fprintf(stderr, "Failed to allocate memory for mem_block structure.\n");
         return NULL;
     }
 
-    block->data = (double *) malloc(sizeof(double) * size);
+    //block->data = (double *) malloc(sizeof(double) * size);
+    void * tmp_mem = NULL; 
+    posix_memalign(&tmp_mem, sizeof(float), sizeof(double) * size);
+    block->data = (double *) tmp_mem;
 
     if (block->data == NULL){
         fprintf(stderr, "Failed to allocate memory for data array.\n");
@@ -22,16 +26,19 @@ struct mem_block * alloc_mem_block(size_t size){
     return block;
 }
 
-struct mem_block * calloc_mem_block(size_t size){
+struct block * calloc_block(size_t size){
 
-    struct mem_block * block = (struct mem_block *) malloc(sizeof(struct mem_block));
+    struct block * block = (struct block *) malloc(sizeof(struct block));
 
     if (block == NULL){
         fprintf(stderr, "Failed to allocate memory for mem_block structure.\n");
         return NULL;
     }
 
-    block->data = (double *) calloc(size,sizeof(double));
+    void * tmp_mem = NULL; 
+    posix_memalign(&tmp_mem, sizeof(float), sizeof(double) * size);
+    memset(tmp_mem,0.0, sizeof(double) * size);
+    block->data = (double *) tmp_mem;
 
     if (block->data == NULL){
         fprintf(stderr, "Failed to allocate memory for data array.\n");
@@ -43,7 +50,7 @@ struct mem_block * calloc_mem_block(size_t size){
 
 }
 
-void free_block(struct mem_block * block){
+void free_block(struct block * block){
 
     free(block->data);
     free(block);

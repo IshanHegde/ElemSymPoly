@@ -15,8 +15,9 @@ void update_item_parameters(struct dichotomus_model * model){
 
     double item_i_estimator_derivative, item_i_difficulty_estimate, item_i_difficulty_estimate_new, item_i_estimator_value, item_i_total_score;
     int num_of_items = model->num_items;
+    int i;
 
-    for (int i = 0; i < num_of_items; i++){
+    for (i = 0; i < num_of_items; i++){
 
         item_i_difficulty_estimate = get_vector_element(model->item_difficulty, i);
         item_i_total_score = get_vector_element(model->item_i_total_scores, i);
@@ -39,9 +40,9 @@ void update_person_parameters(struct dichotomus_model * model){
 
     double person_v_estimator_derivative, person_v_ability_estimate, person_v_ability_estimate_new, person_v_estimator_value, person_v_total_score;
     int num_of_persons = model->num_persons;
-
+    int v;
     
-    for (int v = 0; v < num_of_persons; v++){
+    for (v = 0; v < num_of_persons; v++){
 
         person_v_ability_estimate = get_vector_element(model->person_ability, v);
         person_v_total_score = get_vector_element(model->person_v_total_scores, v);
@@ -65,18 +66,19 @@ double calculate_likelihood(struct dichotomus_model * model){
     double expression_1 = 0.0;
     double expression_2 = 0.0;
     double expression_3 = 0.0;
+    int i, v;
 
-    for (int v = 0; v < model->num_persons; v++){
+    for (v = 0; v < model->num_persons; v++){
         expression_1 += get_vector_element(model->person_v_total_scores, v) * get_vector_element(model->person_ability, v);
 
     }
 
-    for (int i = 0; i < model->num_items; i++){
+    for (i = 0; i < model->num_items; i++){
         expression_2 += get_vector_element(model->item_i_total_scores, i) * get_vector_element(model->item_difficulty, i);
     }
 
-    for (int v = 0; v < model->num_persons; v++){
-        for (int i = 0; i < model->num_items; i++){
+    for (v = 0; v < model->num_persons; v++){
+        for (i = 0; i < model->num_items; i++){
             expression_3 += log(1.0 + exp(get_vector_element(model->person_ability, v) - get_vector_element(model->item_difficulty, i) ));
         }
     }
@@ -133,9 +135,10 @@ struct dichotomus_model * dichotomus_model_create_alloc(struct matrix * data){
 
 
     double data_vi, item_i, person_v, item_i_score, person_v_score;
+    int v,i;
 
-    for (int v =0; v< num_rows; v++){
-        for (int i =0;i < num_cols; i++){
+    for (v =0; v< num_rows; v++){
+        for (i =0;i < num_cols; i++){
 
             data_vi = get_matrix_element(data, v, i);
             item_i = get_vector_element(item_difficulty, i);

@@ -8,7 +8,7 @@ struct vector{
 
     int size;
     double *data;
-    struct mem_block *block;
+    struct block *block;
     int owner;
 };
 
@@ -17,12 +17,12 @@ struct vector * alloc_vector(size_t size);
 
 struct vector * calloc_vector(size_t size);
 
-inline double get_vector_element(struct vector * vec, int i){
+inline __attribute__((always_inline)) double get_vector_element(struct vector * vec, int i){
     return vec->data[i];
 }
 
 
-inline void set_vector_element(struct vector * vec, int i, double value){
+inline __attribute__((always_inline)) void set_vector_element(struct vector * vec, int i, double value){
     vec->data[i] = value;
 }
 
