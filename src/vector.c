@@ -14,7 +14,7 @@ struct vector * alloc_vector(size_t size){
 
     if (vec == NULL) return NULL;
 
-    struct mem_block * block = alloc_mem_block(size);
+    struct block * block = alloc_block(size);
 
     if (block == NULL){
         free(vec);
@@ -36,7 +36,7 @@ struct vector * calloc_vector(size_t size){
 
     if (vec == NULL) return NULL;
 
-    struct mem_block * block = calloc_mem_block(size);
+    struct block * block = calloc_block(size);
 
     if (block == NULL){
         free(vec);
@@ -60,20 +60,22 @@ void print_vector(struct vector * vec){
     }
 
     int size = vec->size;
+    int i;
 
-    for (int i =0; i< size;i++){
+    for (i =0; i< size;i++){
         printf("%lf ", get_vector_element(vec, i));
     }
     printf("\n");
 }
-void standardize_vector_Zscore( struct vector * vec){
+void standardize_vector_Zscore(struct vector * vec){
 
     double sum = 0.0;
     double diff, mean, std, vec_i;
+    int i;
 
     int vec_size = vec->size;
 
-    for (int i =0; i<vec_size; i++){
+    for (i =0; i<vec_size; i++){
         sum += get_vector_element(vec,i);
     }
 
@@ -81,14 +83,14 @@ void standardize_vector_Zscore( struct vector * vec){
 
     sum = 0.0;
 
-    for (int i = 0; i<vec_size;i++){
+    for (i = 0; i<vec_size;i++){
         diff = get_vector_element(vec,i) - mean;
         sum += diff * diff;
     }
 
     std = sqrt(sum / vec_size);
 
-    for (int i = 0; i<vec_size; i++){
+    for (i = 0; i<vec_size; i++){
         vec_i = get_vector_element(vec,i);
         set_vector_element(vec, i, (vec_i - mean) / (std));
     }

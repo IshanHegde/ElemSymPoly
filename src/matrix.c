@@ -25,7 +25,7 @@ struct matrix * alloc_matrix(size_t size_1, size_t size_2){
 
     if (mat == NULL) return NULL;
 
-    struct mem_block * block = alloc_mem_block(size_1* size_2);
+    struct block * block = alloc_block(size_1* size_2);
 
     if (block == NULL){
         free(mat);
@@ -49,7 +49,7 @@ struct matrix * calloc_matrix(size_t size_1, size_t size_2){
 
     if (mat == NULL) return NULL;
 
-    struct mem_block * block = calloc_mem_block(size_1* size_2);
+    struct block * block = calloc_block(size_1* size_2);
 
     if (block == NULL){
         free(mat);
@@ -94,9 +94,10 @@ void set_identity(struct matrix * mat){
 
     int rows = mat->rows;
     int cols = mat->cols;
+    int i,j;
 
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (i = 0; i < rows; i++) {
+        for (j = 0; j < cols; j++) {
             set_matrix_element(mat, i, j, 1.0);
         }
 
@@ -112,9 +113,10 @@ void set_rand(struct matrix * mat){
 
     int rows = mat->rows;
     int cols = mat->cols;
+    int i,j;
 
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (i = 0; i < rows; i++) {
+        for (j = 0; j < cols; j++) {
             set_matrix_element(mat, i, j, (double)rand() / RAND_MAX);
         }
 
