@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
+option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 
 
 project(PyRasch C)
@@ -23,7 +24,9 @@ add_executable(PyRasch
         src/matrix.c
         src/dichotomus.c
         src/utils.c
-        src/test.c)
+        src/test.c
+        src/complex_block.c
+        src/complex_vector.c)
 
 target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon)
 
@@ -35,4 +38,10 @@ target_compile_options(PyRasch PRIVATE
         -fstrict-aliasing
         -funroll-loops
         -fopenmp
+        -ftree-vectorize
 )
+
+if (ENABLE_ASAN)
+    target_compile_options(PyRasch PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+    target_link_options(PyRasch PRIVATE -fsanitize=address)
+endif()
