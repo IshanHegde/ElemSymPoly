@@ -65,13 +65,18 @@ void print_complex_vector(struct complex_vector * vec){
     double complex val;
 
     printf("[ ");
-    for (i =0; i< size;i++){
+    for (i =0; i< size-1;i++){
         val =  get_complex_vector_element(vec, i);
         real = creal(val);
         imag = cimag(val);
-        printf("%lf + %lfi, ",real,imag);
+        printf("%lf + %lfi, \n",real,imag);
+        
     }
-    printf("]\n");
+
+    val =  get_complex_vector_element(vec, i);
+    real = creal(val);
+    imag = cimag(val);
+    printf("%lf + %lfi ]\n",real,imag);
 }
 
 void free_complex_vector(struct complex_vector * vec){

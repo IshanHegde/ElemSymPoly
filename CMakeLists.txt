@@ -26,7 +26,8 @@ add_executable(PyRasch
         src/utils.c
         src/test.c
         src/complex_block.c
-        src/complex_vector.c)
+        src/complex_vector.c
+        src/roots.c)
 
 target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon)
 

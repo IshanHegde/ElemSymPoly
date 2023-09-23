@@ -8,13 +8,13 @@ struct complex_block * alloc_complex_block(size_t size){
     struct complex_block * block = (struct complex_block *) malloc(sizeof(struct complex_block));
 
     if (block == NULL){
-        fprintf(stderr, "Failed to allocate memory for mem_block structure.\n");
+        fprintf(stderr, "Failed to allocate memory for complex block structure.\n");
         return NULL;
     }
 
     //block->data = (double *) malloc(sizeof(double) * size);
     void * tmp_mem = NULL; 
-    posix_memalign(&tmp_mem, sizeof(float), sizeof(double complex) * size);
+    posix_memalign(&tmp_mem, sizeof(double), sizeof(double complex) * size);
     block->data = (double complex *) tmp_mem;
 
     if (block->data == NULL){
@@ -32,7 +32,7 @@ struct complex_block * calloc_complex_block(size_t size){
     struct complex_block * block = (struct complex_block *) malloc(sizeof(struct complex_block));
 
     if (block == NULL){
-        fprintf(stderr, "Failed to allocate memory for mem_block structure.\n");
+        fprintf(stderr, "Failed to allocate memory for complex block structure.\n");
         return NULL;
     }
 
