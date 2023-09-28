@@ -14,6 +14,8 @@ struct block * alloc_block(size_t size);
 
 struct block * calloc_block(size_t size);
 
+struct block * resize_block(struct block * block, size_t new_size);
+
 void free_block(struct block * block);
 
 #endif // _BLOCK_H_
