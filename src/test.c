@@ -8,50 +8,62 @@
 #include <dichotomus.h>
 #include <utils.h>
 #include <panopticon.h>
+#include <roots.h>
+#include <dft.h>
 
+#include <inttypes.h>
+#include <fftw3.h>
 
 int main(){
 
-    GLOBAL_TIMER(NANOSECONDS, CLOCK_MONOTONIC_RAW)
+    GLOBAL_TIMER(MILLISECONDS,CLOCK_MONOTONIC_RAW)
+    
+    int N = 16;
 
-    srand(time(NULL));
-    goto_set_num_threads( 16);
-    openblas_set_num_threads( 16);
-    omp_set_num_threads(10);
-    struct matrix * A = alloc_matrix(70000,6);
+    struct  vector * vec = alloc_vector(N);
 
-    generate_simulated_data(A,-1,1,0,1);
+    fftw_complex *in, *out;
+    fftw_plan p;
 
-    struct dichotomus_model * model =  dichotomus_model_create_alloc(A);
+    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
+    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
+    
+    //fftw_execute(p);
 
-    //print_matrix(A);
+    
 
-    //print_vector(model->person_ability);
-    //print_vector(model->item_difficulty);
-
-
-    for (int i =0; i< 100; i++) {
-        double l = calculate_likelihood(model);
-        update_person_parameters(model);
-        //standardize_vector_Zscore(model->person_ability);
-        update_item_parameters(model);
-        //standardize_vector_Zscore(model->item_difficulty);
-        
-        printf("%d th iteration: %lf \n",i,l);
+    
+    for (int i =0;i < N;i++){
+        in[i] = rand()% 1000;
+        set_vector_element(vec,i, rand()% 1000);
     }
-
-    //print_vector(model->person_ability);
     
-    print_vector(model->item_difficulty);
-
-    //print_vector(model->person_v_total_scores);
-
-    //print_vector(model->item_i_total_scores);
     
-    free_matrix(A);
+    
+    WATCH("fftw")
+
+    p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+
+    fftw_execute(p);
+        
+    STOP_WATCH("fftw")
+    WATCH("dft")
+    struct  complex_vector * a =  dft(vec);
+    STOP_WATCH("dft")
+    
+
+    for (int i =0;i < N;i++){
+        printf("A: %lf I: %lf \n",creal(out[i]),cimag(out[i]));
+    }
+    
+    print_complex_vector(a);
+    fftw_destroy_plan(p);
+    fftw_free(in); fftw_free(out);
+   
 
 
+
+    return 0;    
 
 }
-
 // gcc test.c matrix.c -O3 -march=native -mtune=native -I/opt/OpenBLAS/include/ -L/opt/OpenBLAS/lib/ -lopenblas -flto -lpthread -fstrict-aliasing -funroll-loops

@@ -30,7 +30,7 @@ add_executable(PyRasch
         src/roots.c
         src/dft.c)
 
-target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon)
+target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon fftw3)
 
 target_compile_options(PyRasch PRIVATE
         -march=native
