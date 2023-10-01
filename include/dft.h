@@ -9,13 +9,13 @@
 void print_bits(unsigned int num);
 
 
-struct complex_vector * dft(struct vector * coeff_vec);
+void dft(struct complex_vector * coeff_vec ,struct complex_vector * A);
 
 static int reverse_bits_odd( int x , int max_num_bits, int mask_base_index);
 
 static int reverse_bits_even(int x , int max_num_bits, int base_index);
 
-struct complex_vector * reverse_copy(struct vector * vec);
+struct complex_vector * reverse_copy(struct complex_vector * vec);
 
 static const unsigned int masks[]= {
     0b01, 0b10, //2

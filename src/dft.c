@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <panopticon.h>
 
 void print_bits(unsigned int num) {
     int num_bits = sizeof(num) * 8;  // Number of bits in the variable
@@ -57,7 +58,7 @@ static int reverse_bits_even(int x , int max_num_bits, int base_index)
 }
 
 
-struct complex_vector * reverse_copy(struct vector * vec){
+struct complex_vector * reverse_copy(struct complex_vector * vec){
 
     assert(vec->size % 2 == 0);
 
@@ -79,7 +80,7 @@ struct complex_vector * reverse_copy(struct vector * vec){
     if (max_num_bits % 2 == 1){
         for(i = 0; i < n; i++){
             index = reverse_bits_odd(i, max_num_bits, mask_base_index_);
-            val = get_vector_element(vec, index);
+            val = get_complex_vector_element(vec, index);
             
             set_complex_vector_element(A, i, val);
         }
@@ -87,7 +88,7 @@ struct complex_vector * reverse_copy(struct vector * vec){
     else{
         for(i = 0; i < n; i++){
             index = reverse_bits_even(i, max_num_bits, mask_base_index_);
-            val = get_vector_element(vec, index);
+            val = get_complex_vector_element(vec, index);
             
             set_complex_vector_element(A, i, val);
         }
@@ -98,82 +99,98 @@ struct complex_vector * reverse_copy(struct vector * vec){
 
 }
 
-struct complex_vector * dft(struct vector * coeff_vec){
+void dft(struct complex_vector * coeff_vec, struct complex_vector * A){
 
     
     int n = coeff_vec->size;
 
     // check if the size of the input is a power of 2
-    if ((n & (n - 1)) != 0){
-        int new_size = 1 << (int) ceil(log2(n));
-        coeff_vec = resize_vector(coeff_vec, new_size);
-        
-        n = coeff_vec->size;
-    }
+    // if ((n & (n - 1)) != 0){
+    //     int new_size = 1 << (int) ceil(log2(n));
+    //     coeff_vec = resize_vector(coeff_vec, new_size);
+    //     out = resize_complex_vector(out, new_size);
+    //     n = coeff_vec->size;
+    // }
 
     
 
-    struct roots_of_unity * w = init_alloc_roots(n);
+    //struct roots_of_unity * w = init_alloc_roots(n);
 
-    struct complex_vector * A = reverse_copy(coeff_vec);
+    //struct complex_vector * A = reverse_copy(coeff_vec);
 
-    struct complex_vector ** A_K = (struct complex_vector **) malloc(sizeof(struct complex_vector *) * n);
 
-   
+    int k,s,m,j,i;
 
-    for (int i = 0;i < n;i++){
+    
 
-        A_K[i] = reverse_copy(coeff_vec);
-        
-    }
-
-    int k,s,m,j;
-
-    struct roots_of_unity * w_m;
-
-    double complex t,u, v, A_k, w_m_k;
+    double complex t,u, v, w_m, w;
 
     int max_iter = log2(n);
 
-   
-    for (k = 0; k < n/2;k++){
-        for (s = 1; s < max_iter+1; s++){
+    // [ A_0, A_1, ..... A_N]
+    // [ W_n^W_]
+    // [ y_0, y_1, .... y_N]
+    i =0;
 
-            m = pow(2,s);
+    for (s = 1; s < max_iter+1; s++){
+
+        m = pow(2,s);
+        
+        //printf("M val: %d \n",k);
+        //w_m = init_alloc_roots(m);
+        
+        w_m = cexp(I*2*M_PI / m);
+        
+        w =1;
+        //printf("W_m_k val: %f %f \n ",creal(w_m_k),cimag(w_m_k));
+
+        
+        for (j = 0; j < m/2; j++){
+
             
-            //printf("M val: %d \n",k);
-            //w_m = init_alloc_roots(m);
-            
-
-            w_m_k = cexp(-2 * M_PI * I * k / m);
-
-            //printf("W_m_k val: %f %f \n ",creal(w_m_k),cimag(w_m_k));
-
-            
-            for (j = 0; j < n; j+=m){
-
+            WATCH("inner")
+            for (k = j; k < n;k+=m){
+                //WATCH("inner")
+                //printf("K val: %d \n",k);
+                //w_m_k = cpow(w->roots->data[k],n/m);
                 
-                
-                
-                u = get_complex_vector_element(A_K[k],j);
-                v = get_complex_vector_element(A_K[k],j+m/2);
+                //printf("val %d: \n", 2 * k / m);
+                u = get_complex_vector_element(A,k);
+                v = get_complex_vector_element(A,k+m/2);
 
                 //printf("A val: %f %f \n ",creal(u),cimag(u));
+                t = w * v;
+                /*
+                if (k==3){
+                    printf("HERE %lf + %lfi \n", creal(w),cimag(w));
 
-                set_complex_vector_element(A_K[k],j, u + w_m_k * v);
+                    printf("vla %d ,,,, %d \n", k+m/2, m);
 
-                set_complex_vector_element(A_K[k+ n/2],j, u - w_m_k * v);
+                }
+                */
+                set_complex_vector_element(A,k, u + t);
+
+                set_complex_vector_element(A,k+m/2, u - t);
                 
-
+                i++;
+                //STOP_WATCH("inner")
+                
             }
-        
-            //free_roots_of_unity(w_m);
+            
+            
+            w = w_m *w;
+            STOP_WATCH("inner")
+
         }
+    
+        //free_roots_of_unity(w_m);
     }
 
-    for (int i = 0;i < n; i++){
-        set_complex_vector_element(A,i,A_K[i]->data[0]);
-    }
 
-    return A;
+    // for (int i = 0;i < n; i++){
+    //     set_complex_vector_element(out,i,get_complex_vector_element(A,i));
+    // }
+
 }
+
+
