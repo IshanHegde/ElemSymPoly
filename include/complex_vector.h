@@ -15,6 +15,8 @@ struct complex_vector * alloc_complex_vector(size_t size);
 
 struct complex_vector * calloc_complex_vector(size_t size);
 
+struct complex_vector * resize_complex_vector(struct complex_vector * vec, size_t new_size);
+
 inline __attribute__((always_inline)) double complex get_complex_vector_element(struct complex_vector * vec, int i){
     return vec->data[i];
 }

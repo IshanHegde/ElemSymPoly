@@ -51,6 +51,32 @@ struct complex_block * calloc_complex_block(size_t size){
 
 }
 
+struct complex_block * resize_complex_block(struct complex_block * block, size_t new_size){
+
+    if (block == NULL) return NULL;
+
+    if (block->size == new_size) return block;
+
+    void * tmp_mem = NULL; 
+    posix_memalign(&tmp_mem, sizeof(double), sizeof(double complex) * new_size);
+    double complex * new_data = (double complex *) tmp_mem;
+
+    if (new_data == NULL){
+        fprintf(stderr, "Failed to allocate memory for data array.\n");
+        return NULL;
+    }
+
+    
+    memcpy(new_data, block->data, sizeof(double complex) * block->size);
+    memset(new_data + block->size, 0.0, sizeof(double complex) * (new_size - block->size));
+
+    free(block->data);
+    block->data = new_data;
+    block->size = new_size;
+
+    return block;
+}
+
 void free_complex_block(struct complex_block * block){
 
     free(block->data);

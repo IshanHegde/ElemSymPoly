@@ -17,6 +17,9 @@ struct vector * alloc_vector(size_t size);
 
 struct vector * calloc_vector(size_t size);
 
+struct vector * resize_vector(struct vector * vec, size_t new_size);
+
+
 inline __attribute__((always_inline)) double get_vector_element(struct vector * vec, int i){
     return vec->data[i];
 }

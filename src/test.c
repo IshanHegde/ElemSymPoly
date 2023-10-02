@@ -1,6 +1,3 @@
-//
-// Created by ishan on 9/7/23.
-//
 #include <stdio.h>
 #include <time.h>
 #include <cblas.h>
@@ -8,50 +5,107 @@
 #include <dichotomus.h>
 #include <utils.h>
 #include <panopticon.h>
+#include <roots.h>
+#include <dft.h>
+#include <arena.h>
+
 
 
 int main(){
 
-    GLOBAL_TIMER(NANOSECONDS, CLOCK_MONOTONIC_RAW)
+    GLOBAL_TIMER(MICROSECONDS,CLOCK_MONOTONIC_RAW)  
 
-    srand(time(NULL));
-    goto_set_num_threads( 16);
-    openblas_set_num_threads( 16);
-    omp_set_num_threads(10);
-    struct matrix * A = alloc_matrix(70000,6);
+    int N =pow(2,16);
+    int alignment = 32;
+    //complex_array * in = malloc(sizeof( complex_array ));
 
-    generate_simulated_data(A,-1,1,0,1);
+    //in->reals = malloc(sizeof(float)*N);
+    //in->imags = calloc(N,sizeof(float));
+    //complex_array * in = arena_alloc(arena,sizeof(complex_array));
 
-    struct dichotomus_model * model =  dichotomus_model_create_alloc(A);
+    //float * in_reals = arena_calloc(arena,N,sizeof(float));
+    //float *  in_imags = arena_calloc(arena,N,sizeof(float));
+    float * in_reals;
+    float * in_imags;
+    int result = posix_memalign((void**)&in_reals, alignment, N * sizeof(float));
+    int result2 = posix_memalign((void**)&in_imags, alignment, N * sizeof(float));
 
-    //print_matrix(A);
 
-    //print_vector(model->person_ability);
-    //print_vector(model->item_difficulty);
+    float * in_reals2;
+    float * in_imags2;
+
+    int result9 = posix_memalign((void**)&in_reals2, alignment, N * sizeof(float));
+    int result10 = posix_memalign((void**)&in_imags2, alignment, N * sizeof(float));
+    //complex_array * out = malloc(sizeof( complex_array ));
+    //float *  out_reals = arena_calloc(arena,N,sizeof(float));
+    //float *  out_imags = arena_calloc(arena,N,sizeof(float));
+
+    float * out_reals;
+    float * out_imags;
+
+    int result3 = posix_memalign((void**)&out_reals, alignment, N * sizeof(float));
+    int result4 = posix_memalign((void**)&out_imags, alignment, N * sizeof(float));
+
+    float * w_reals;
+    float * w_imags;
+
+    int result5 = posix_memalign((void**)&w_reals, alignment, N * sizeof(float));
+    int result6 = posix_memalign((void**)&w_imags, alignment, N * sizeof(float));
+
+    float * w_reals_inverse;
+    float * w_imags_inverse;
+
+    int result7 = posix_memalign((void**)&w_reals_inverse, alignment, N * sizeof(float));
+    int result8 = posix_memalign((void**)&w_imags_inverse, alignment, N * sizeof(float));
 
 
-    for (int i =0; i< 100; i++) {
-        double l = calculate_likelihood(model);
-        update_person_parameters(model);
-        //standardize_vector_Zscore(model->person_ability);
-        update_item_parameters(model);
-        //standardize_vector_Zscore(model->item_difficulty);
+ 
+    for (int i =0;i < N;i++){
         
-        printf("%d th iteration: %lf \n",i,l);
+        in_reals[i]= rand()% 100 +1;
     }
+  
+/*
+    in_reals[0] = 1;
+    in_reals[1] =-19992;
+    in_reals[2] = 3;
+    in_reals[3] = 827;
+    in_reals[4] = 1;
+    in_reals[5] =2;
+    in_reals[6] = 3;
+    in_reals[7] = 4;
+    in_reals[8] = 1;
+    in_reals[9] =2;
+    in_reals[10] = 3;
+    in_reals[11] = -4;
+    in_reals[12] = 1;
+    in_reals[13] =2;
+    in_reals[14] = 3;
+    in_reals[15] = 4;*/
 
-    //print_vector(model->person_ability);
+ 
+
+    WATCH("copy")
+    init_look_up_table(N,w_reals,w_imags);
+    init_look_up_inverse(N,w_reals_inverse,w_imags_inverse);
+    STOP_WATCH("copy")
+    //A = reverse_copy(vec);
+
     
-    print_vector(model->item_difficulty);
+    WATCH("dft")
+    //dft(vec,A);
+    recursive_fft(in_reals,in_imags,out_reals,out_imags,w_reals,w_imags,1,N);
+    //recursive_inverse_fft(out_reals,out_imags,in_reals2,in_imags2,w_reals_inverse,w_imags_inverse,1,N);
 
-    //print_vector(model->person_v_total_scores);
-
-    //print_vector(model->item_i_total_scores);
-    
-    free_matrix(A);
+    STOP_WATCH("dft")
 
 
+
+    for (int i =0;i<4;i++){
+        printf("Valw: %f + i%f \n",in_reals2[i],in_imags2[i]);
+    }
+    //print_complex_vector(A);
+
+    return 0;
 
 }
-
-// gcc test.c matrix.c -O3 -march=native -mtune=native -I/opt/OpenBLAS/include/ -L/opt/OpenBLAS/lib/ -lopenblas -flto -lpthread -fstrict-aliasing -funroll-loops

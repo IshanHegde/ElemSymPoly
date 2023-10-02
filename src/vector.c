@@ -52,6 +52,28 @@ struct vector * calloc_vector(size_t size){
     return vec;
 }
 
+struct vector * resize_vector(struct vector * vec, size_t new_size){
+
+    if (vec == NULL) return NULL;
+
+    if (vec->size == new_size) return vec;
+
+    struct block * block = resize_block(vec->block, new_size);
+
+    if (block == NULL){
+        fprintf(stderr, "Failed to allocate memory for vector. \n");
+        return NULL;
+    }
+
+    vec->block = block;
+    vec->size = new_size;
+    vec->data = block->data;
+    vec->owner = 1;
+
+    return vec;
+}
+
+
 void print_vector(struct vector * vec){
 
     if (vec == NULL) {
@@ -97,6 +119,8 @@ void standardize_vector_Zscore(struct vector * vec){
 
 }
 
+
+
 void free_vector(struct vector * vec){
 
     if (vec->owner){
@@ -105,3 +129,4 @@ void free_vector(struct vector * vec){
 
     free(vec);
 }
+

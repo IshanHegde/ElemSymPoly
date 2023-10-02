@@ -52,6 +52,27 @@ struct complex_vector * calloc_complex_vector(size_t size){
 
 }
 
+struct complex_vector * resize_complex_vector(struct complex_vector * vec, size_t new_size){
+
+    if (vec == NULL) return NULL;
+
+    if (vec->size == new_size) return vec;
+
+    struct complex_block * block = resize_complex_block(vec->block, new_size);
+
+    if (block == NULL){
+        fprintf(stderr, "Failed to allocate memory for complex vector. \n");
+        return NULL;
+    }
+
+    vec->block = block;
+    vec->size = new_size;
+    vec->data = block->data;
+    vec->owner = 1;
+
+    return vec;
+}
+
 void print_complex_vector(struct complex_vector * vec){
 
     if (vec == NULL) {
