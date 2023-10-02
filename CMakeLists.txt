@@ -37,6 +37,7 @@ add_executable(PyRasch
 target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon fftw3)
 
 target_compile_options(PyRasch PRIVATE
+        -O3
         -march=native
         -mtune=native
         -flto
