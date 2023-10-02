@@ -37,15 +37,15 @@ static inline complex_8 MUL(complex_8 a, complex_8 b){
 static inline complex_8 LOAD(float * restrict reals, float * restrict imags){
 
     complex_8 ret;
-    ret.real = _mm256_loadu_ps(reals);
-    ret.imag = _mm256_loadu_ps(imags);
+    ret.real = _mm256_load_ps(reals);
+    ret.imag = _mm256_load_ps(imags);
 
     return ret;
 }
 
 static inline void STORE(float * restrict reals, float * restrict imags, complex_8 val){
 
-    _mm256_storeu_ps(reals, val.real);
-    _mm256_storeu_ps(imags, val.imag);
+    _mm256_store_ps(reals, val.real);
+    _mm256_store_ps(imags, val.imag);
 
 }

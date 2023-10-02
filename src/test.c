@@ -20,6 +20,12 @@ typedef struct complex_array{
 
 } complex_array;
 
+static inline complex_array * shift_array(complex_array * array, int n){
+    array->imags = array->imags + n;
+    array->reals = array->reals + n;
+    return array;
+}
+
 complex_array * get_even(complex_array * A,Arena_T arena, int n){
 
     //complex_array * ret = malloc(sizeof(complex_array));
@@ -64,130 +70,126 @@ complex_array * get_odd(complex_array * A, Arena_T arena, int n){
 
 
 
-complex_array * recursive_fft(complex_array * A, complex_array * look_up_table, Arena_T arena, int n){
+void recursive_fft( float * restrict in_reals,  float *  restrict in_imags,  float * restrict out_reals,  float * restrict out_imags, complex_array * restrict look_up_table, int stride, int n){
 
-    //printf("N: %d\n",n);
-    if (n ==1){
-        return A;
-    }
-    else if (n ==2){
 
-        float o1_real = A->reals[0];
-        float o1_imag = A->imags[0];
-        float o2_real = A->reals[1];
-        float o2_imag = A->imags[1];
+    if (n ==2){
 
-        A->reals[0] = o1_real + o2_real;
-        A->imags[0] = o1_imag + o2_imag;
-        A->reals[1] = o1_real - o2_real;
-        A->imags[1] = o1_imag - o2_imag;
+
+        float o1_real = in_reals[0];
+        float o1_imag = in_imags[0];
+        float o2_real = in_reals[stride];
+        float o2_imag = in_imags[stride];
+
+        out_reals[0] = o1_real + o2_real;
+        out_imags[0] = o1_imag + o2_imag;
+        out_reals[n/2] = o1_real - o2_real;
+        out_imags[n/2] = o1_imag - o2_imag;
         
-
-        return A;
     } else if ( n == 4){
+
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, look_up_table, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals +n/2, out_imags+n/2, look_up_table, stride << 1, n >> 1);
         
-        float o0_real = A->reals[0];
-        float o0_imag = A->imags[0];
-        float o1_real = A->reals[1];
-        float o1_imag = A->imags[1];
-        float o2_real = A->reals[2];
-        float o2_imag = A->imags[2];
-        float o3_real = A->reals[3];
-        float o3_imag = A->imags[3];
+
+        float o0_real = out_reals[0];
+        float o0_imag = out_imags[0];
+        float o1_real = out_reals[1];
+        float o1_imag = out_imags[1];
+        float o2_real = out_reals[2];
+        float o2_imag = out_imags[2];
+        float o3_real = out_reals[3];
+        float o3_imag = out_imags[3];
+        
+        
+
+        out_reals[0] = o0_real + o2_real;
+        out_imags[0] = o0_imag + o2_imag;
+
+        out_reals[1] = o1_real - o3_imag;
+        out_imags[1] = o1_imag + o3_real;
+
+        out_reals[2] = o0_real - o2_real;
+        out_imags[2] = o0_imag - o2_imag;
+
+        out_reals[3] = o1_real + o3_imag;
+        out_imags[3] = o1_imag - o3_real;
 
 
-        //A[0] = o0 + o1 + o2 + o3;
-        A->reals[0] = o0_real + o1_real + o2_real + o3_real;
-        A->imags[0] = o0_imag + o1_imag + o2_imag + o3_imag;
-        //A[1] = o0 + I*o1 - o2 - I*o3;
-        A->reals[1] = o0_real - o1_imag - o2_real + o3_imag;
-        A->imags[1] = o0_imag + o1_real - o2_imag - o3_real;
-        //A[2] = o0 - o1 + o2  -o3;
-        A->reals[2] = o0_real - o1_real + o2_real  -o3_real;
-        A->imags[2] = o0_imag - o1_imag + o2_imag  -o3_imag;
-        //A[3] = o0 - I*o1 - o2 + I*o3;
-        A->reals[3] = o0_real + o1_imag - o2_real - o3_imag;
-        A->imags[3] = o0_imag - o1_real - o2_imag + o3_real;
-        
-        return A;
+
     } else if ( n == 8){
-        WATCH("8")
-        float w_n_real = cos(-2.0f * M_PI * (float)(1)/(float)(n));
-        float w_n_imag = sin(-2.0f * M_PI * (float)(1)/(float)(n));
+        
+        float w_n_real = cos(2.0f * M_PI * (float)(1)/(float)(8));
+        float w_n_imag = sin(2.0f * M_PI * (float)(1)/(float)(8));
         float w_real =1;
         float w_imag =0;
 
-        complex_array * A_0 = get_even(A,arena,n);
-        complex_array * A_1 = get_odd(A,arena,n);
-
-        complex_array * y_0 = recursive_fft(A_0,look_up_table,arena, n/2);
-        complex_array * y_1 = recursive_fft(A_1,look_up_table,arena, n/2);
-
-        //complex_array * y_k = malloc(sizeof(complex_array ));
-        //y_k->reals = calloc(n,sizeof(float));
-        //y_k->imags = calloc(n,sizeof(float));
-        complex_array * y_k = arena_alloc(arena,sizeof(complex_array));
-        y_k->reals = arena_alloc(arena,sizeof(float)*n);
-        y_k->imags = arena_alloc(arena,sizeof(float)*n);
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, look_up_table, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals +n/2, out_imags+n/2, look_up_table, stride << 1, n >> 1);
 
         for (int k =0; k < n/2; k++){
-            float t_real = w_real*y_1->reals[k] - w_imag*y_1->imags[k];
-            float t_imag = w_real*y_1->imags[k] + w_imag*y_1->reals[k];
+            //printf("Val: %f + i%f \n",out->reals[k],out->imags[k]);
+            float t_real = w_real*out_reals[k + n/2] - w_imag*out_imags[k + n/2];
+            float t_imag = w_real*out_imags[k + n/2] + w_imag*out_reals[k + n/2];
 
+            float temp_real = out_reals[k];
+            float temp_imag = out_imags[k];
             
-            y_k->reals[k] = y_0->reals[k] + t_real;
-            y_k->imags[k] = y_0->imags[k] + t_imag;
-            y_k->reals[k+n/2] = y_0->reals[k] - t_real;
-            y_k->imags[k+n/2] = y_0->imags[k] - t_imag;
+            out_reals[k] = temp_real + t_real;
+            out_imags[k] = temp_imag + t_imag;
+            out_reals[k+n/2] = temp_real - t_real;
+            out_imags[k+n/2] = temp_imag - t_imag;
 
 
-            w_real =  w_real*w_n_real - w_imag*w_n_imag;
-            w_imag =  w_real*w_n_imag + w_imag*w_n_real;
+            float prev_w_real = w_real;
+            float prev_w_imag = w_imag;
+
+            // Update w_real and w_imag using the correct formulas
+            w_real = prev_w_real * w_n_real - prev_w_imag * w_n_imag;
+            w_imag = prev_w_real * w_n_imag + prev_w_imag * w_n_real;
         }
-        STOP_WATCH("8")
-        return y_k;
+        
+        
+    } else if ( n == 16){
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, look_up_table, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals +n/2, out_imags+n/2, look_up_table, stride << 1, n >> 1);
+
+        complex_8 w, y_1_k, t, y_0_k;
+        int k;
+
+        w = LOAD(&look_up_table->reals[0],&look_up_table->imags[0]);
+        y_1_k = LOAD(&out_reals[8],&out_imags[8]);
+        y_0_k = LOAD(&out_reals[0],&out_imags[0]);
+        
+        t = MUL(w,y_1_k);
+        
+        STORE(&out_reals[0],&out_imags[0],ADD(y_0_k,t));
+        STORE(&out_reals[8],&out_imags[8],SUB(y_0_k,t));
+
     } else {
 
-        
-        complex_array * A_0 = get_even(A,arena,n);
-        complex_array * A_1 = get_odd(A,arena,n);
-        
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, look_up_table, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals +n/2, out_imags+n/2, look_up_table, stride << 1, n >> 1);
 
-        complex_array * y_0 = recursive_fft(A_0,look_up_table,arena, n >> 1);
-        complex_array * y_1 = recursive_fft(A_1,look_up_table,arena, n >> 1);
-
-        
-        //complex_array * y_k = malloc(sizeof(complex_array ));
-        //y_k->reals = calloc(n,sizeof(float));
-        //y_k->imags = calloc(n,sizeof(float));
-        complex_array * y_k = arena_alloc(arena,sizeof(complex_array));
-        y_k->reals = arena_alloc(arena,sizeof(float)*n);
-        y_k->imags = arena_alloc(arena,sizeof(float)*n);
-        
-        complex_8 w, y_1_k, t, y_0_k, y_k_k, y_k_k_n2;
+        complex_8 w, y_1_k, t, y_0_k;
         int k;
-        WATCH("loop")
-        //#pragma omp parallel for schedule(static) num_threads(4) private(k, w, y_1_k, t, y_0_k, y_k_k, y_k_k_n2, n)
-        for (k =0; k < n/2; k+=8){
-
-             w = LOAD(&look_up_table->reals[k],&look_up_table->imags[k]);
-
-            
-             y_1_k = LOAD(&y_1->reals[k],&y_1->imags[k]);
-             t = MUL(w,y_1_k);
-
-             y_0_k = LOAD(&y_0->reals[k],&y_0->imags[k]);
-
-             y_k_k = ADD(y_0_k,t);
-            STORE(&y_k->reals[k],&y_k->imags[k],y_k_k);
-
-             y_k_k_n2 = SUB(y_0_k,t);
-            STORE(&y_k->reals[k+n/2],&y_k->imags[k+n/2],y_k_k_n2);
-
-        }
-        STOP_WATCH("loop")
         
-        return y_k;
+        
+        for (k =0; k < n/2; k+=8){
+            
+            w = LOAD(&look_up_table->reals[k],&look_up_table->imags[k]);
+            y_1_k = LOAD(&out_reals[k+n/2],&out_imags[k + n/2]);
+            y_0_k = LOAD(&out_reals[k],&out_imags[k]);
+            
+            t = MUL(w,y_1_k);
+            
+            STORE(&out_reals[k],&out_imags[k],ADD(y_0_k,t));
+            STORE(&out_reals[k+n/2],&out_imags[k+n/2],SUB(y_0_k,t));
+            
+        }
+       
+        
+        
     }
 
 }
@@ -200,13 +202,19 @@ complex_array * init_look_up_table(int N, Arena_T arena){
     //look_up_table->reals = malloc(sizeof(float)*N);
     //look_up_table->imags = malloc(sizeof(float)*N);
 
-    complex_array * look_up_table = arena_alloc(arena,sizeof(complex_array));
-    look_up_table->reals = arena_alloc(arena,sizeof(float)*N);
-    look_up_table->imags = arena_alloc(arena,sizeof(float)*N);
+    complex_array * look_up_table = malloc(sizeof(complex_array));
+    float * reals;
+    float * imags;
+
+    int result = posix_memalign((void**)&reals, 32, N * sizeof(float));
+    int result2 = posix_memalign((void**)&imags, 32, N * sizeof(float));
+    
+    look_up_table->reals = reals;
+    look_up_table->imags = imags;
 
     for (int i =0;i < N/2;i++){
-        look_up_table->reals[i] = cos(-2.0f * M_PI * (float)(i)/(float)(N));
-        look_up_table->imags[i] = sin(-2.0f * M_PI * (float)(i)/(float)(N));
+        look_up_table->reals[i] = cos(2.0f * M_PI * (float)(i)/(float)(N));
+        look_up_table->imags[i] = sin(2.0f * M_PI * (float)(i)/(float)(N));
     }
 
     return look_up_table;
@@ -214,30 +222,58 @@ complex_array * init_look_up_table(int N, Arena_T arena){
 
 int main(){
 
-    GLOBAL_TIMER(MILLISECONDS,CLOCK_MONOTONIC_RAW)  
+    GLOBAL_TIMER(MICROSECONDS,CLOCK_MONOTONIC_RAW)  
     Arena_T arena = arena_new();
-    int N =65536;
-
+    int N =pow(2,16);
+    int alignment = 32;
     //complex_array * in = malloc(sizeof( complex_array ));
 
     //in->reals = malloc(sizeof(float)*N);
     //in->imags = calloc(N,sizeof(float));
-    complex_array * in = arena_alloc(arena,sizeof(complex_array));
-    in->reals = arena_alloc(arena,sizeof(float)*N);
-    in->imags = arena_alloc(arena,sizeof(float)*N);
+    //complex_array * in = arena_alloc(arena,sizeof(complex_array));
+
+    //float * in_reals = arena_calloc(arena,N,sizeof(float));
+    //float *  in_imags = arena_calloc(arena,N,sizeof(float));
+    float * in_reals;
+    float * in_imags;
+    int result = posix_memalign((void**)&in_reals, alignment, N * sizeof(float));
+    int result2 = posix_memalign((void**)&in_imags, alignment, N * sizeof(float));
+
+    //complex_array * out = malloc(sizeof( complex_array ));
+    //float *  out_reals = arena_calloc(arena,N,sizeof(float));
+    //float *  out_imags = arena_calloc(arena,N,sizeof(float));
+
+    float * out_reals;
+    float * out_imags;
+
+    int result3 = posix_memalign((void**)&out_reals, alignment, N * sizeof(float));
+    int result4 = posix_memalign((void**)&out_imags, alignment, N * sizeof(float));
+
 
     for (int i =0;i < N;i++){
         
-        in->reals[i]= rand()% 100 +1;
+        in_reals[i]= rand()% 100 +1;
     }
-
+  
 /*
-    in->reals[0] = 1;
-    in->reals[1] =2;
-    in->reals[2] = 3;
-    in->reals[3] = -114;
-*/
-    
+    in_reals[0] = 1;
+    in_reals[1] =2;
+    in_reals[2] = 3;
+    in_reals[3] = -4;
+    in_reals[4] = 1;
+    in_reals[5] =2;
+    in_reals[6] = 3;
+    in_reals[7] = 4;
+    in_reals[8] = 1;
+    in_reals[9] =2;
+    in_reals[10] = 3;
+    in_reals[11] = -4;
+    in_reals[12] = 1;
+    in_reals[13] =2;
+    in_reals[14] = 3;
+    in_reals[15] = 4;
+
+ */
 
     WATCH("copy")
     complex_array * look_up_table = init_look_up_table(N,arena);
@@ -247,13 +283,13 @@ int main(){
     
     WATCH("dft")
     //dft(vec,A);
-    complex_array * y = recursive_fft(in,look_up_table,arena,N);
+    recursive_fft(in_reals,in_imags,out_reals,out_imags,look_up_table,1,N);
 
     STOP_WATCH("dft")
 
 
-    for (int i =0;i<4;i++){
-        printf("Val: %f + i%f \n",y->reals[i],y->imags[i]);
+    for (int i =0;i<2;i++){
+        printf("Valw: %f + i%f \n",out_reals[i],out_imags[i]);
     }
     //print_complex_vector(A);
     arena_dispose(&arena);
