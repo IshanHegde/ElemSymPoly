@@ -4,28 +4,43 @@
 #include <math.h>
 #include <stdlib.h>
 #include <vecmath.h>
-
+#include <sse_math_func.h>
 
 void init_look_up_table(int N, float * restrict reals, float * restrict imags){
 
+    int i;
 
-    for (int i =0;i < N/2;i+=8){
+    __m128 two_pi_n = _mm_set1_ps( 2.0f * M_PI / (float)(N) );
+    
+    for ( i =0;i < N/2;i+=4){
         
+        __m128  index = _mm_set_ps(i,i+1,i+2,i+3);
+        __m128 x_vec = _mm_mul_ps(index,two_pi_n);
+        __m128 sinx, cosx;
+        sincos_ps(x_vec,&sinx,&cosx);
 
-        reals[i] = cos(2.0f * M_PI * (float)(i)/(float)(N));
-        imags[i] = sin(2.0f * M_PI * (float)(i)/(float)(N));
+        _mm_store_ps(&reals[i],cosx);
+        _mm_store_ps(&imags[i],sinx);
+
     }
-
 }
 
 void init_look_up_inverse(int N, float * restrict reals, float * restrict imags){
 
+    int i;
 
-    for (int i =0;i < N/2;i+=8){
+    __m128 two_pi_n = _mm_set1_ps( -2.0f * M_PI / (float)(N) );
+    
+    for ( i =0;i < N/2;i+=4){
         
+        __m128  index = _mm_set_ps(i,i+1,i+2,i+3);
+        __m128 x_vec = _mm_mul_ps(index,two_pi_n);
+        __m128 sinx, cosx;
+        sincos_ps(x_vec,&sinx,&cosx);
 
-        reals[i] = cos(2.0f * M_PI * (float)(i)/(float)(N));
-        imags[i] = sin(-2.0f * M_PI * (float)(i)/(float)(N));
+        _mm_store_ps(&reals[i],cosx);
+        _mm_store_ps(&imags[i],sinx);
+
     }
 
 }
