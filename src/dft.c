@@ -3,194 +3,256 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <panopticon.h>
+#include <vecmath.h>
 
-void print_bits(unsigned int num) {
-    int num_bits = sizeof(num) * 8;  // Number of bits in the variable
 
-    for (int i = num_bits - 1; i >= 0; i--) {
-        int bit = (num >> i) & 1;
-        printf("%d", bit);
+void init_look_up_table(int N, float * restrict reals, float * restrict imags){
+
+
+    for (int i =0;i < N/2;i+=8){
+        
+
+        reals[i] = cos(2.0f * M_PI * (float)(i)/(float)(N));
+        imags[i] = sin(2.0f * M_PI * (float)(i)/(float)(N));
     }
-
-    printf("\n");
-}
-
-
-
-
-static int reverse_bits_odd(int x , int max_num_bits, int base_index)
-{
-    int aux_shift_num = 1;
-
-    int m = base_index;
-
-
-    
-    while (aux_shift_num < max_num_bits){
-        x = ((x & masks[m]) << aux_shift_num ) | ((x & masks[m+1]) >> aux_shift_num);
-        m +=2;
-        aux_shift_num *= 2;
-    }
-
-
-
-    return x >> max_num_bits -2;
-}
-
-static int reverse_bits_even(int x , int max_num_bits, int base_index)
-{
-    int aux_shift_num = 1;
-
-    int m = base_index;
-
-
-    
-    while (aux_shift_num < max_num_bits){
-        x = ((x & masks[m]) << aux_shift_num ) | ((x & masks[m+1]) >> aux_shift_num);
-        m +=2;
-        aux_shift_num *= 2;
-    }
-
-
-
-    return x ;
-}
-
-
-struct complex_vector * reverse_copy(struct complex_vector * vec){
-
-    assert(vec->size % 2 == 0);
-
-    int n = vec->size;
-
-    int max_num_bits = ceil(log2(n-1));
-    int mask_base_index_ = mask_base_index[max_num_bits];
-
-
-    struct complex_vector * A = alloc_complex_vector(n);
-
-
-    int i, n_half, index;
-    double val;
-
-    n_half = n / 2;
-
-
-    if (max_num_bits % 2 == 1){
-        for(i = 0; i < n; i++){
-            index = reverse_bits_odd(i, max_num_bits, mask_base_index_);
-            val = get_complex_vector_element(vec, index);
-            
-            set_complex_vector_element(A, i, val);
-        }
-    }
-    else{
-        for(i = 0; i < n; i++){
-            index = reverse_bits_even(i, max_num_bits, mask_base_index_);
-            val = get_complex_vector_element(vec, index);
-            
-            set_complex_vector_element(A, i, val);
-        }
-    }
-    
-
-    return A;
 
 }
 
-void dft(struct complex_vector * coeff_vec, struct complex_vector * A){
-
-    
-    int n = coeff_vec->size;
-
-    // check if the size of the input is a power of 2
-    // if ((n & (n - 1)) != 0){
-    //     int new_size = 1 << (int) ceil(log2(n));
-    //     coeff_vec = resize_vector(coeff_vec, new_size);
-    //     out = resize_complex_vector(out, new_size);
-    //     n = coeff_vec->size;
-    // }
-
-    
-
-    //struct roots_of_unity * w = init_alloc_roots(n);
-
-    //struct complex_vector * A = reverse_copy(coeff_vec);
+void init_look_up_inverse(int N, float * restrict reals, float * restrict imags){
 
 
-    int k,s,m,j,i;
-
-    
-
-    double complex t,u, v, w_m, w;
-
-    int max_iter = log2(n);
-
-    // [ A_0, A_1, ..... A_N]
-    // [ W_n^W_]
-    // [ y_0, y_1, .... y_N]
-    i =0;
-
-    for (s = 1; s < max_iter+1; s++){
-
-        m = pow(2,s);
+    for (int i =0;i < N/2;i+=8){
         
-        //printf("M val: %d \n",k);
-        //w_m = init_alloc_roots(m);
-        
-        w_m = cexp(I*2*M_PI / m);
-        
-        w =1;
-        //printf("W_m_k val: %f %f \n ",creal(w_m_k),cimag(w_m_k));
 
-        
-        for (j = 0; j < m/2; j++){
+        reals[i] = cos(2.0f * M_PI * (float)(i)/(float)(N));
+        imags[i] = sin(-2.0f * M_PI * (float)(i)/(float)(N));
+    }
 
+}
+
+
+void recursive_fft( float * restrict in_reals,  float *  restrict in_imags,  float * restrict out_reals,  float * restrict out_imags, float * restrict w_reals,float * restrict w_imags , int stride, int n){
+
+
+    if (n ==2){
+
+
+        float o1_real = in_reals[0];
+        float o1_imag = in_imags[0];
+        float o2_real = in_reals[stride];
+        float o2_imag = in_imags[stride];
+
+        out_reals[0] = o1_real + o2_real;
+        out_imags[0] = o1_imag + o2_imag;
+        out_reals[1] = o1_real - o2_real;
+        out_imags[1] = o1_imag - o2_imag;
+        
+    } else if ( n == 4){
+
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals + 2, out_imags + 2, w_reals, w_imags, stride << 1, n >> 1);
+        
+
+        float o0_real = out_reals[0];
+        float o0_imag = out_imags[0];
+        float o1_real = out_reals[1];
+        float o1_imag = out_imags[1];
+        float o2_real = out_reals[2];
+        float o2_imag = out_imags[2];
+        float o3_real = out_reals[3];
+        float o3_imag = out_imags[3];
+        
+        
+
+        out_reals[0] = o0_real + o2_real;
+        out_imags[0] = o0_imag + o2_imag;
+
+        out_reals[1] = o1_real - o3_imag;
+        out_imags[1] = o1_imag + o3_real;
+
+        out_reals[2] = o0_real - o2_real;
+        out_imags[2] = o0_imag - o2_imag;
+
+        out_reals[3] = o1_real + o3_imag;
+        out_imags[3] = o1_imag - o3_real;
+
+
+
+    } else if ( n == 8){
+        
+        float w_real;
+        float w_imag;
+
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals + 4, out_imags + 4, w_reals, w_imags, stride << 1, n >> 1);
+
+        for (int k =0; k < 4; k++){
+            w_real = w_reals[k];
+            w_imag = w_imags[k];
+
+            float t_real = w_real*out_reals[k + 4] - w_imag*out_imags[k + 4];
+            float t_imag = w_real*out_imags[k + 4] + w_imag*out_reals[k + 4];
+
+            float temp_real = out_reals[k];
+            float temp_imag = out_imags[k];
             
-            WATCH("inner")
-            for (k = j; k < n;k+=m){
-                //WATCH("inner")
-                //printf("K val: %d \n",k);
-                //w_m_k = cpow(w->roots->data[k],n/m);
-                
-                //printf("val %d: \n", 2 * k / m);
-                u = get_complex_vector_element(A,k);
-                v = get_complex_vector_element(A,k+m/2);
-
-                //printf("A val: %f %f \n ",creal(u),cimag(u));
-                t = w * v;
-                /*
-                if (k==3){
-                    printf("HERE %lf + %lfi \n", creal(w),cimag(w));
-
-                    printf("vla %d ,,,, %d \n", k+m/2, m);
-
-                }
-                */
-                set_complex_vector_element(A,k, u + t);
-
-                set_complex_vector_element(A,k+m/2, u - t);
-                
-                i++;
-                //STOP_WATCH("inner")
-                
-            }
-            
-            
-            w = w_m *w;
-            STOP_WATCH("inner")
+            out_reals[k] = temp_real + t_real;
+            out_imags[k] = temp_imag + t_imag;
+            out_reals[k+4] = temp_real - t_real;
+            out_imags[k+4] = temp_imag - t_imag;
 
         }
-    
-        //free_roots_of_unity(w_m);
+        
+        
+    } else if ( n == 16){
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals + 8, out_imags + 8, w_reals, w_imags, stride << 1, n >> 1);
+
+        complex_8 w, y_1_k, t, y_0_k;
+
+        w = LOAD(&w_reals[0],&w_imags[0]);
+        y_1_k = LOAD(&out_reals[8],&out_imags[8]);
+        y_0_k = LOAD(&out_reals[0],&out_imags[0]);
+        
+        t = MUL(w,y_1_k);
+        
+        STORE(&out_reals[0],&out_imags[0],ADD(y_0_k,t));
+        STORE(&out_reals[8],&out_imags[8],SUB(y_0_k,t));
+
+    }  else{
+
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals +n/2, out_imags+n/2, w_reals, w_imags, stride << 1, n >> 1);
+
+        complex_8 w, y_1_k, t, y_0_k;
+        int k;
+        
+        
+        for (k =0; k < n/2; k+=8){
+            
+            w = LOAD(&w_reals[k],&w_imags[k]);
+            y_1_k = LOAD(&out_reals[k+n/2],&out_imags[k + n/2]);
+            y_0_k = LOAD(&out_reals[k],&out_imags[k]);
+            
+            t = MUL(w,y_1_k);
+            
+            STORE(&out_reals[k],&out_imags[k],ADD(y_0_k,t));
+            STORE(&out_reals[k+n/2],&out_imags[k+n/2],SUB(y_0_k,t));
+            
+        }
+        
     }
-
-
-    // for (int i = 0;i < n; i++){
-    //     set_complex_vector_element(out,i,get_complex_vector_element(A,i));
-    // }
 
 }
 
+void recursive_inverse_fft( float * restrict in_reals,  float *  restrict in_imags,  float * restrict out_reals,  float * restrict out_imags, float * restrict w_reals,float * restrict w_imags , int stride, int n){
+    
+    if (n ==2){
 
+
+        float o1_real = in_reals[0];
+        float o1_imag = in_imags[0];
+        float o2_real = in_reals[stride];
+        float o2_imag = in_imags[stride];
+
+        out_reals[0] = o1_real + o2_real;
+        out_imags[0] = o1_imag + o2_imag;
+        out_reals[1] = o1_real - o2_real;
+        out_imags[1] = o1_imag - o2_imag;
+        
+    } else if ( n == 4){
+
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals + 2, out_imags + 2, w_reals, w_imags, stride << 1, n >> 1);
+        
+
+        float o0_real = out_reals[0];
+        float o0_imag = out_imags[0];
+        float o1_real = out_reals[1];
+        float o1_imag = out_imags[1];
+        float o2_real = out_reals[2];
+        float o2_imag = out_imags[2];
+        float o3_real = out_reals[3];
+        float o3_imag = out_imags[3];
+        
+        
+
+        out_reals[0] = o0_real + o2_real;
+        out_imags[0] = o0_imag + o2_imag;
+
+        out_reals[1] = o1_real + o3_imag;
+        out_imags[1] = o1_imag - o3_real;
+
+        out_reals[2] = o0_real - o2_real;
+        out_imags[2] = o0_imag - o2_imag;
+
+        out_reals[3] = o1_real - o3_imag;
+        out_imags[3] = o1_imag + o3_real;
+
+
+
+    } else if ( n == 8){
+        
+        float w_real;
+        float w_imag;
+
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals + 4, out_imags + 4, w_reals, w_imags, stride << 1, n >> 1);
+
+        for (int k =0; k < 4; k++){
+            w_real = w_reals[k];
+            w_imag = w_imags[k];
+
+            float t_real = w_real*out_reals[k + 4] - w_imag*out_imags[k + 4];
+            float t_imag = w_real*out_imags[k + 4] + w_imag*out_reals[k + 4];
+
+            float temp_real = out_reals[k];
+            float temp_imag = out_imags[k];
+            
+            out_reals[k] = temp_real + t_real;
+            out_imags[k] = temp_imag + t_imag;
+            out_reals[k+4] = temp_real - t_real;
+            out_imags[k+4] = temp_imag - t_imag;
+
+        }
+        
+        
+    } else if ( n == 16){
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals + 8, out_imags + 8, w_reals, w_imags, stride << 1, n >> 1);
+
+        complex_8 w, y_1_k, t, y_0_k;
+
+        w = LOAD(&w_reals[0],&w_imags[0]);
+        y_1_k = LOAD(&out_reals[8],&out_imags[8]);
+        y_0_k = LOAD(&out_reals[0],&out_imags[0]);
+        
+        t = MUL(w,y_1_k);
+        
+        STORE(&out_reals[0],&out_imags[0],ADD(y_0_k,t));
+        STORE(&out_reals[8],&out_imags[8],SUB(y_0_k,t));
+
+    }  else{
+
+        recursive_fft(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride,in_imags + stride, out_reals +n/2, out_imags+n/2, w_reals, w_imags, stride << 1, n >> 1);
+
+        complex_8 w, y_1_k, t, y_0_k;
+        int k;
+        
+        
+        for (k =0; k < n/2; k+=8){
+            
+            w = LOAD(&w_reals[k],&w_imags[k]);
+            y_1_k = LOAD(&out_reals[k+n/2],&out_imags[k + n/2]);
+            y_0_k = LOAD(&out_reals[k],&out_imags[k]);
+            
+            t = MUL(w,y_1_k);
+            
+            STORE(&out_reals[k],&out_imags[k],ADD(y_0_k,t));
+            STORE(&out_reals[k+n/2],&out_imags[k+n/2],SUB(y_0_k,t));
+            
+        }
+        
+    }
+}
