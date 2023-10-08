@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 
 option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 
+
+
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
 
@@ -27,7 +29,8 @@ add_executable(PyRasch
         src/matrix.c
         src/dichotomus.c
         src/utils.c
-        src/test.c
+        src/temps.c
+        #src/test_dft.c
         src/complex_block.c
         src/complex_vector.c
         src/roots.c
@@ -46,9 +49,12 @@ target_compile_options(PyRasch PRIVATE
         -funroll-loops
         -fopenmp
         -ftree-vectorize
+        -fomit-frame-pointer
+
 )
 
 if (ENABLE_ASAN)
     target_compile_options(PyRasch PRIVATE -fsanitize=address -fno-omit-frame-pointer)
     target_link_options(PyRasch PRIVATE -fsanitize=address)
 endif()
+
