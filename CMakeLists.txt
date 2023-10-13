@@ -29,7 +29,8 @@ add_executable(PyRasch
         src/matrix.c
         src/dichotomus.c
         src/utils.c
-        src/temps.c
+        #src/temps.c
+        src/polynomial.c
         #src/test_dft.c
         src/complex_block.c
         src/complex_vector.c
@@ -49,8 +50,6 @@ target_compile_options(PyRasch PRIVATE
         -funroll-loops
         -fopenmp
         -ftree-vectorize
-        -fomit-frame-pointer
-
 )
 
 if (ENABLE_ASAN)
