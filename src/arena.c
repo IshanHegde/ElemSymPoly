@@ -21,7 +21,6 @@ union align {
     void *p;
     float f;
     double d;
-    double complex ld;
     size_t u;
 };
 
