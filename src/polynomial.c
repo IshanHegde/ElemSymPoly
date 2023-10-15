@@ -8,15 +8,7 @@
 #include <vecmath.h>
 #include <arena.h>
 
-struct polynomial_d{
-    int degree_bound;
-    double * coefficients;
-};
 
-struct polynomial{
-    int degree_bound;
-    float * coefficients;
-};
 
 struct polynomial_state_d{
 
@@ -75,13 +67,17 @@ struct polynomial_state{
 
 };
 
-struct polynomial_state_d * init_polynomial_mul_state_d(struct polynomial_d * A, struct polynomial_d * B, struct polynomial_d * C){
+struct polynomial_state_d * init_polynomial_mul_state_d(Arena_T arena, double * A, double * B, double * C, int poly_size){
 
-    int N = A->degree_bound;
+    int N = 2* poly_size;
+
+    
+    
+
+    /* 
 
     struct polynomial_state_d * state = malloc(sizeof(struct polynomial_state_d));
-
-    state->N = N;
+    
     posix_memalign((void**)&state->A_reals, 32, N * sizeof(double));
     posix_memalign((void**)&state->A_imags, 32, N * sizeof(double));
     posix_memalign((void**)&state->B_reals, 32, N * sizeof(double));
@@ -98,29 +94,51 @@ struct polynomial_state_d * init_polynomial_mul_state_d(struct polynomial_d * A,
     posix_memalign((void**)&state->w_imags, 32, N * sizeof(double));
     posix_memalign((void**)&state->w_reals_inverse, 32, N * sizeof(double));
     posix_memalign((void**)&state->w_imags_inverse, 32, N * sizeof(double));
+   */
+    WATCH("fft-poly-init")
+    struct polynomial_state_d * state = arena_alloc(arena,sizeof(struct polynomial_state_d));
+    state->A_reals = arena_alloc(arena,N * sizeof(double));
+    state->A_imags = arena_alloc(arena,N * sizeof(double));
+
+    state->B_reals = arena_alloc(arena,N * sizeof(double));
+    state->B_imags = arena_alloc(arena,N * sizeof(double));
+
+    state->C_reals = C;
+    state->C_imags = arena_alloc(arena,N * sizeof(double));
+
+    state->A_out_reals = arena_alloc(arena,N * sizeof(double));
+    state->A_out_imags = arena_alloc(arena,N * sizeof(double));
+
+    state->B_out_reals = arena_alloc(arena,N * sizeof(double));
+    state->B_out_imags = arena_alloc(arena,N * sizeof(double));
+
+    state->C_out_reals = arena_alloc(arena,N * sizeof(double));
+    state->C_out_imags = arena_alloc(arena,N * sizeof(double));
+
+    state->w_reals = arena_alloc(arena,N * sizeof(double));
+    state->w_imags = arena_alloc(arena,N * sizeof(double));
+
+    state->w_reals_inverse = arena_alloc(arena,N * sizeof(double));
+    state->w_imags_inverse = arena_alloc(arena,N * sizeof(double));
 
     memset(state->A_imags,0,N*sizeof(double));
     memset(state->B_imags,0,N*sizeof(double));
 
-    memcpy(state->A_reals,A->coefficients,N*sizeof(double));
-    memcpy(state->B_reals,B->coefficients,N*sizeof(double));
-
+    memcpy(state->A_reals,A,N*sizeof(double));
+    memcpy(state->B_reals,B,N*sizeof(double));
+    
 
     init_look_up_table_d(N,state->w_reals,state->w_imags);
     init_look_up_inverse_d(N,state->w_reals_inverse,state->w_imags_inverse);
-
+    state->N = N;
+    STOP_WATCH("fft-poly-init")
     return state;
 }
 
-void update_polynomial_mul_state_d(struct polynomial_state_d * state, struct polynomial_d * A, struct polynomial_d * B, struct polynomial_d * C){
 
+struct polynomial_state * init_polynomial_mul_state(float * A, float * B, float * C, int poly_size){
 
-}
-
-
-struct polynomial_state * init_polynomial_mul_state(struct polynomial * A, struct polynomial * B, struct polynomial * C){
-
-    int N = A->degree_bound;
+    int N = 2* poly_size;
 
     struct polynomial_state * state = malloc(sizeof(struct polynomial_state));
 
@@ -148,8 +166,8 @@ struct polynomial_state * init_polynomial_mul_state(struct polynomial * A, struc
     memset(state->A_out_reals,0,N*sizeof(float));
     memset(state->A_out_imags,0,N*sizeof(float));
 
-    memcpy(state->A_reals,A->coefficients,N*sizeof(float));
-    memcpy(state->B_reals,B->coefficients,N*sizeof(float));
+    memcpy(state->A_reals,A,N*sizeof(float));
+    memcpy(state->B_reals,B,N*sizeof(float));
 
 
     init_look_up_table(N,state->w_reals,state->w_imags);
@@ -178,6 +196,7 @@ void free_polynomial_state_d(struct polynomial_state_d * state){
     free(state->w_reals_inverse);
     free(state->w_imags_inverse);
     free(state);
+
 }
 
 
@@ -251,18 +270,81 @@ void multiplyPolynomials(double* poly1, int size1, double* poly2, int size2, dou
     }
 }
 
-void elementary_symmetric_recursive(struct polynomial_d ** poly_array, int stride, int n){
+void elementary_symmetric_recursive(Arena_T arena, double ** poly_array,int stride, int n){
 
-    if (stride > n/2){
-        return;
-    } else {
-        elementary_symmetric_recursive(poly_array,stride << 1, n);
-
-        for (int i = 0; i < n; i+=2*stride ){
-            struct polynomial_state_d * state = init_polynomial_mul_state_d(poly_array[i],poly_array[i+stride],poly_array[i]);
-            polynomial_multiply_d(state);
+    if ( n == 2){
+        
+        printf(" n stride : %d  %d\n", n, stride);
+        puts("-----------------------------------------");
+        for (int i =0;i< n;i++){
+            printf("Val A: %lf ------- %lf \n",poly_array[0][i],poly_array[stride][i]);
         }
-    }
+        double poly_array_0_1 = poly_array[0][1];
+        
+        poly_array[0][0] = 1;
+        poly_array[0][1] = poly_array_0_1 + poly_array[stride][1]; 
+        poly_array[0][2] = poly_array_0_1 * poly_array[stride][1];
+        poly_array[0][3] = 0;
+        
+        puts("-----------------------------------------");
+        //base
+    } else if (n == 4){
+        printf(" n stride : %d  %d\n", n, stride);
+        puts("-----------------------------------------");
+
+        
+
+        elementary_symmetric_recursive(arena, poly_array, 1, 2);
+        elementary_symmetric_recursive(arena, poly_array + 2, 1 , 2);
+
+        for (int i =0;i< n;i++){
+            printf("Val A: %lf ------- %lf \n",poly_array[0][i],poly_array[stride][i]);
+        }
+
+        double poly_array_0_1 = poly_array[0][1];
+        double poly_array_0_2 = poly_array[0][2];
+        double poly_array_0_3 = poly_array[0][3];
+
+        poly_array[0][0] = 1;
+        poly_array[0][1] = poly_array_0_1 + poly_array[stride][1];
+        poly_array[0][2] = poly_array_0_1 * poly_array[stride][1] + poly_array[stride][2] + poly_array_0_2;
+        poly_array[0][3] = poly_array_0_1 * poly_array[stride][2] + poly_array[stride][1] * poly_array_0_2 + poly_array_0_3 + poly_array[stride][3];
+        poly_array[0][4] = poly_array_0_3 * poly_array[stride][1] + poly_array[stride][2] * poly_array_0_2 + poly_array_0_1 * poly_array[stride][3];
+        poly_array[0][5] = poly_array_0_3 * poly_array[stride][2] + poly_array[stride][3] * poly_array_0_2;
+        poly_array[0][6] = poly_array_0_3 * poly_array[stride][3];
+        poly_array[0][7] = 0;
+
+        puts("-----------------------------------------");
+
+    } else{
+        elementary_symmetric_recursive(arena, poly_array, stride/2, n/2);
+        elementary_symmetric_recursive(arena, poly_array + n/2, stride/2 , n/2);
+
+        printf(" n stride : %d  %d\n", n, stride);
+        puts("-----------------------------------------");
+        for (int i =0;i< n;i++){
+            printf("Val A: %lf ------- %lf \n",poly_array[0][i],poly_array[stride][i]);
+        }
+
+        for (int i =0 ;i < n; i+=2*stride){
+            printf("i and stride: %d %d\n",i,stride);
+            for (int j =0; j< 4;j++){
+                printf("@ %lf <-> %lf \n",poly_array[i][j],poly_array[i + stride][j]);
+            }
+
+            struct polynomial_state_d * state = init_polynomial_mul_state_d(arena, poly_array[i], poly_array[i + stride], poly_array[i], n/2);
+            polynomial_multiply_d(state);
+
+        }
+        puts("-----------------------------------------");
+    }   
+
+    
+    
+            
+    //struct polynomial_state_d * state = init_polynomial_mul_state_d(arena, poly_array[i],poly_array[i+stride],poly_array[i],n);
+    //polynomial_multiply_d(state);
+    
 
 
 }
@@ -272,11 +354,10 @@ int main(){
     GLOBAL_TIMER(MICROSECONDS,CLOCK_MONOTONIC_RAW)
 
 
-    struct polynomial_d * p = malloc(sizeof(struct polynomial_d));
-    struct polynomial * a = malloc(sizeof(struct polynomial));
+    
 
-    int N = pow(2,6);
-
+    int N = pow(2,3);
+/*
     p->degree_bound = 2*N;
     a->degree_bound = 2*N;
 
@@ -331,35 +412,27 @@ int main(){
     //multiplyPolynomials(p->coefficients,N,q->coefficients,N,r->coefficients);
 
     STOP_WATCH("poly-naive")
+*/
+    Arena_T arena = arena_new();
+    double * elements = arena_alloc(arena,N*sizeof(double));
 
-    double * elements;
-    posix_memalign((void**)&elements, 32, N * sizeof(double));
-
-    struct polynomial_d ** polys = malloc(sizeof(struct polynomial_d*)*N);
+    double ** polys = arena_alloc(arena,sizeof(double *)*N);
 
     for (int i = 0;i < N;i++){
-        struct polynomial_d * poly = malloc(sizeof(struct polynomial_d));
-        posix_memalign((void**)&poly->coefficients, 32, N * sizeof(double));
-        poly->degree_bound = N;
-        elements[i] = i;
-        poly->coefficients[0] = 1;
-        poly->coefficients[1] = i; 
-        polys[i] = poly;
+        polys[i] = arena_alloc(arena,N*sizeof(double));
+        elements[i] = 1;
+        polys[i][0] = 1;
+        polys[i][1] = 1;
     }
 
-
+    
     WATCH("poly-elem")
-    elementary_symmetric_recursive(polys,1,N);
+    elementary_symmetric_recursive(arena,polys,N/2,N);
     STOP_WATCH("poly-elem")
 
-
-    free_polynomial_state_d(state);
-    free(p->coefficients);
-    free(p);
-    free(q->coefficients);
-    free(q);
-    free(r->coefficients);
-    free(r);
+    for (int i =0;i< N;i++){
+        printf("Val: %lf \n",polys[0][i]);
+    }
 
     return 0;
 

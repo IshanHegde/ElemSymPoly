@@ -56,7 +56,8 @@ void * arena_alloc(T arena, size_t nbytes){
         }
         else {
             size_t m = sizeof(union header) + nbytes + CHUNK_SIZE;
-            ptr = _mm_malloc(m,32);
+            //ptr = _mm_malloc(m,32);
+            posix_memalign((void **)&ptr,32,m);
             limit = (char *)ptr + m;
         }
 
