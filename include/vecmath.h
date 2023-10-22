@@ -69,33 +69,6 @@ static inline complex_4 MUL_4(complex_4 a, complex_4 b){
     return ret;
 }
 
-static inline complex_4 FMADD_4(complex_4 a, complex_4 b, complex_4 c){
-
-    complex_4 ret;
-    ret.real = _mm256_fmadd_pd(a.real,b.real,c.real);
-    ret.imag = _mm256_fmadd_pd(a.imag,b.imag,c.imag);
-
-    return ret;
-}
-
-static inline complex_4 FMSUB_4(complex_4 a, complex_4 b, complex_4 c){
-
-    complex_4 ret;
-    ret.real = _mm256_fnmadd_pd(a.real,b.real,c.real);
-    ret.imag = _mm256_fnmadd_pd(a.imag,b.imag,c.imag);
-
-    return ret;
-}
-
-static inline complex_4 CONJ_4(complex_4 a){
-
-    complex_4 ret;
-    ret.real = a.real;
-    ret.imag = _mm256_sub_pd(_mm256_setzero_pd(),a.imag);
-
-    return ret;
-}
-
 
 static inline complex_8 LOAD(float * restrict reals, float * restrict imags){
 
@@ -110,8 +83,8 @@ static inline complex_8 LOAD(float * restrict reals, float * restrict imags){
 static inline complex_4 LOAD_4(double * restrict reals, double * restrict imags){
 
     complex_4 ret;
-    ret.real = _mm256_loadu_pd(reals);
-    ret.imag = _mm256_loadu_pd(imags);
+    ret.real = _mm256_load_pd(reals);
+    ret.imag = _mm256_load_pd(imags);
 
     return ret;
 }
@@ -126,7 +99,7 @@ static inline void STORE(float * restrict reals, float * restrict imags, complex
 
 static inline void STORE_4(double * restrict reals, double * restrict imags, complex_4 val){
 
-    _mm256_storeu_pd(reals, val.real);
-    _mm256_storeu_pd(imags, val.imag);
+    _mm256_store_pd(reals, val.real);
+    _mm256_store_pd(imags, val.imag);
 
 }
