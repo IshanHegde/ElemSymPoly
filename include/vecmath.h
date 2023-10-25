@@ -59,13 +59,17 @@ static inline complex_8 MUL(complex_8 a, complex_8 b){
 
     return ret;
 }
+//ret.real = _mm256_sub_pd(_mm256_mul_pd(a.real,b.real),_mm256_mul_pd(a.imag,b.imag));
+//ret.imag = _mm256_add_pd(_mm256_mul_pd(a.real,b.imag),_mm256_mul_pd(a.imag,b.real));
+//ret.real = _mm256_fnmadd_pd(a.imag,b.imag,_mm256_mul_pd(a.real,b.real));
+//ret.imag = _mm256_fmadd_pd(a.real,b.imag,_mm256_mul_pd(a.imag,b.real));
+
 
 static inline complex_4 MUL_4(complex_4 a, complex_4 b){
 
     complex_4 ret;
     ret.real = _mm256_sub_pd(_mm256_mul_pd(a.real,b.real),_mm256_mul_pd(a.imag,b.imag));
     ret.imag = _mm256_add_pd(_mm256_mul_pd(a.real,b.imag),_mm256_mul_pd(a.imag,b.real));
-
     return ret;
 }
 

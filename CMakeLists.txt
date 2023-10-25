@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
-option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
-
+option(ASAN "Enable AddressSanitizer" OFF)
+option(UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
 
 
 set(CMAKE_C_COMPILER "gcc")
@@ -30,8 +30,9 @@ add_executable(PyRasch
         src/dichotomus.c
         src/utils.c
         #src/temps.c
-        src/polynomial.c
+        #src/polynomial.c
         #src/test_dft.c
+        src/test.c
         src/complex_block.c
         src/complex_vector.c
         src/roots.c
@@ -39,6 +40,7 @@ add_executable(PyRasch
         src/arena.c)
 
 target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon fftw3)
+
 
 target_compile_options(PyRasch PRIVATE
         -O3
@@ -50,10 +52,16 @@ target_compile_options(PyRasch PRIVATE
         -funroll-loops
         -fopenmp
         -ftree-vectorize
+        
+        
 )
 
-if (ENABLE_ASAN)
-    target_compile_options(PyRasch PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+if (ASAN)
+    target_compile_options(PyRasch PRIVATE -g -fsanitize=address -fno-omit-frame-pointer)
     target_link_options(PyRasch PRIVATE -fsanitize=address)
 endif()
 
+if (UBSAN)
+    target_compile_options(PyRasch PRIVATE  -g -fsanitize=undefined -fno-omit-frame-pointer)
+    target_link_options(PyRasch PRIVATE -fsanitize=undefined)
+endif()
