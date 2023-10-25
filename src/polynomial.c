@@ -10,7 +10,7 @@
 
 
 
-struct polynomial_state_d{
+typedef struct polynomial_state_d{
 
     int N;
 
@@ -19,9 +19,6 @@ struct polynomial_state_d{
 
     double * B_reals;
     double * B_imags;
-
-    double * C_reals;
-    double * C_imags;
 
     double * A_out_reals;
     double * A_out_imags;
@@ -32,159 +29,93 @@ struct polynomial_state_d{
     double * C_out_reals;
     double * C_out_imags;
 
-    double * w_reals;
-    double * w_imags;
-    double * w_reals_inverse;
-    double * w_imags_inverse;
-};
+    double ** w_reals;
+    double ** w_imags;
+    double ** w_reals_inverse;
+    double ** w_imags_inverse;
 
-struct polynomial_state{
+    double * temp_C_reals;
+    double * temp_C_imags;
+} poly_mul_state;
 
-    int N;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
 
-    float * A_reals;
-    float * A_imags;
+#define ALLOC_ALIGNED(ptr, alignment, size) posix_memalign((void **)&(ptr), alignment, (size))
 
-    float * B_reals;
-    float * B_imags;
+#pragma GCC diagnostic pop
 
-    float * C_reals;
-    float * C_imags;
-
-    float * A_out_reals;
-    float * A_out_imags;
-
-    float * B_out_reals;
-    float * B_out_imags;
-
-    float * C_out_reals;
-    float * C_out_imags;
-
-    float * w_reals;
-    float * w_imags;
-    float * w_reals_inverse;
-    float * w_imags_inverse;
-
-};
-
-struct polynomial_state_d * init_polynomial_mul_state_d(Arena_T arena, double * A, double * B, double * C, int poly_size){
+poly_mul_state * init_polynomial_mul_state_d(int poly_size){
 
     int N = 2* poly_size;
+    int alignment = 32;
 
+    poly_mul_state * state = malloc(sizeof(poly_mul_state));
     
+    ALLOC_ALIGNED(state->A_reals, alignment, sizeof(double) * N);
+    //ALLOC_ALIGNED(state->A_imags, alignment, sizeof(double) * N);
+
+    ALLOC_ALIGNED(state->B_reals, alignment, sizeof(double) * N);
+    //ALLOC_ALIGNED(state->B_imags, alignment, sizeof(double) * N);
+
+    ALLOC_ALIGNED(state->temp_C_reals, alignment, sizeof(double) * N);
+    ALLOC_ALIGNED(state->temp_C_imags, alignment, sizeof(double) * N);
     
+    ALLOC_ALIGNED(state->A_out_reals, alignment, sizeof(double) * N);
+    ALLOC_ALIGNED(state->A_out_imags, alignment, sizeof(double) * N);
 
-    /* 
+    ALLOC_ALIGNED(state->B_out_reals, alignment, sizeof(double) * N);
+    ALLOC_ALIGNED(state->B_out_imags, alignment, sizeof(double) * N);
 
-    struct polynomial_state_d * state = malloc(sizeof(struct polynomial_state_d));
-    
-    posix_memalign((void**)&state->A_reals, 32, N * sizeof(double));
-    posix_memalign((void**)&state->A_imags, 32, N * sizeof(double));
-    posix_memalign((void**)&state->B_reals, 32, N * sizeof(double));
-    posix_memalign((void**)&state->B_imags, 32, N * sizeof(double));
-    posix_memalign((void**)&state->C_reals, 32, N * sizeof(double));
-    posix_memalign((void**)&state->C_imags, 32, N * sizeof(double));
-    posix_memalign((void**)&state->A_out_reals, 32, N * sizeof(double));
-    posix_memalign((void**)&state->A_out_imags, 32, N * sizeof(double));
-    posix_memalign((void**)&state->B_out_reals, 32, N * sizeof(double));
-    posix_memalign((void**)&state->B_out_imags, 32, N * sizeof(double));
-    posix_memalign((void**)&state->C_out_reals, 32, N * sizeof(double));
-    posix_memalign((void**)&state->C_out_imags, 32, N * sizeof(double));
-    posix_memalign((void**)&state->w_reals, 32, N * sizeof(double));
-    posix_memalign((void**)&state->w_imags, 32, N * sizeof(double));
-    posix_memalign((void**)&state->w_reals_inverse, 32, N * sizeof(double));
-    posix_memalign((void**)&state->w_imags_inverse, 32, N * sizeof(double));
-   */
-    WATCH("fft-poly-init")
-    struct polynomial_state_d * state = arena_alloc(arena,sizeof(struct polynomial_state_d));
-    state->A_reals = arena_alloc(arena,N * sizeof(double));
-    state->A_imags = arena_alloc(arena,N * sizeof(double));
+    ALLOC_ALIGNED(state->C_out_reals, alignment, sizeof(double) * N);
+    ALLOC_ALIGNED(state->C_out_imags, alignment, sizeof(double) * N);
 
-    state->B_reals = arena_alloc(arena,N * sizeof(double));
-    state->B_imags = arena_alloc(arena,N * sizeof(double));
+    memset(state->C_out_reals, 0, sizeof(double) * N);
+    memset(state->C_out_imags, 0,  sizeof(double) * N);
 
-    state->C_reals = C;
-    state->C_imags = arena_alloc(arena,N * sizeof(double));
+    state->w_reals = (double **) malloc(sizeof(double *) * log2(N));
+    state->w_imags = (double **) malloc(sizeof(double *) * log2(N));
 
-    state->A_out_reals = arena_alloc(arena,N * sizeof(double));
-    state->A_out_imags = arena_alloc(arena,N * sizeof(double));
-
-    state->B_out_reals = arena_alloc(arena,N * sizeof(double));
-    state->B_out_imags = arena_alloc(arena,N * sizeof(double));
-
-    state->C_out_reals = arena_alloc(arena,N * sizeof(double));
-    state->C_out_imags = arena_alloc(arena,N * sizeof(double));
-
-    state->w_reals = arena_alloc(arena,N * sizeof(double));
-    state->w_imags = arena_alloc(arena,N * sizeof(double));
-
-    state->w_reals_inverse = arena_alloc(arena,N * sizeof(double));
-    state->w_imags_inverse = arena_alloc(arena,N * sizeof(double));
-
-    memset(state->A_imags,0,N*sizeof(double));
-    memset(state->B_imags,0,N*sizeof(double));
-
-    memcpy(state->A_reals,A,N*sizeof(double));
-    memcpy(state->B_reals,B,N*sizeof(double));
-    
+    state->w_reals_inverse = (double **) malloc(sizeof(double *) * log2(N));
+    state->w_imags_inverse = (double **) malloc(sizeof(double *) * log2(N));
 
     init_look_up_table_d(N,state->w_reals,state->w_imags);
     init_look_up_inverse_d(N,state->w_reals_inverse,state->w_imags_inverse);
     state->N = N;
-    STOP_WATCH("fft-poly-init")
+
     return state;
 }
 
-
-struct polynomial_state * init_polynomial_mul_state(float * A, float * B, float * C, int poly_size){
+void update_polynomial_mul_state(poly_mul_state * state, double * A, double * B, int poly_size){
 
     int N = 2* poly_size;
 
-    struct polynomial_state * state = malloc(sizeof(struct polynomial_state));
-
     state->N = N;
-    posix_memalign((void**)&state->A_reals, 32, N * sizeof(float));
-    posix_memalign((void**)&state->A_imags, 32, N * sizeof(float));
-    posix_memalign((void**)&state->B_reals, 32, N * sizeof(float));
-    posix_memalign((void**)&state->B_imags, 32, N * sizeof(float));
-    posix_memalign((void**)&state->C_reals, 32, N * sizeof(float));
-    posix_memalign((void**)&state->C_imags, 32, N * sizeof(float));
-    posix_memalign((void**)&state->A_out_reals, 32, N * sizeof(float));
-    posix_memalign((void**)&state->A_out_imags, 32, N * sizeof(float));
-    posix_memalign((void**)&state->B_out_reals, 32, N * sizeof(float));
-    posix_memalign((void**)&state->B_out_imags, 32, N * sizeof(float));
-    posix_memalign((void**)&state->C_out_reals, 32, N * sizeof(float));
-    posix_memalign((void**)&state->C_out_imags, 32, N * sizeof(float));
-    posix_memalign((void**)&state->w_reals, 32, N * sizeof(float));
-    posix_memalign((void**)&state->w_imags, 32, N * sizeof(float));
-    posix_memalign((void**)&state->w_reals_inverse, 32, N * sizeof(float));
-    posix_memalign((void**)&state->w_imags_inverse, 32, N * sizeof(float));
 
-    memset(state->A_imags,0,N*sizeof(float));
-    memset(state->B_imags,0,N*sizeof(float));
+    size_t byte_size = poly_size * sizeof(double);
 
-    memset(state->A_out_reals,0,N*sizeof(float));
-    memset(state->A_out_imags,0,N*sizeof(float));
+    memcpy(state->A_reals, A, byte_size);
+    memcpy(state->B_reals, B, byte_size);
 
-    memcpy(state->A_reals,A,N*sizeof(float));
-    memcpy(state->B_reals,B,N*sizeof(float));
+    memset(state->A_out_reals, 0, 2 * byte_size);
+    memset(state->B_out_reals, 0, 2 * byte_size);
+
+    memset(state->A_reals + poly_size, 0, byte_size);
+    memset(state->B_reals + poly_size, 0, byte_size);
+
+    //memset(state->C_out_reals, 0, 2* byte_size);
+    //memset(state->C_out_imags, 0, 2* byte_size);
 
 
-    init_look_up_table(N,state->w_reals,state->w_imags);
-    init_look_up_inverse(N,state->w_reals_inverse,state->w_imags_inverse);
-
-    return state;
 
 }
 
-void free_polynomial_state_d(struct polynomial_state_d * state){
+void free_polynomial_state_d(poly_mul_state * state){
 
     free(state->A_reals);
     free(state->A_imags);
     free(state->B_reals);
     free(state->B_imags);
-    free(state->C_reals);
-    free(state->C_imags);
     free(state->A_out_reals);
     free(state->A_out_imags);
     free(state->B_out_reals);
@@ -200,58 +131,31 @@ void free_polynomial_state_d(struct polynomial_state_d * state){
 }
 
 
-void polynomial_multiply_d(struct polynomial_state_d * state){
+double * polynomial_multiply_d(poly_mul_state * state){
 
     int N = state->N;
 
-    recursive_fft_d(state->A_reals,state->A_imags,state->A_out_reals,state->A_out_imags,state->w_reals,state->w_imags,1,N);
-    recursive_fft_d(state->B_reals,state->B_imags,state->B_out_reals,state->B_out_imags,state->w_reals,state->w_imags,1,N);
+    recursive_rfft_half_zero_d(state->A_reals,state->B_reals,state->A_out_reals,state->A_out_imags,state->w_reals,state->w_imags,1,N);
+    //recursive_rfft_half_zero_d(state->B_reals,state->B_imags,state->B_out_reals,state->B_out_imags,state->w_reals,state->w_imags,1,N);
 
     for (int i = 0;i < N;i+=4){
         
         complex_4 a = LOAD_4(&state->A_out_reals[i],&state->A_out_imags[i]);
         complex_4 b = LOAD_4(&state->B_out_reals[i],&state->B_out_imags[i]);
 
-        STORE_4(&state->C_reals[i],&state->C_imags[i],MUL_4(a,b));
+        STORE_4(&state->temp_C_reals[i],&state->temp_C_imags[i],MUL_4(a,b));
     }
 
-    recursive_inverse_fft_d(state->C_reals,state->C_imags,state->C_out_reals,state->C_out_imags,state->w_reals_inverse,state->w_imags_inverse,1,N);
-
-    //state->C_reals = state->C_out_reals;
-    memcpy(state->C_reals,state->C_out_reals,N*sizeof(double));
-    for (int i = 0;i < N;i++){
-        state->C_reals[i] /= N;
-    }
-
-
-    
-
-}
-
-void polynomial_multiply(struct polynomial_state * state){
-
-    int N = state->N;
-
-
-
-    recursive_fft(state->A_reals,state->A_imags,state->A_out_reals,state->A_out_imags,state->w_reals,state->w_imags,1,N);
-    recursive_fft(state->B_reals,state->B_imags,state->B_out_reals,state->B_out_imags,state->w_reals,state->w_imags,1,N);
-
-    for (int i = 0;i < N;i+=8){
-        
-        complex_8 a = LOAD(&state->A_out_reals[i],&state->A_out_imags[i]);
-        complex_8 b = LOAD(&state->B_out_reals[i],&state->B_out_imags[i]);
-
-        STORE(&state->C_reals[i],&state->C_imags[i],MUL(a,b));
-    }
-
-    recursive_inverse_fft(state->C_reals,state->C_imags,state->C_out_reals,state->C_out_imags,state->w_reals_inverse,state->w_imags_inverse,1,N);
+    recursive_inverse_fft_d(state->temp_C_reals,state->temp_C_imags,state->C_out_reals,state->C_out_imags,state->w_reals_inverse,state->w_imags_inverse,1,N);
 
     for (int i = 0;i < N;i++){
         state->C_out_reals[i] /= N;
     }
 
+    return state->C_out_reals;
+
 }
+
 
 
 void multiplyPolynomials(double* poly1, int size1, double* poly2, int size2, double* result) {
@@ -270,36 +174,21 @@ void multiplyPolynomials(double* poly1, int size1, double* poly2, int size2, dou
     }
 }
 
-void elementary_symmetric_recursive(Arena_T arena, double ** poly_array,int stride, int n){
+void elementary_symmetric_recursive(poly_mul_state * state, double ** poly_array,int stride, int n){
 
     if ( n == 2){
-        
-        printf(" n stride : %d  %d\n", n, stride);
-        puts("-----------------------------------------");
-        for (int i =0;i< n;i++){
-            printf("Val A: %lf ------- %lf \n",poly_array[0][i],poly_array[stride][i]);
-        }
+
         double poly_array_0_1 = poly_array[0][1];
         
         poly_array[0][0] = 1;
         poly_array[0][1] = poly_array_0_1 + poly_array[stride][1]; 
         poly_array[0][2] = poly_array_0_1 * poly_array[stride][1];
         poly_array[0][3] = 0;
-        
-        puts("-----------------------------------------");
-        //base
+
     } else if (n == 4){
-        printf(" n stride : %d  %d\n", n, stride);
-        puts("-----------------------------------------");
 
-        
-
-        elementary_symmetric_recursive(arena, poly_array, 1, 2);
-        elementary_symmetric_recursive(arena, poly_array + 2, 1 , 2);
-
-        for (int i =0;i< n;i++){
-            printf("Val A: %lf ------- %lf \n",poly_array[0][i],poly_array[stride][i]);
-        }
+        elementary_symmetric_recursive(state, poly_array, 1, 2);
+        elementary_symmetric_recursive(state, poly_array + 2, 1 , 2);
 
         double poly_array_0_1 = poly_array[0][1];
         double poly_array_0_2 = poly_array[0][2];
@@ -307,45 +196,26 @@ void elementary_symmetric_recursive(Arena_T arena, double ** poly_array,int stri
 
         poly_array[0][0] = 1;
         poly_array[0][1] = poly_array_0_1 + poly_array[stride][1];
-        poly_array[0][2] = poly_array_0_1 * poly_array[stride][1] + poly_array[stride][2] + poly_array_0_2;
-        poly_array[0][3] = poly_array_0_1 * poly_array[stride][2] + poly_array[stride][1] * poly_array_0_2 + poly_array_0_3 + poly_array[stride][3];
-        poly_array[0][4] = poly_array_0_3 * poly_array[stride][1] + poly_array[stride][2] * poly_array_0_2 + poly_array_0_1 * poly_array[stride][3];
-        poly_array[0][5] = poly_array_0_3 * poly_array[stride][2] + poly_array[stride][3] * poly_array_0_2;
+        poly_array[0][2] = poly_array_0_1 * poly_array[stride][1] + poly_array_0_2 + poly_array[stride][2];
+        poly_array[0][3] = poly_array_0_1 * poly_array[stride][2] + poly_array_0_2 * poly_array[stride][1] + poly_array_0_3 + poly_array[stride][3];
+        poly_array[0][4] = poly_array_0_1 * poly_array[stride][3] + poly_array_0_2 * poly_array[stride][2] + poly_array_0_3 * poly_array[stride][1];
+        poly_array[0][5] = poly_array_0_2 * poly_array[stride][3] + poly_array_0_3 * poly_array[stride][2];
         poly_array[0][6] = poly_array_0_3 * poly_array[stride][3];
         poly_array[0][7] = 0;
 
-        puts("-----------------------------------------");
-
     } else{
-        elementary_symmetric_recursive(arena, poly_array, stride/2, n/2);
-        elementary_symmetric_recursive(arena, poly_array + n/2, stride/2 , n/2);
-
-        printf(" n stride : %d  %d\n", n, stride);
-        puts("-----------------------------------------");
-        for (int i =0;i< n;i++){
-            printf("Val A: %lf ------- %lf \n",poly_array[0][i],poly_array[stride][i]);
-        }
+        elementary_symmetric_recursive(state, poly_array, stride/2, n/2);
+        elementary_symmetric_recursive(state, poly_array + n/2, stride/2 , n/2);
 
         for (int i =0 ;i < n; i+=2*stride){
-            printf("i and stride: %d %d\n",i,stride);
-            for (int j =0; j< 4;j++){
-                printf("@ %lf <-> %lf \n",poly_array[i][j],poly_array[i + stride][j]);
-            }
 
-            struct polynomial_state_d * state = init_polynomial_mul_state_d(arena, poly_array[i], poly_array[i + stride], poly_array[i], n/2);
-            polynomial_multiply_d(state);
-
-        }
-        puts("-----------------------------------------");
-    }   
-
-    
-    
+            update_polynomial_mul_state(state, poly_array[i], poly_array[i + stride], n / 2);
+            double * result = polynomial_multiply_d(state);
+            memcpy(poly_array[i], result, n / 2 * sizeof(double));
             
-    //struct polynomial_state_d * state = init_polynomial_mul_state_d(arena, poly_array[i],poly_array[i+stride],poly_array[i],n);
-    //polynomial_multiply_d(state);
-    
+        }
 
+    }   
 
 }
 
@@ -353,10 +223,9 @@ void elementary_symmetric_recursive(Arena_T arena, double ** poly_array,int stri
 int main(){
     GLOBAL_TIMER(MICROSECONDS,CLOCK_MONOTONIC_RAW)
 
-
     
 
-    int N = pow(2,3);
+    int N = pow(2,14);
 /*
     p->degree_bound = 2*N;
     a->degree_bound = 2*N;
@@ -413,26 +282,58 @@ int main(){
 
     STOP_WATCH("poly-naive")
 */
-    Arena_T arena = arena_new();
-    double * elements = arena_alloc(arena,N*sizeof(double));
+    int aligement = 32;
+    double * elements;
+    double * elements_1;
+    volatile double * out;
 
-    double ** polys = arena_alloc(arena,sizeof(double *)*N);
+    ALLOC_ALIGNED(elements, aligement, 2*N*sizeof(double));
+    ALLOC_ALIGNED(elements_1, aligement, 2*N*sizeof(double));
+    ALLOC_ALIGNED(out, aligement, 2*N* sizeof(double));
+
+    double ** polys = (double **)malloc(sizeof(double *)*N);
 
     for (int i = 0;i < N;i++){
-        polys[i] = arena_alloc(arena,N*sizeof(double));
-        elements[i] = 1;
+        polys[i];
+        ALLOC_ALIGNED(polys[i],aligement,sizeof(double)* 2* N);
+        elements[i] = i;
+        elements_1[i] = i;
         polys[i][0] = 1;
         polys[i][1] = 1;
+        out[i] =0;
     }
 
-    
     WATCH("poly-elem")
-    elementary_symmetric_recursive(arena,polys,N/2,N);
+    struct polynomial_state_d * state = init_polynomial_mul_state_d(N);
+    
+    //elementary_symmetric_recursive(arena,polys,N/2,N);
     STOP_WATCH("poly-elem")
-
-    for (int i =0;i< N;i++){
+/*
+    for (int i =0;i< 2*N;i++){
         printf("Val: %lf \n",polys[0][i]);
     }
+*/  
+    WATCH("poly_mul")
+    for (int i =0;i< 10;i++){
+        update_polynomial_mul_state(state,elements,elements_1, N);
+        double * ret =polynomial_multiply_d(state);
+    }
+    
+    STOP_WATCH("poly_mul");
+
+
+
+//    for (int i =0;i< 2;i++){
+//        printf("Val: %lf  \n",ret[i]);
+//    }
+
+
+    
+    WATCH("naive")
+    for (int i =0;i< 10;i++){
+        multiplyPolynomials(elements,N,elements_1,N,out);
+    }
+    STOP_WATCH("naive")
 
     return 0;
 

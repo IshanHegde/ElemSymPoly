@@ -13,9 +13,9 @@
 
 int main(){
 
-    GLOBAL_TIMER(MICROSECONDS,CLOCK_MONOTONIC_RAW)  
+    GLOBAL_TIMER(MILLISECONDS,CLOCK_MONOTONIC_RAW)  
 
-    int N =pow(2,23);
+    int N =pow(2,22);
     int alignment = 32;
     //complex_array * in = malloc(sizeof( complex_array ));
 
@@ -78,9 +78,14 @@ int main(){
 
  
 
-    for (int i =0;i < N;i++){
+    for (int i =0;i < N/2;i++){
         
         in_reals[i]= i;
+        
+    }
+    for (int i =N/2;i < N;i++){
+        
+        in_reals[i]= 0;
         
     }
 
@@ -111,17 +116,22 @@ int main(){
     STOP_WATCH("copy")
     //A = reverse_copy(vec);
     
-    WATCH("dft")
-    //dft(vec,A);
-    recursive_fft_d(in_reals,in_imags,out_reals,out_imags,w_reals,w_imags,1,N);
-    recursive_inverse_fft_d(out_reals,out_imags,in_reals2,in_imags2,w_reals_inverse,w_imags_inverse,1,N);
 
+
+    WATCH("dft")
+    recursive_fft_d(in_reals,in_imags,out_reals,out_imags,w_reals,w_imags,1,N);
     STOP_WATCH("dft")
 
+    WATCH("dft_zero")
+    //dft(vec,A);
 
+    recursive_rfft_half_zero_d(in_reals,in_imags,out_reals,out_imags,w_reals,w_imags,1,N);
+    
+    //recursive_inverse_fft_d(out_reals,out_imags,in_reals2,in_imags2,w_reals_inverse,w_imags_inverse,1,N);
+    STOP_WATCH("dft_zero")
 
     for (int i =0;i<2;i++){
-        printf("Valw: %lf + i%lf \n",in_reals2[i]/N,in_imags2[i]/N);
+        printf("Valw: %lf + i%lf \n",out_reals[i],out_imags[i]);
     }
     //print_complex_vector(A);
 
