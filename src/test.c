@@ -15,7 +15,7 @@ int main(){
 
     GLOBAL_TIMER(MILLISECONDS,CLOCK_MONOTONIC_RAW)  
 
-    int N =pow(2,22);
+    int N =pow(2,4);
     int alignment = 32;
     //complex_array * in = malloc(sizeof( complex_array ));
 
@@ -76,20 +76,23 @@ int main(){
     memset(in_reals2,0,N*sizeof(double));
     memset(in_imags2,0,N*sizeof(double));
 
- 
+    complex double * in = malloc(sizeof(complex double)*N);
+    complex double * out = malloc(sizeof(complex double)*N);
 
     for (int i =0;i < N/2;i++){
         
         in_reals[i]= i;
+        in[i] = i;
         
     }
     for (int i =N/2;i < N;i++){
         
         in_reals[i]= 0;
+        in[i] = 0;
         
     }
 
-/*
+
     in_reals[0] = -20;
     in_reals[1] =2;
     in_reals[2] = 34;
@@ -99,7 +102,7 @@ int main(){
     in_reals[6] = 3;
     in_reals[7] = 200;
     //in_imags[3] = -2000;
-    in_reals[8] = 1;
+/*    in_reals[8] = 1;
     in_reals[9] =0;
     in_reals[10] = 3;
     in_reals[11] = -21;
@@ -110,28 +113,39 @@ int main(){
 */ 
 
 
-    WATCH("copy")
+    //WATCH("copy")
     init_look_up_table_d(N,w_reals,w_imags);
     init_look_up_inverse_d(N,w_reals_inverse,w_imags_inverse);
-    STOP_WATCH("copy")
+    //STOP_WATCH("copy")
     //A = reverse_copy(vec);
     
+    complex double  ** w = malloc(sizeof(complex double *) * (int) log2(N));
 
+    for (int i =0;i<log2(N);i++){
+        w[i] = malloc(sizeof(complex double)*N);
+
+        for (int j =0;j<N;j++){
+            w[i][j] = cexp(-2*M_PI*I*j/pow(2,i+1));
+        }
+    }
 
     WATCH("dft")
-    recursive_fft_d(in_reals,in_imags,out_reals,out_imags,w_reals,w_imags,1,N);
+    //naive_recursive_fft(in,out,w,1,N);
+
+
+    //recursive_split_fft_d(in_reals,in_imags,out_reals,out_imags,w_reals_inverse,w_imags_inverse,1,N);
     STOP_WATCH("dft")
 
     WATCH("dft_zero")
     //dft(vec,A);
-
-    recursive_rfft_half_zero_d(in_reals,in_imags,out_reals,out_imags,w_reals,w_imags,1,N);
+    recursive_fft_d(in_reals,in_imags,out_reals,out_imags,w_reals,w_imags,1,N);
+    //recursive_rfft_half_zero_d(in_reals,in_imags,out_reals,out_imags,w_reals,w_imags,1,N);
     
-    //recursive_inverse_fft_d(out_reals,out_imags,in_reals2,in_imags2,w_reals_inverse,w_imags_inverse,1,N);
+    recursive_inverse_fft_d(out_reals,out_imags,in_reals2,in_imags2,w_reals_inverse,w_imags_inverse,1,N);
     STOP_WATCH("dft_zero")
 
-    for (int i =0;i<2;i++){
-        printf("Valw: %lf + i%lf \n",out_reals[i],out_imags[i]);
+    for (int i =0;i<N;i++){
+        printf("Valw: %lf + i%lf \n",in_reals2[i]/N,in_imags2[i]/N);
     }
     //print_complex_vector(A);
 

@@ -30,9 +30,10 @@ add_executable(PyRasch
         src/dichotomus.c
         src/utils.c
         #src/temps.c
-        #src/polynomial.c
+        src/polynomial.c
+        src/polynomial_test.c
         #src/test_dft.c
-        src/test.c
+        #src/test.c
         src/complex_block.c
         src/complex_vector.c
         src/roots.c
@@ -52,7 +53,7 @@ target_compile_options(PyRasch PRIVATE
         -funroll-loops
         -fopenmp
         -ftree-vectorize
-        
+        -g
         
 )
 
