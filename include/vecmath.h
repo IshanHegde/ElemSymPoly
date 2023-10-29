@@ -59,11 +59,12 @@ static inline complex_8 MUL(complex_8 a, complex_8 b){
 
     return ret;
 }
-//ret.real = _mm256_sub_pd(_mm256_mul_pd(a.real,b.real),_mm256_mul_pd(a.imag,b.imag));
-//ret.imag = _mm256_add_pd(_mm256_mul_pd(a.real,b.imag),_mm256_mul_pd(a.imag,b.real));
-//ret.real = _mm256_fnmadd_pd(a.imag,b.imag,_mm256_mul_pd(a.real,b.real));
-//ret.imag = _mm256_fmadd_pd(a.real,b.imag,_mm256_mul_pd(a.imag,b.real));
-
+/*
+_mm256_sub_pd(_mm256_mul_pd(a.real,b.real),_mm256_mul_pd(a.imag,b.imag));
+_mm256_add_pd(_mm256_mul_pd(a.real,b.imag),_mm256_mul_pd(a.imag,b.real));
+_mm256_fnmadd_pd(a.imag,b.imag,_mm256_mul_pd(a.real,b.real));
+_mm256_fmadd_pd(a.real,b.imag,_mm256_mul_pd(a.imag,b.real));
+*/
 
 static inline complex_4 MUL_4(complex_4 a, complex_4 b){
 
@@ -72,6 +73,7 @@ static inline complex_4 MUL_4(complex_4 a, complex_4 b){
     ret.imag = _mm256_add_pd(_mm256_mul_pd(a.real,b.imag),_mm256_mul_pd(a.imag,b.real));
     return ret;
 }
+
 
 
 static inline complex_8 LOAD(float * restrict reals, float * restrict imags){
@@ -93,6 +95,14 @@ static inline complex_4 LOAD_4(double * restrict reals, double * restrict imags)
     return ret;
 }
 
+static inline complex_4 LOAD_CONJ_4(double * restrict reals, double * restrict imags){
+    // imag = -imag
+    complex_4 ret;
+    ret.real = _mm256_load_pd(reals);
+    ret.imag = _mm256_mul_pd(_mm256_load_pd(imags), _mm256_set_pd(-1.0, -1.0, -1.0, -1.0));
+
+    return ret;
+}
 
 static inline void STORE(float * restrict reals, float * restrict imags, complex_8 val){
 

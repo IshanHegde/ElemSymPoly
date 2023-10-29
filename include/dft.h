@@ -24,4 +24,8 @@ void recursive_inverse_fft_d( double * restrict in_reals, double * restrict  in_
 
 void recursive_rfft_half_zero_d(double * restrict in_reals, double * restrict  in_imags, double * restrict out_reals, double * restrict out_imags, double ** restrict w_reals, double ** restrict w_imags , int stride, int n);
 
+void recursive_split_fft_d(double * restrict in_reals, double * restrict  in_imags, double * restrict out_reals, double * restrict out_imags, double ** restrict w_reals, double ** restrict w_imags , int stride, int n);
+
+void naive_recursive_fft(complex double * restrict in, complex double * restrict out, complex double ** restrict w, int stride, int n);
+
 #endif // RASCH_DFT_H
