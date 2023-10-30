@@ -24,19 +24,20 @@ add_subdirectory(panopticon)
 
 add_executable(PyRasch
 
-        src/block.c
-        src/vector.c
-        src/matrix.c
-        src/dichotomus.c
-        src/utils.c
+        #src/block.c
+        #src/vector.c
+        #src/matrix.c
+        #src/dichotomus.c
+        #src/utils.c
         #src/temps.c
         src/polynomial.c
         src/polynomial_test.c
         #src/test_dft.c
         #src/test.c
-        src/complex_block.c
-        src/complex_vector.c
-        src/roots.c
+        src/elementary_symmetric_polynomial.c
+        #src/complex_block.c
+        #src/complex_vector.c
+        #src/roots.c
         src/dft.c
         src/arena.c)
 
@@ -44,7 +45,7 @@ target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon fft
 
 
 target_compile_options(PyRasch PRIVATE
-        -O3
+        -O1
         -march=native
         -mtune=native
         -flto
@@ -55,7 +56,10 @@ target_compile_options(PyRasch PRIVATE
         -ftree-vectorize
         -g
         
+        
 )
+
+
 
 if (ASAN)
     target_compile_options(PyRasch PRIVATE -g -fsanitize=address -fno-omit-frame-pointer)
