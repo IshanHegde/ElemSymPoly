@@ -2,64 +2,70 @@
 #include <dft.h>
 #include <string.h>
 
-struct polynomial_state_d{
+#define data_t double
+#define array_t data_t *
+#define matrix_t data_t **
+
+#define state_t poly_mul_state_t
+
+struct state_t{
 
     int N;
 
-    double * A_reals;
-    double * A_imags;
+    array_t A_reals;
+    array_t A_imags;
 
-    double * B_reals;
-    double * B_imags;
+    array_t B_reals;
+    array_t B_imags;
 
-    double * A_out_reals;
-    double * A_out_imags;
+    array_t A_out_reals;
+    array_t A_out_imags;
 
-    double * B_out_reals;
-    double * B_out_imags;
+    array_t B_out_reals;
+    array_t B_out_imags;
 
-    double * C_out_reals;
-    double * C_out_imags;
+    array_t C_out_reals;
+    array_t C_out_imags;
 
-    double ** w_reals;
-    double ** w_imags;
-    double ** w_reals_inverse;
-    double ** w_imags_inverse;
+    matrix_t w_reals;
+    matrix_t w_imags;
+    matrix_t w_reals_inverse;
+    matrix_t w_imags_inverse;
 
-    double * temp_C_reals;
-    double * temp_C_imags;
+    array_t temp_C_reals;
+    array_t temp_C_imags;
 };
 
 
-state_t * init_polynomial_mul_state(int poly_size){
+state_t init_polynomial_mul_state(int poly_size){
 
     int N = 2* poly_size;
     int alignment = 32;
 
-    state_t * state = malloc(sizeof(state_t));
+    state_t state = malloc(sizeof(struct state_t));
     
-    ALLOC_ALIGNED(state->A_reals, alignment, sizeof(double) * N);
+    ALLOC_ALIGNED(state->A_reals, alignment, sizeof(data_t) * N);
 
-    ALLOC_ALIGNED(state->B_reals, alignment, sizeof(double) * N);
+    ALLOC_ALIGNED(state->B_reals, alignment, sizeof(data_t) * N);
 
-    ALLOC_ALIGNED(state->temp_C_reals, alignment, sizeof(double) * N);
-    ALLOC_ALIGNED(state->temp_C_imags, alignment, sizeof(double) * N);
+    ALLOC_ALIGNED(state->temp_C_reals, alignment, sizeof(data_t) * N);
+    ALLOC_ALIGNED(state->temp_C_imags, alignment, sizeof(data_t) * N);
     
-    ALLOC_ALIGNED(state->A_out_reals, alignment, sizeof(double) * N);
-    ALLOC_ALIGNED(state->A_out_imags, alignment, sizeof(double) * N);
+    ALLOC_ALIGNED(state->A_out_reals, alignment, sizeof(data_t) * N);
+    ALLOC_ALIGNED(state->A_out_imags, alignment, sizeof(data_t) * N);
 
 
-    ALLOC_ALIGNED(state->C_out_reals, alignment, sizeof(double) * N);
-    ALLOC_ALIGNED(state->C_out_imags, alignment, sizeof(double) * N);
+    ALLOC_ALIGNED(state->C_out_reals, alignment, sizeof(data_t) * N);
+    ALLOC_ALIGNED(state->C_out_imags, alignment, sizeof(data_t) * N);
 
-    memset(state->C_out_reals, 0, sizeof(double) * N);
-    memset(state->C_out_imags, 0,  sizeof(double) * N);
+    memset(state->C_out_reals, 0, sizeof(data_t) * N);
+    memset(state->C_out_imags, 0,  sizeof(data_t) * N);
 
-    state->w_reals = (double **) malloc(sizeof(double *) * log2(N));
-    state->w_imags = (double **) malloc(sizeof(double *) * log2(N));
+    state->w_reals = (matrix_t) malloc(sizeof(array_t) * log2(N));
+    state->w_imags = (matrix_t) malloc(sizeof(array_t) * log2(N));
 
-    state->w_reals_inverse = (double **) malloc(sizeof(double *) * log2(N));
-    state->w_imags_inverse = (double **) malloc(sizeof(double *) * log2(N));
+    state->w_reals_inverse = (matrix_t) malloc(sizeof(array_t) * log2(N));
+    state->w_imags_inverse = (matrix_t) malloc(sizeof(array_t) * log2(N));
 
     init_look_up_table_d(N,state->w_reals,state->w_imags);
     init_look_up_inverse_d(N,state->w_reals_inverse,state->w_imags_inverse);
@@ -69,7 +75,7 @@ state_t * init_polynomial_mul_state(int poly_size){
 }
 
 
-void update_polynomial_mul_state(state_t * state, array_t * A, array_t * B, int poly_size){
+void update_polynomial_mul_state(state_t state, array_t A, array_t B, int poly_size){
     
     int N = 2* poly_size;
 
@@ -90,7 +96,7 @@ void update_polynomial_mul_state(state_t * state, array_t * A, array_t * B, int 
     //memset(state->C_out_imags, 0, 2* byte_size);
 }
 
-array_t * polynomial_multiply(state_t * state){
+array_t polynomial_multiply(state_t state){
 
     int N = state->N;
 
@@ -122,7 +128,7 @@ array_t * polynomial_multiply(state_t * state){
     return state->C_out_reals;
 }
 
-void free_polynomial_mul_state(state_t * state){
+void free_polynomial_mul_state(state_t state){
 
     free(state->A_reals);
     free(state->B_reals);
@@ -138,3 +144,8 @@ void free_polynomial_mul_state(state_t * state){
     free(state->w_imags_inverse);
     free(state);
 }
+
+#undef state_t
+#undef data_t
+#undef array_t
+#undef matrix_t
