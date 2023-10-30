@@ -36,7 +36,7 @@ target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon fft
 
 
 target_compile_options(PyRasch PRIVATE
-        -O1
+        -O3
         -march=native
         -mtune=native
         -flto
@@ -45,11 +45,12 @@ target_compile_options(PyRasch PRIVATE
         -funroll-loops
         -fopenmp
         -ftree-vectorize
-        -g
+        
         
         
 )
 
+target_link_options(PyRasch PRIVATE -flto)
 
 
 if (ASAN)

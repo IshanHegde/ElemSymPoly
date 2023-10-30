@@ -13,6 +13,8 @@ void init_look_up_table_d(int N, matrix_t reals, matrix_t imags);
 
 void init_look_up_inverse_d(int N, matrix_t reals, matrix_t imags);
 
+void free_look_up_table(int N, matrix_t reals, matrix_t imags);
+
 void recursive_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n);
 
 void recursive_inverse_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n);

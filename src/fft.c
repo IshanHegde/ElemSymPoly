@@ -56,6 +56,18 @@ void init_look_up_inverse_d(int N, matrix_t reals, matrix_t imags){
     
 }
 
+void free_look_up_table(int N, matrix_t reals, matrix_t imags){
+
+    int outer_array_size = (int)log2(N);
+
+    for (int i =0; i < outer_array_size;i++){
+        free(reals[i]);
+        free(imags[i]);
+    }
+
+    free(reals);
+    free(imags);
+}
 
 void recursive_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
 
@@ -193,7 +205,6 @@ void recursive_rfft_half_zero_d(array_t in_reals, array_t in_imags, array_t out_
         complex_t w, y_1_k, t, y_0_k;
         // twiddle factor outer array index
         int aux_num = log2(n)-1;
-        
         
         for (int k =0; k < n/2; k+=4){
 

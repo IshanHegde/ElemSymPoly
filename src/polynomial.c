@@ -138,10 +138,10 @@ void free_polynomial_mul_state(state_t state){
     free(state->temp_C_imags);
     free(state->C_out_reals);
     free(state->C_out_imags);
-    free(state->w_reals);
-    free(state->w_imags);
-    free(state->w_reals_inverse);
-    free(state->w_imags_inverse);
+
+    free_look_up_table(state->N,state->w_reals,state->w_imags);
+    free_look_up_table(state->N,state->w_reals_inverse,state->w_imags_inverse);
+
     free(state);
 }
 

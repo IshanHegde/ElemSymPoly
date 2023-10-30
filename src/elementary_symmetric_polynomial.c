@@ -25,8 +25,6 @@ struct state_t {
 };
 
 
-
-
 state_t  init_elementary_symmetric_state(int size){
 
     if (size & (size - 1) != 0){
@@ -60,7 +58,7 @@ void update_elementary_symmetric_state(state_t state, array_t input_elements, in
         size = pow(2,ceil(log2(size)));
         state->N = size;
 
-        memcpy(state->elements, input_elements, sizeof(data_t) * state->N);
+        memcpy(state->elements, input_elements, sizeof(data_t) * current_size);
         memset(state->elements + current_size, 0, sizeof(data_t) * (size - current_size));
 
     } else{
@@ -96,13 +94,17 @@ static void _elem_symm_poly_comp(poly_mul_state_t poly_mul_state, matrix_t poly_
         data_t poly_matrix_0_1 = poly_matrix[0][1];
         data_t poly_matrix_0_2 = poly_matrix[0][2];
         data_t poly_matrix_0_3 = poly_matrix[0][3];
-
+        
         poly_matrix[0][0] = 1;
         poly_matrix[0][1] = poly_matrix_0_1 + poly_matrix[stride][1];
         poly_matrix[0][2] = poly_matrix_0_1 * poly_matrix[stride][1] + poly_matrix_0_2 + poly_matrix[stride][2];
+        //poly_matrix[0][2] = fma(poly_matrix_0_1, poly_matrix[stride][1], poly_matrix_0_2 + poly_matrix[stride][2]);     
         poly_matrix[0][3] = poly_matrix_0_1 * poly_matrix[stride][2] + poly_matrix_0_2 * poly_matrix[stride][1] + poly_matrix_0_3 + poly_matrix[stride][3];
+        //poly_matrix[0][3] = fma(poly_matrix_0_1,poly_matrix[stride][2], fma(poly_matrix_0_2, poly_matrix[stride][1], poly_matrix_0_3 + poly_matrix[stride][3]));
         poly_matrix[0][4] = poly_matrix_0_1 * poly_matrix[stride][3] + poly_matrix_0_2 * poly_matrix[stride][2] + poly_matrix_0_3 * poly_matrix[stride][1];
+        //poly_matrix[0][4] = fma(poly_matrix_0_1, poly_matrix[stride][3], fma(poly_matrix_0_2, poly_matrix[stride][2], poly_matrix_0_3 * poly_matrix[stride][1]));
         poly_matrix[0][5] = poly_matrix_0_2 * poly_matrix[stride][3] + poly_matrix_0_3 * poly_matrix[stride][2];
+        //poly_matrix[0][5] = fma(poly_matrix_0_2, poly_matrix[stride][3], poly_matrix_0_3 * poly_matrix[stride][2]);
         poly_matrix[0][6] = poly_matrix_0_3 * poly_matrix[stride][3];
         poly_matrix[0][7] = 0;
 
