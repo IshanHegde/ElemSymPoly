@@ -12,7 +12,7 @@
 #define matrix_t data_t ** restrict
 
 
-void init_look_up_table_d(int N, matrix_t reals, matrix_t imags){
+void init_look_up_table(int N, matrix_t reals, matrix_t imags){
 
     int m = N;
     int alignment = 32;
@@ -33,7 +33,7 @@ void init_look_up_table_d(int N, matrix_t reals, matrix_t imags){
     }
 }
 
-void init_look_up_inverse_d(int N, matrix_t reals, matrix_t imags){
+void init_look_up_inverse(int N, matrix_t reals, matrix_t imags){
     
     int m = N;
     int alignment = 32;
@@ -69,7 +69,7 @@ void free_look_up_table(int N, matrix_t reals, matrix_t imags){
     free(imags);
 }
 
-void recursive_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
+void recursive_fft(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
 
 
     if (n == 4){
@@ -97,8 +97,8 @@ void recursive_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, arra
 
 
     }else {
-        recursive_fft_d(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
-        recursive_fft_d(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_fft(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
 
         complex_t w, y_1_k, t, y_0_k;
         // twiddle factor outer array index
@@ -119,7 +119,7 @@ void recursive_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, arra
 
 }
 
-void recursive_inverse_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
+void recursive_inverse_fft(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
     
     if (n == 4){
         
@@ -148,8 +148,8 @@ void recursive_inverse_fft_d(array_t in_reals, array_t in_imags, array_t out_rea
         
         
     }else{
-        recursive_inverse_fft_d(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
-        recursive_inverse_fft_d(in_reals + stride,in_imags + stride, out_reals +n/2, out_imags+n/2, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_inverse_fft(in_reals,in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_inverse_fft(in_reals + stride,in_imags + stride, out_reals +n/2, out_imags+n/2, w_reals, w_imags, stride << 1, n >> 1);
 
         
         complex_t w, y_1_k, t, y_0_k;
@@ -175,7 +175,7 @@ void recursive_inverse_fft_d(array_t in_reals, array_t in_imags, array_t out_rea
     
 }
 
-void recursive_rfft_half_zero_d(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
+void recursive_rfft_half_zero(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
 
 
     if (n == 4){
@@ -199,8 +199,8 @@ void recursive_rfft_half_zero_d(array_t in_reals, array_t in_imags, array_t out_
 
 
     }else {
-        recursive_rfft_half_zero_d(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
-        recursive_rfft_half_zero_d(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_rfft_half_zero(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+        recursive_rfft_half_zero(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
 
         complex_t w, y_1_k, t, y_0_k;
         // twiddle factor outer array index

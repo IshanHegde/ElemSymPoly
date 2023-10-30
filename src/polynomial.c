@@ -67,8 +67,8 @@ state_t init_polynomial_mul_state(int poly_size){
     state->w_reals_inverse = (matrix_t) malloc(sizeof(array_t) * log2(N));
     state->w_imags_inverse = (matrix_t) malloc(sizeof(array_t) * log2(N));
 
-    init_look_up_table_d(N,state->w_reals,state->w_imags);
-    init_look_up_inverse_d(N,state->w_reals_inverse,state->w_imags_inverse);
+    init_look_up_table(N,state->w_reals,state->w_imags);
+    init_look_up_inverse(N,state->w_reals_inverse,state->w_imags_inverse);
     state->N = N;
 
     return state;
@@ -100,7 +100,7 @@ array_t polynomial_multiply(state_t state){
 
     int N = state->N;
 
-    recursive_rfft_half_zero_d(state->A_reals,state->B_reals,state->A_out_reals,state->A_out_imags,state->w_reals,state->w_imags,1,N);
+    recursive_rfft_half_zero(state->A_reals,state->B_reals,state->A_out_reals,state->A_out_imags,state->w_reals,state->w_imags,1,N);
 
     state->temp_C_reals[0] = state->A_out_reals[0] * state->A_out_imags[0];
     state->temp_C_imags[0] = 0;
@@ -118,7 +118,7 @@ array_t polynomial_multiply(state_t state){
     }
 
 
-    recursive_inverse_fft_d(state->temp_C_reals,state->temp_C_imags,state->C_out_reals,state->C_out_imags,state->w_reals_inverse,state->w_imags_inverse,1,N);
+    recursive_inverse_fft(state->temp_C_reals,state->temp_C_imags,state->C_out_reals,state->C_out_imags,state->w_reals_inverse,state->w_imags_inverse,1,N);
 
     for (int i = 0;i < N;i++){
         state->C_out_reals[i] /= N;
