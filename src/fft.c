@@ -88,19 +88,19 @@ void recursive_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, arra
         recursive_fft_d(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
         recursive_fft_d(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
 
-        complex_4 w, y_1_k, t, y_0_k;
+        complex_t w, y_1_k, t, y_0_k;
         // twiddle factor outer array index
         int aux_num = log2(n)-1;
 
         for (int k =0; k < n/2; k+=4){
 
-            w = LOAD_4(&w_reals[aux_num][k],&w_imags[aux_num][k]);
-            y_1_k = LOAD_4(&out_reals[k+n/2],&out_imags[k+n/2]);
-            y_0_k = LOAD_4(&out_reals[k],&out_imags[k]);
-            t = MUL_4(w,y_1_k);
+            w = LOAD(&w_reals[aux_num][k],&w_imags[aux_num][k]);
+            y_1_k = LOAD(&out_reals[k+n/2],&out_imags[k+n/2]);
+            y_0_k = LOAD(&out_reals[k],&out_imags[k]);
+            t = MUL(w,y_1_k);
             
-            STORE_4(&out_reals[k],&out_imags[k],ADD_4(y_0_k,t));
-            STORE_4(&out_reals[k+n/2],&out_imags[k+n/2],SUB_4(y_0_k,t));
+            STORE(&out_reals[k],&out_imags[k],ADD(y_0_k,t));
+            STORE(&out_reals[k+n/2],&out_imags[k+n/2],SUB(y_0_k,t));
 
         }
     }
@@ -140,20 +140,20 @@ void recursive_inverse_fft_d(array_t in_reals, array_t in_imags, array_t out_rea
         recursive_inverse_fft_d(in_reals + stride,in_imags + stride, out_reals +n/2, out_imags+n/2, w_reals, w_imags, stride << 1, n >> 1);
 
         
-        complex_4 w, y_1_k, t, y_0_k;
+        complex_t w, y_1_k, t, y_0_k;
         int k;
         // twiddle factor outer array index
         int aux_num = log2(n)-1;
 
         for (k =0; k < n/2; k+=4){
             
-            w = LOAD_4(&w_reals[aux_num][k],&w_imags[aux_num][k]);
-            y_1_k = LOAD_4(&out_reals[k+n/2],&out_imags[k + n/2]);
-            y_0_k = LOAD_4(&out_reals[k],&out_imags[k]);
-            t = MUL_4(w,y_1_k);
+            w = LOAD(&w_reals[aux_num][k],&w_imags[aux_num][k]);
+            y_1_k = LOAD(&out_reals[k+n/2],&out_imags[k + n/2]);
+            y_0_k = LOAD(&out_reals[k],&out_imags[k]);
+            t = MUL(w,y_1_k);
             
-            STORE_4(&out_reals[k],&out_imags[k],ADD_4(y_0_k,t));
-            STORE_4(&out_reals[k+n/2],&out_imags[k+n/2],SUB_4(y_0_k,t));
+            STORE(&out_reals[k],&out_imags[k],ADD(y_0_k,t));
+            STORE(&out_reals[k+n/2],&out_imags[k+n/2],SUB(y_0_k,t));
 
         }
 
@@ -190,22 +190,27 @@ void recursive_rfft_half_zero_d(array_t in_reals, array_t in_imags, array_t out_
         recursive_rfft_half_zero_d(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
         recursive_rfft_half_zero_d(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
 
-        complex_4 w, y_1_k, t, y_0_k;
+        complex_t w, y_1_k, t, y_0_k;
         // twiddle factor outer array index
         int aux_num = log2(n)-1;
         
         
         for (int k =0; k < n/2; k+=4){
 
-            w = LOAD_4(&w_reals[aux_num][k],&w_imags[aux_num][k]);
-            y_1_k = LOAD_4(&out_reals[k+n/2],&out_imags[k+n/2]);
-            y_0_k = LOAD_4(&out_reals[k],&out_imags[k]);
-            t = MUL_4(w,y_1_k);
+            w = LOAD(&w_reals[aux_num][k],&w_imags[aux_num][k]);
+            y_1_k = LOAD(&out_reals[k+n/2],&out_imags[k+n/2]);
+            y_0_k = LOAD(&out_reals[k],&out_imags[k]);
+            t = MUL(w,y_1_k);
             
-            STORE_4(&out_reals[k],&out_imags[k],ADD_4(y_0_k,t));
-            STORE_4(&out_reals[k+n/2],&out_imags[k+n/2],SUB_4(y_0_k,t));
+            STORE(&out_reals[k],&out_imags[k],ADD(y_0_k,t));
+            STORE(&out_reals[k+n/2],&out_imags[k+n/2],SUB(y_0_k,t));
 
         }
     }
 
 }
+
+
+#undef data_t
+#undef array_t
+#undef matrix_t
