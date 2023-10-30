@@ -23,23 +23,14 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -mtune=nat
 add_subdirectory(panopticon)
 
 add_executable(PyRasch
-
-        #src/block.c
-        #src/vector.c
-        #src/matrix.c
         #src/dichotomus.c
         #src/utils.c
-        #src/temps.c
         src/polynomial.c
         src/polynomial_test.c
         #src/test_dft.c
         #src/test.c
         src/elementary_symmetric_polynomial.c
-        #src/complex_block.c
-        #src/complex_vector.c
-        #src/roots.c
-        src/dft.c
-        src/arena.c)
+        src/fft.c)
 
 target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon fftw3)
 

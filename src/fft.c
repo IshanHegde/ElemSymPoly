@@ -1,16 +1,18 @@
-#include <dft.h>
+#include <fft.h>
 #include <assert.h>
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <vecmath.h>
-
+#include <common.h>
 #include <panopticon.h> 
 
+#define data_t double
+#define array_t data_t * restrict
+#define matrix_t data_t ** restrict
 
 
-
-void init_look_up_table_d(int N, double ** restrict reals, double ** restrict imags){
+void init_look_up_table_d(int N, matrix_t reals, matrix_t imags){
 
     int m = N;
     int alignment = 32;
@@ -21,17 +23,17 @@ void init_look_up_table_d(int N, double ** restrict reals, double ** restrict im
         int inner_array_size = (int) pow(2,i);
         int aux_size = inner_array_size * 2;
 
-        posix_memalign(&reals[i], alignment, sizeof(double) * inner_array_size);
-        posix_memalign(&imags[i], alignment, sizeof(double) * inner_array_size);
+        ALLOC_ALIGNED(reals[i], alignment, sizeof(data_t) * inner_array_size);
+        ALLOC_ALIGNED(imags[i], alignment, sizeof(data_t) * inner_array_size);
 
         for (int j =0;j < inner_array_size;j++){
-            reals[i][j] = cos(2.0*M_PI*(double)j/(double)aux_size);
-            imags[i][j] = sin(2.0*M_PI*(double)j/(double)aux_size);
+            reals[i][j] = cos(2.0*M_PI*(data_t)j/(data_t)aux_size);
+            imags[i][j] = sin(2.0*M_PI*(data_t)j/(data_t)aux_size);
         }
     }
 }
 
-void init_look_up_inverse_d(int N, double ** restrict  reals, double ** restrict  imags){
+void init_look_up_inverse_d(int N, matrix_t reals, matrix_t imags){
     
     int m = N;
     int alignment = 32;
@@ -42,12 +44,12 @@ void init_look_up_inverse_d(int N, double ** restrict  reals, double ** restrict
         int inner_array_size = (int) pow(2,i);
         int aux_size = inner_array_size * 2;
 
-        posix_memalign(&reals[i], alignment, sizeof(double) * inner_array_size);
-        posix_memalign(&imags[i], alignment, sizeof(double) * inner_array_size);
+        ALLOC_ALIGNED(reals[i], alignment, sizeof(data_t) * inner_array_size);
+        ALLOC_ALIGNED(imags[i], alignment, sizeof(data_t) * inner_array_size);
 
         for (int j =0;j < inner_array_size;j++){
-            reals[i][j] = cos(2.0*M_PI*(double)j/(double)aux_size);
-            imags[i][j] = sin(-2.0*M_PI*(double)j/(double)aux_size);
+            reals[i][j] = cos(2.0*M_PI*(data_t)j/(data_t)aux_size);
+            imags[i][j] = sin(-2.0*M_PI*(data_t)j/(data_t)aux_size);
         }
     }
     
@@ -55,19 +57,19 @@ void init_look_up_inverse_d(int N, double ** restrict  reals, double ** restrict
 }
 
 
-void recursive_fft_d(double * restrict in_reals, double * restrict  in_imags, double * restrict out_reals, double * restrict out_imags, double ** restrict w_reals, double ** restrict w_imags , int stride, int n){
+void recursive_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
 
 
     if (n == 4){
 
-        double o0_real = in_reals[0];
-        double o0_imag = in_imags[0];
-        double o1_real = in_reals[stride];
-        double o1_imag = in_imags[stride];
-        double o2_real = in_reals[2*stride];
-        double o2_imag = in_imags[2*stride];
-        double o3_real = in_reals[3*stride];
-        double o3_imag = in_imags[3*stride];
+        data_t o0_real = in_reals[0];
+        data_t o0_imag = in_imags[0];
+        data_t o1_real = in_reals[stride];
+        data_t o1_imag = in_imags[stride];
+        data_t o2_real = in_reals[2*stride];
+        data_t o2_imag = in_imags[2*stride];
+        data_t o3_real = in_reals[3*stride];
+        data_t o3_imag = in_imags[3*stride];
         
         out_reals[0] = o0_real + o2_real + o1_real + o3_real;
         out_imags[0] = o0_imag + o2_imag + o1_imag + o3_imag;
@@ -105,20 +107,19 @@ void recursive_fft_d(double * restrict in_reals, double * restrict  in_imags, do
 
 }
 
-
-void recursive_inverse_fft_d( double * restrict in_reals, double * restrict  in_imags, double * restrict out_reals, double * restrict out_imags, double ** restrict w_reals, double ** restrict w_imags ,  int stride, int n){
+void recursive_inverse_fft_d(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
     
     if (n == 4){
         
         
-        double o0_real = in_reals[0];
-        double o0_imag = in_imags[0];
-        double o1_real = in_reals[stride];
-        double o1_imag = in_imags[stride];
-        double o2_real = in_reals[2*stride];
-        double o2_imag = in_imags[2*stride];
-        double o3_real = in_reals[3*stride];
-        double o3_imag = in_imags[3*stride];
+        data_t o0_real = in_reals[0];
+        data_t o0_imag = in_imags[0];
+        data_t o1_real = in_reals[stride];
+        data_t o1_imag = in_imags[stride];
+        data_t o2_real = in_reals[2*stride];
+        data_t o2_imag = in_imags[2*stride];
+        data_t o3_real = in_reals[3*stride];
+        data_t o3_imag = in_imags[3*stride];
         
 
         out_reals[0] = o0_real + o2_real + o1_real + o3_real;
@@ -162,16 +163,15 @@ void recursive_inverse_fft_d( double * restrict in_reals, double * restrict  in_
     
 }
 
-
-void recursive_rfft_half_zero_d(double * restrict in_reals, double * restrict  in_imags, double * restrict out_reals, double * restrict out_imags, double ** restrict w_reals, double ** restrict w_imags , int stride, int n){
+void recursive_rfft_half_zero_d(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
 
 
     if (n == 4){
 
-        double o0_real = in_reals[0];
-        double o0_imag = in_imags[0];
-        double o1_real = in_reals[stride];
-        double o1_imag = in_imags[stride];
+        data_t o0_real = in_reals[0];
+        data_t o0_imag = in_imags[0];
+        data_t o1_real = in_reals[stride];
+        data_t o1_imag = in_imags[stride];
         
         out_reals[0] = o0_real + o1_real;
         out_imags[0] = o0_imag + o1_imag;

@@ -1,5 +1,5 @@
 #include <polynomial.h>
-#include <dft.h>
+#include <fft.h>
 #include <string.h>
 
 #define data_t double
