@@ -2,8 +2,9 @@
 #define RASCH_COMMON_H
 
 #include <panopticon.h>
-#include <omp.h>
 #include <math.h>
 #include <stdio.h>
+
+#define ALLOC_ALIGNED(ptr, alignment, size) posix_memalign((void **)&(ptr), alignment, (size))
 
 #endif // RASCH_COMMON_H
