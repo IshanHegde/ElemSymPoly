@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <common.h>
 
-#define data_t double
+#define data_t mpfr_t
 #define array_t data_t *
 #define matrix_t data_t **
 
@@ -15,10 +15,10 @@ typedef struct state_t *state_t;
 
 extern state_t  init_elementary_symmetric_state(int size);
 
-extern void update_elementary_symmetric_state(state_t state, array_t elements, int size);
+extern void update_elementary_symmetric_state(state_t state, double * elements, int size);
 
 
-extern array_t compute_elementary_symmetric_polynomials(state_t state);
+extern double * compute_elementary_symmetric_polynomials(state_t state);
 
 extern void free_elementary_symmetric_state(state_t state);
 
