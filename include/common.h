@@ -1,5 +1,5 @@
-#ifndef RASCH_COMMON_H
-#define RASCH_COMMON_H
+#ifndef ELEM_SYM_POLY_COMMON_INCLUDED
+#define ELEM_SYM_POLY_COMMON_INCLUDED
 
 
 #include <panopticon.h>
@@ -14,4 +14,4 @@
 
 #define ALLOC(size) malloc((size))
 
-#endif // RASCH_COMMON_H
+#endif //ELEM_SYM_POLY_COMMON_INCLUDED

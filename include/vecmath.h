@@ -1,8 +1,6 @@
 #include <immintrin.h>
 
 
-
-
 typedef struct complex_4{
     __m256d real;
     __m256d imag;

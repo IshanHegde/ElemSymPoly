@@ -1,5 +1,5 @@
-#ifndef PYRASCH_FFT_INCLUDED
-#define PYRASCH_FFT_INCLUDED
+#ifndef ELEM_SYM_POLY_ELEMENTARY_FFT_INCLUDED
+#define ELEM_SYM_POLY_ELEMENTARY_FFT_INCLUDED
 
 #include <stdint.h>
 #include <stdio.h>
@@ -23,4 +23,4 @@ extern void recursive_inverse_fft_safe(array_t in_reals, array_t in_imags, array
 #undef array_t
 #undef matrix_t
 
-#endif // PYRASCH_FFT_INCLUDED
+#endif // ELEM_SYM_POLY_ELEMENTARY_FFT_INCLUDED

@@ -1,5 +1,5 @@
-#ifndef PYRASCH_ELEMENTARY_SYMMETRIC_INCLUDED
-#define PYRASCH_ELEMENTARY_SYMMETRIC_INCLUDED
+#ifndef ELEM_SYM_POLY_ELEMENTARY_SYMMETRIC_INCLUDED
+#define ELEM_SYM_POLY_ELEMENTARY_SYMMETRIC_INCLUDED
 
 #include <stddef.h>
 #include <common.h>
@@ -28,4 +28,4 @@ extern void free_elementary_symmetric_state(state_t state);
 #undef array_t
 #undef matrix_t
 
-#endif // PYRASCH_ELEMENTARY_SYMMETRIC_INCLUDED
+#endif // ELEM_SYM_POLY_ELEMENTARY_SYMMETRIC_INCLUDED

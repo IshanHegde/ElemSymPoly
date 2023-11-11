@@ -7,7 +7,7 @@ option(UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
 
-project(PyRasch C)
+project(elem_sym_poly C)
 
 set(CMAKE_C_STANDARD 99)
 include_directories(/opt/OpenBLAS/include ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/panopticon/include)
@@ -22,9 +22,7 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -mtune=nat
 
 add_subdirectory(panopticon)
 
-add_executable(PyRasch
-        #src/dichotomus.c
-        #src/utils.c
+add_executable(elem_sym_poly
         src/polynomial.c
         src/polynomial_test.c
         #src/test_fft.c
@@ -35,10 +33,10 @@ add_executable(PyRasch
         #src/test_fft.c
 )
 
-target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon fftw3 mpfr gmp)
+target_link_libraries(elem_sym_poly openblas m pthread OpenMP::OpenMP_C panopticon fftw3 mpfr gmp)
 
 
-target_compile_options(PyRasch PRIVATE
+target_compile_options(elem_sym_poly PRIVATE
         -O3
         -march=native
         -mtune=native
@@ -50,15 +48,15 @@ target_compile_options(PyRasch PRIVATE
         
 )
 
-target_link_options(PyRasch PRIVATE -flto)
+target_link_options(elem_sym_poly PRIVATE -flto)
 
 
 if (ASAN)
-    target_compile_options(PyRasch PRIVATE -g -fsanitize=address -fno-omit-frame-pointer)
-    target_link_options(PyRasch PRIVATE -fsanitize=address)
+    target_compile_options(elem_sym_poly PRIVATE -g -fsanitize=address -fno-omit-frame-pointer)
+    target_link_options(elem_sym_poly PRIVATE -fsanitize=address)
 endif()
 
 if (UBSAN)
-    target_compile_options(PyRasch PRIVATE  -g -fsanitize=undefined -fno-omit-frame-pointer)
-    target_link_options(PyRasch PRIVATE -fsanitize=undefined)
+    target_compile_options(elem_sym_poly PRIVATE  -g -fsanitize=undefined -fno-omit-frame-pointer)
+    target_link_options(elem_sym_poly PRIVATE -fsanitize=undefined)
 endif()
