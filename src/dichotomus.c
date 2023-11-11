@@ -1,14 +1,87 @@
 #include <dichotomus.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
-extern double person_v_estimator(struct dichotomus_model * model, double person_v_ability_estimate);
+#define data_t double
+#define array_t data_t *
+#define matrix_t data_t **
 
-extern double item_i_estimator(struct dichotomus_model * model, double item_i_difficulty_estimate);
+#define state_t dichotomus_state_t
 
-extern double person_v_estimator_differential(struct dichotomus_model * model, double person_v_ability_estimate);
+struct state_t{
 
-extern double item_i_estimator_differential(struct dichotomus_model * model, double item_i_difficulty_estimate);
+    matrix_t data;
+
+    array_t item_difficulty;
+    array_t person_ability;
+    array_t item_i_total_scores;
+    array_t person_v_total_scores;
+
+    int num_items;
+    int num_persons;
+}
+
+static inline data_t person_v_estimator(state_t model, data_t person_v_ability_estimate){
+
+    data_t value =0.0;
+    data_t item_i_difficulty;
+
+
+    for (int i = 0; i< model->num_items; i++){
+        item_i_difficulty = model->item_difficulty[i];
+        value += 1.0 / (exp(item_i_difficulty - person_v_ability_estimate ) + 1.0 ); 
+    }
+
+    return value;
+
+}
+
+
+static inline data_t item_i_estimator(state_t * model, data_t item_i_difficulty_estimate){
+
+    data_t  person_v_ability, tmp_val;
+    data_t value = 0.0;
+
+    for (int v = 0; v < model->num_persons; v++){
+
+        person_v_ability = model->person_ability[v];
+        tmp_val = exp(item_i_difficulty_estimate - person_v_ability);
+        value += 1.0 / ( tmp_val+ 1.0);
+    }
+
+    return value;
+}
+
+static inline data_t person_v_estimator_differential(state_t model, data_t person_v_ability_estimate){
+
+    data_t value = 0.0;
+    data_t item_i_difficulty, exp_value;
+
+
+    for (int i = 0; i< model->num_items; i++){
+        item_i_difficulty = model->item_difficulty[i];
+        exp_value = exp(item_i_difficulty - person_v_ability_estimate );
+        value += exp_value / (( exp_value + 1.0 ) * ( exp_value + 1.0 )); 
+    }
+
+    return value;
+}
+
+static inline data_t item_i_estimator_differential(state_t model, data_t item_i_difficulty_estimate){
+
+    data_t value = 0.0;
+    data_t person_v_ability, exp_value;
+
+
+    for (int v = 0; v< model->num_persons; v++){
+        person_v_ability = model->person_ability[v];
+        exp_value = exp(item_i_difficulty_estimate - person_v_ability);
+        value -= exp_value / (( exp_value + 1.0 ) * ( exp_value + 1.0 )); 
+    }
+
+    return value;
+}
 
 
 void update_item_parameters(struct dichotomus_model * model){
