@@ -27,29 +27,30 @@ add_executable(PyRasch
         #src/utils.c
         src/polynomial.c
         src/polynomial_test.c
+        #src/test_fft.c
         #src/test_dft.c
         #src/test.c
         src/elementary_symmetric_polynomial.c
-        src/fft.c)
+        src/fft.c
+        #src/test_fft.c
+)
 
-target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon fftw3)
+target_link_libraries(PyRasch openblas m pthread OpenMP::OpenMP_C panopticon fftw3 mpfr gmp)
 
 
 target_compile_options(PyRasch PRIVATE
-        -O1
+        -O3
         -march=native
         -mtune=native
         -flto
         -lpthread
-        -fstrict-aliasing
-        -funroll-loops
         -fopenmp
-        -ftree-vectorize
-        -g
+
         
         
 )
 
+target_link_options(PyRasch PRIVATE -flto)
 
 
 if (ASAN)
