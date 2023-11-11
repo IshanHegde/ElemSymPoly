@@ -1,11 +1,9 @@
-#include <fft.h>
-#include <assert.h>
+#include <mpfr_fft.h>
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <vecmath.h>
 #include <common.h>
-#include <panopticon.h> 
+
 
 #define data_t mpfr_t
 #define array_t data_t * restrict
@@ -93,7 +91,7 @@ void free_look_up_table(int N, matrix_t reals, matrix_t imags){
     free(imags);
 }
 
-void recursive_rfft_half_zero_safe(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
+void mpfr_recursive_fft_half_zero(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
 
 	if (n == 4){
 
@@ -110,8 +108,8 @@ void recursive_rfft_half_zero_safe(array_t in_reals, array_t in_imags, array_t o
 		mpfr_sub(out_imags[3],in_imags[0],in_reals[stride], MPFR_RNDN);
 
 	}else{
-		recursive_rfft_half_zero_safe(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
-		recursive_rfft_half_zero_safe(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
+		mpfr_recursive_fft_half_zero(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+		mpfr_recursive_fft_half_zero(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
 
 		// twiddle factor outer array index
 		int aux_num = log2(n)-1;
@@ -145,7 +143,7 @@ void recursive_rfft_half_zero_safe(array_t in_reals, array_t in_imags, array_t o
 
 }
 
-void recursive_inverse_fft_safe(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
+void mpfr_recursive_inverse_fft(array_t in_reals, array_t in_imags, array_t out_reals, array_t out_imags, matrix_t w_reals, matrix_t w_imags , int stride, int n){
 
 	if (n == 4){
 
@@ -183,8 +181,8 @@ void recursive_inverse_fft_safe(array_t in_reals, array_t in_imags, array_t out_
 
 
 	}else{
-		recursive_inverse_fft_safe(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
-		recursive_inverse_fft_safe(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
+		mpfr_recursive_inverse_fft(in_reals, in_imags, out_reals, out_imags, w_reals, w_imags, stride << 1, n >> 1);
+		mpfr_recursive_inverse_fft(in_reals + stride, in_imags + stride, out_reals + n/2, out_imags + n/2, w_reals, w_imags, stride << 1, n >> 1);
 
 		int aux_num = log2(n)-1;
 		mpfr_t t_real, t_imag, aux_0, aux_1, aux_2, aux_3;

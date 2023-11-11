@@ -29,7 +29,7 @@ add_executable(elem_sym_poly
         #src/test_dft.c
         #src/test.c
         src/elementary_symmetric_polynomial.c
-        src/fft.c
+        src/mpfr_fft.c
         #src/test_fft.c
 )
 

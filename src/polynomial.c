@@ -1,5 +1,5 @@
 #include <polynomial.h>
-#include <fft.h>
+#include <mpfr_fft.h>
 #include <string.h>
 
 #define data_t mpfr_t
