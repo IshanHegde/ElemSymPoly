@@ -76,6 +76,9 @@ state_t init_polynomial_mul_state(int poly_size){
 					state->temp_C_reals[i],
 					state->temp_C_imags[i],
 					(mpfr_ptr)NULL);
+
+		mpfr_set_d(state->A_imags[i], 0, MPFR_RNDN);
+		mpfr_set_d(state->B_imags[i], 0, MPFR_RNDN);
     }
     //memset(state->C_out_reals, 0, sizeof(data_t) * N);
     //memset(state->C_out_imags, 0,  sizeof(data_t) * N);
@@ -118,52 +121,24 @@ void update_polynomial_mul_state(state_t state, array_t A, array_t B, int poly_s
 array_t polynomial_multiply(state_t state){
 
     int N = state->N;
-	puts("input A, B:");
-	for (int i =0;i < N;i++){
-		mpfr_printf("%Rf +I %Rf\n ", state->A_reals[i], state->B_reals[i]);
+
+	recursive_rfft_half_zero_safe(state->A_reals,state->A_imags,state->A_out_reals,state->A_out_imags, state->w_reals, state->w_imags,1,N);
+	recursive_rfft_half_zero_safe(state->B_reals,state->B_imags,state->B_out_reals,state->B_out_imags, state->w_reals, state->w_imags,1,N);
+
+
+	data_t aux_0, aux_1, aux_2, aux_3;
+	mpfr_inits2(PRECISION, aux_0, aux_1, aux_2, aux_3, (mpfr_ptr)NULL);
+	for (int i =0; i< N;i++){
+		mpfr_mul(aux_0, state->A_out_reals[i], state->B_out_reals[i], MPFR_RNDN);
+		mpfr_mul(aux_1, state->A_out_imags[i], state->B_out_imags[i], MPFR_RNDN);
+		mpfr_sub(state->temp_C_reals[i],aux_0,aux_1, MPFR_RNDN);
+
+		mpfr_mul(aux_2, state->A_out_reals[i], state->B_out_imags[i], MPFR_RNDN);
+		mpfr_mul(aux_3, state->A_out_imags[i], state->B_out_reals[i], MPFR_RNDN);
+
+		mpfr_add(state->temp_C_imags[i],aux_2,aux_3, MPFR_RNDN);
 	}
-	recursive_rfft_half_zero_safe(state->A_reals,state->A_out_imags,state->A_out_reals,state->A_out_imags, state->w_reals, state->w_imags,1,N);
-	recursive_rfft_half_zero_safe(state->B_reals,state->B_out_imags,state->B_out_reals,state->B_out_imags, state->w_reals, state->w_imags,1,N);
-
-
-	puts("A_out:");
-	for (int i =0;i < N;i++){
-		mpfr_printf("%Rf +I %Rf\n ", state->A_out_reals[i], state->A_out_imags[i]);
-
-	}
-
-    //state->temp_C_reals[0] = state->A_out_reals[0] * state->A_out_imags[0];
-	mpfr_mul(state->temp_C_reals[0], state->A_out_reals[0], state->A_out_imags[0], MPFR_RNDN);
-
-	mpfr_t half, quarter, aux_0, aux_1;
-	mpfr_init2(half, PRECISION);
-	mpfr_init2(quarter, PRECISION);
-    mpfr_init2(aux_0,PRECISION);
-    mpfr_init2(aux_1,PRECISION);
-	mpfr_set_d(half, 0.5, MPFR_RNDN);
-	mpfr_set_d(quarter, 0.25, MPFR_RNDN);
-    for (int i = 1;i < N;i++){
-        /*
-        data_t a = state->A_out_reals[i];
-        data_t b = state->A_out_imags[i];
-
-        data_t c = state->A_out_reals[N - i];
-        data_t d = state->A_out_imags[N - i];
-		*/
-        mpfr_fmma(aux_0,state->A_out_reals[i],state->A_out_imags[i], state->A_out_reals[N-i],state->A_out_imags[N-i],MPFR_RNDN);
-        mpfr_mul(state->temp_C_reals[i],half,aux_0,MPFR_RNDN);
-        //state->temp_C_reals[i] = 0.5 * (a * b +  c * d);
-        mpfr_fmma(aux_0,state->A_out_reals[N-i],state->A_out_reals[N-i],state->A_out_imags[i],state->A_out_imags[i],MPFR_RNDN);
-        mpfr_fmma(aux_1,state->A_out_reals[i],state->A_out_reals[i],state->A_out_imags[N-i],state->A_out_imags[N-i],MPFR_RNDN);
-        mpfr_add(state->temp_C_imags[i],aux_1, aux_0,MPFR_RNDN);
-        mpfr_mul(state->temp_C_imags[i],state->temp_C_imags[i],quarter,MPFR_RNDN);
-        //state->temp_C_imags[i] = 0.25 * (c * c + b * b - a * a - d * d);
-
-    }
-    mpfr_clear(half);
-    mpfr_clear(quarter);
-    mpfr_clear(aux_0);
-    mpfr_clear(aux_1);
+	mpfr_clears(aux_0, aux_1, aux_2, aux_3, (mpfr_ptr)NULL);
 
 	recursive_inverse_fft_safe(state->temp_C_reals,state->temp_C_imags,state->C_out_reals,state->C_out_imags,state->w_reals_inverse,state->w_imags_inverse,1,N);
 

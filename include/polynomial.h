@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <common.h>
 
-#define data_t double
+#define data_t mpfr_t
 #define array_t data_t *
 #define matrix_t data_t **
 
