@@ -165,7 +165,8 @@ void free_polynomial_mul_state(state_t state){
                     state->temp_C_reals[i],
                     state->temp_C_imags[i],
                     state->C_out_reals[i],
-                    state->C_out_imags[i]);
+                    state->C_out_imags[i],
+                    (mpfr_ptr)NULL);
     }
     free(state->A_reals);
     free(state->A_imags);

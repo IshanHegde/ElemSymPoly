@@ -1,5 +1,4 @@
 #include <mpfr_fft.h>
-#include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <common.h>
@@ -9,7 +8,7 @@
 #define array_t data_t * restrict
 #define matrix_t data_t ** restrict
 
-#define PRECISION_FFT 86
+#define PRECISION_FFT 128
 
 void mpfr_init_look_up_table(int N, matrix_t reals, matrix_t imags){
 
@@ -82,10 +81,10 @@ void mpfr_free_look_up_table(int N, matrix_t reals, matrix_t imags){
 
     int outer_array_size = (int)log2(N);
 
-    for (int i =0; i < outer_array_size;i++){
+    for (int i = 0; i < outer_array_size; i++){
         int inner_array_size = (int) pow(2,i);
-        for (int j =0; j< inner_array_size;j++){
-            mpfr_clears(reals[i][j],imags[i][j],(mpfr_ptr)NULL);
+        for (int j = 0; j < inner_array_size; j++){
+            mpfr_clears(reals[i][j], imags[i][j], (mpfr_ptr)NULL);
         }
         free(reals[i]);
         free(imags[i]);
@@ -214,7 +213,7 @@ void mpfr_recursive_inverse_fft(array_t in_reals, array_t in_imags, array_t out_
 
 
 		}
-		mpfr_clears(t_real, t_imag, aux_0, aux_1, aux_2, aux_3, (mpfr_ptr)NULL);
+		mpfr_clears( t_real, t_imag, aux_0, aux_1, aux_2, aux_3, (mpfr_ptr)NULL);
 
 	}
 }

@@ -44,15 +44,14 @@ target_compile_options(elem_sym_poly PRIVATE
         -flto
         -lpthread
         -fopenmp
-
-        
-        
+        -g
 )
 
 target_link_options(elem_sym_poly PRIVATE -flto)
 
 
 if (ASAN)
+    message("ADDRESS SANITIZER")
     target_compile_options(elem_sym_poly PRIVATE -g -fsanitize=address -fno-omit-frame-pointer)
     target_link_options(elem_sym_poly PRIVATE -fsanitize=address)
 endif()

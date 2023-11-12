@@ -73,8 +73,8 @@ void update_elementary_symmetric_state(state_t state, double * input_elements, i
     }
 
     for (int i = 0;i < state->N;i++){
-		mpfr_init2(state->aux_polys[i][0],PRECISION);
-		mpfr_init2(state->aux_polys[i][1],PRECISION);
+		//mpfr_init2(state->aux_polys[i][0],PRECISION);
+		//mpfr_init2(state->aux_polys[i][1],PRECISION);
 		mpfr_set_d(state->aux_polys[i][0],1, MPFR_RNDN);
 		mpfr_set_d(state->aux_polys[i][1],input_elements[i], MPFR_RNDN);
 		//mpfr_printf("%Rf\n", state->aux_polys[i][1]);
@@ -183,8 +183,10 @@ void free_elementary_symmetric_state(state_t  state){
     
     free_polynomial_mul_state(state->poly_mul_state);
 
-    for (int i = 0;i < state->N; i++){
-        for (int j =0; j < 2*state->N;j++){
+    int size = state->N;
+
+    for (int i = 0;i < size; i++){
+        for (int j =0; j < 2*size;j++){
             mpfr_clear(state->aux_polys[i][j]);
         }
         free(state->aux_polys[i]);
@@ -195,6 +197,8 @@ void free_elementary_symmetric_state(state_t  state){
     free(state->elements);
 
     free(state);
+
+    mpfr_free_cache();
 }
 
 
