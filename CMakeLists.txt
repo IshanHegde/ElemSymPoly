@@ -30,10 +30,11 @@ add_executable(elem_sym_poly
         #src/test.c
         src/elementary_symmetric_polynomial.c
         src/mpfr_fft.c
+        src/simd_fft.c
         #src/test_fft.c
 )
 
-target_link_libraries(elem_sym_poly openblas m pthread OpenMP::OpenMP_C panopticon fftw3 mpfr gmp)
+target_link_libraries(elem_sym_poly openblas m pthread OpenMP::OpenMP_C panopticon mpfr gmp)
 
 
 target_compile_options(elem_sym_poly PRIVATE

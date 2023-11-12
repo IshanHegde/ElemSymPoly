@@ -184,6 +184,9 @@ void free_elementary_symmetric_state(state_t  state){
     free_polynomial_mul_state(state->poly_mul_state);
 
     for (int i = 0;i < state->N; i++){
+        for (int j =0; j < 2*state->N;j++){
+            mpfr_clear(state->aux_polys[i][j]);
+        }
         free(state->aux_polys[i]);
     }
 

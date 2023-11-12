@@ -2,9 +2,6 @@
 #define ELEM_SYM_POLY_COMMON_INCLUDED
 
 
-#include <panopticon.h>
-#include <math.h>
-#include <stdio.h>
 #include <gmp.h>
 #include <mpfr.h>
 

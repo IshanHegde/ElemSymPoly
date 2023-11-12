@@ -1,6 +1,8 @@
 #include <polynomial.h>
 #include <mpfr_fft.h>
 #include <string.h>
+#include <math.h>
+#include <stdlib.h>
 
 #define data_t mpfr_t
 #define array_t data_t *
@@ -89,8 +91,8 @@ state_t init_polynomial_mul_state(int poly_size){
     state->w_reals_inverse = ALLOC(sizeof(array_t) * log2(N));
     state->w_imags_inverse = ALLOC(sizeof(array_t) * log2(N));
 
-    init_look_up_table(N,state->w_reals,state->w_imags);
-    init_look_up_inverse(N,state->w_reals_inverse,state->w_imags_inverse);
+    mpfr_init_look_up_table(N,state->w_reals,state->w_imags);
+    mpfr_init_look_up_inverse(N,state->w_reals_inverse,state->w_imags_inverse);
     state->N = N;
 
     return state;
@@ -103,7 +105,6 @@ void update_polynomial_mul_state(state_t state, array_t A, array_t B, int poly_s
 
     state->N = N;
 
-    //size_t byte_size = poly_size * sizeof(data_t);
 
 	for (int i = 0; i < poly_size; i++){
 		mpfr_set(state->A_reals[i], A[i], MPFR_RNDN);
@@ -122,8 +123,8 @@ array_t polynomial_multiply(state_t state){
 
     int N = state->N;
 
-	recursive_rfft_half_zero_safe(state->A_reals,state->A_imags,state->A_out_reals,state->A_out_imags, state->w_reals, state->w_imags,1,N);
-	recursive_rfft_half_zero_safe(state->B_reals,state->B_imags,state->B_out_reals,state->B_out_imags, state->w_reals, state->w_imags,1,N);
+    mpfr_recursive_fft_half_zero(state->A_reals,state->A_imags,state->A_out_reals,state->A_out_imags, state->w_reals, state->w_imags,1,N);
+    mpfr_recursive_fft_half_zero(state->B_reals,state->B_imags,state->B_out_reals,state->B_out_imags, state->w_reals, state->w_imags,1,N);
 
 
 	data_t aux_0, aux_1, aux_2, aux_3;
@@ -140,7 +141,7 @@ array_t polynomial_multiply(state_t state){
 	}
 	mpfr_clears(aux_0, aux_1, aux_2, aux_3, (mpfr_ptr)NULL);
 
-	recursive_inverse_fft_safe(state->temp_C_reals,state->temp_C_imags,state->C_out_reals,state->C_out_imags,state->w_reals_inverse,state->w_imags_inverse,1,N);
+    mpfr_recursive_inverse_fft(state->temp_C_reals,state->temp_C_imags,state->C_out_reals,state->C_out_imags,state->w_reals_inverse,state->w_imags_inverse,1,N);
 
     for (int i = 0;i < N;i++){
         mpfr_div_ui(state->C_out_reals[i],state->C_out_reals[i],N,MPFR_RNDN);
@@ -152,17 +153,38 @@ array_t polynomial_multiply(state_t state){
 
 void free_polynomial_mul_state(state_t state){
 
+    for (int i =0;i < state->N;i++){
+        mpfr_clears(state->A_reals[i],
+                    state->A_imags[i],
+                    state->B_reals[i],
+                    state->B_imags[i],
+                    state->A_out_reals[i],
+                    state->A_out_imags[i],
+                    state->B_out_reals[i],
+                    state->B_out_imags[i],
+                    state->temp_C_reals[i],
+                    state->temp_C_imags[i],
+                    state->C_out_reals[i],
+                    state->C_out_imags[i]);
+    }
     free(state->A_reals);
+    free(state->A_imags);
     free(state->B_reals);
+    free(state->B_imags);
+
     free(state->A_out_reals);
     free(state->A_out_imags);
+    free(state->B_out_reals);
+    free(state->B_out_imags);
+
     free(state->temp_C_reals);
     free(state->temp_C_imags);
     free(state->C_out_reals);
     free(state->C_out_imags);
 
-    free_look_up_table(state->N,state->w_reals,state->w_imags);
-    free_look_up_table(state->N,state->w_reals_inverse,state->w_imags_inverse);
+
+    mpfr_free_look_up_table(state->N,state->w_reals,state->w_imags);
+    mpfr_free_look_up_table(state->N,state->w_reals_inverse,state->w_imags_inverse);
 
     free(state);
 }
