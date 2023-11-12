@@ -20,22 +20,25 @@ find_package(OpenMP REQUIRED)
 
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -mtune=native")
 
-add_subdirectory(panopticon)
+#add_subdirectory(panopticon)
 
-add_executable(elem_sym_poly
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+
+
+
+add_library(elem_sym_poly SHARED
         src/polynomial.c
-        src/polynomial_test.c
-        #src/test_fft.c
-        #src/test_dft.c
-        #src/test.c
+        #src/polynomial_test.c
         src/elementary_symmetric_polynomial.c
         src/mpfr_fft.c
         src/simd_fft.c
-        #src/test_fft.c
+        src/elem_sym_poly.c
+        include/elem_sym_poly.h
 )
 
 target_link_libraries(elem_sym_poly openblas m pthread OpenMP::OpenMP_C panopticon mpfr gmp)
 
+set_target_properties(elem_sym_poly PROPERTIES PREFIX "")
 
 target_compile_options(elem_sym_poly PRIVATE
         -O3
