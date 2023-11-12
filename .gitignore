@@ -6,3 +6,4 @@ build
 *test*
 src/test.c
 /.idea
+*/env/
