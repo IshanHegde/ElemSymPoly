@@ -7,3 +7,7 @@ build
 src/test.c
 /.idea
 */env/
+*.so
+*.whl
+/*.egg-info/
+.*
