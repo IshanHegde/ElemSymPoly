@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.4...3.18)
 
 option(ASAN "Enable AddressSanitizer" OFF)
 option(UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
@@ -13,7 +13,7 @@ set(CMAKE_C_STANDARD 99)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(GMP REQUIRED)
 find_package(MPFR REQUIRED)
-find_package(Python3 REQUIRED COMPONENTS Development)
+find_package(Python3 COMPONENTS Development.Module REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Python3_INCLUDE_DIRS})
 message( STATUS ${Python3_INCLUDE_DIRS})
@@ -21,7 +21,8 @@ message( STATUS ${Python3_INCLUDE_DIRS})
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+message(STATUS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
 
 
@@ -34,7 +35,7 @@ add_library(pyElemSymPoly SHARED
 
 target_link_libraries(pyElemSymPoly m mpfr gmp)
 
-set_target_properties(pyElemSymPoly PROPERTIES PREFIX "")
+set_target_properties(pyElemSymPoly PROPERTIES PREFIX "" )
 
 target_compile_options(pyElemSymPoly PUBLIC
         -O3
@@ -46,6 +47,8 @@ target_compile_options(pyElemSymPoly PUBLIC
 target_link_options(pyElemSymPoly PUBLIC -flto -fomit-frame-pointer -fPIC)
 
 target_compile_definitions(pyElemSymPoly PUBLIC VERSION_INFO=${EXAMPLE_VERSION_INFO})
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
 if (ASAN)
     message("ADDRESS SANITIZER")

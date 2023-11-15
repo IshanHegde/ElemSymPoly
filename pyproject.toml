@@ -8,8 +8,16 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 
-[tool.cibuildwheel]
-before-build = "rm -rf {project}/build"
+
+
 
 [tool.cibuildwheel.linux]
-before-all = "yum install -y gmp-devel mpfr-devel"
+before-build = "rm -rf {project}/build"
+before-all = "yum install -y gmp-devel mpfr-devel python3-devel"
+
+[tool.cibuildwheel.windows]
+before-build = [
+    "pip install delvewheel --no-cache-dir",
+    "if exist build rmdir /s /q build",
+]
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"

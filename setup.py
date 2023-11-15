@@ -24,14 +24,14 @@ class CMakeExtension(Extension):
         self.sourcedir = os.fspath(Path(sourcedir).resolve())
 
 
-class CMakeBuild(build_ext):
-    def build_extension(self, ext: CMakeExtension) -> None:
-        # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
-        ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
-        extdir = ext_fullpath.parent.resolve()
 
-        # Using this requires trailing slash for auto-detection & inclusion of
-        # auxiliary "native" libs
+class CMakeBuild(build_ext):
+    def build_extension(self, ext):
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+
+        # required for auto-detection & inclusion of auxiliary "native" libs
+        if not extdir.endswith(os.path.sep):
+            extdir += os.path.sep
 
         debug = int(os.environ.get("DEBUG", 0)) if self.debug is None else self.debug
         cfg = "Debug" if debug else "Release"
@@ -44,7 +44,7 @@ class CMakeBuild(build_ext):
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
         # from Python.
         cmake_args = [
-            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
+            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
         ]
@@ -65,9 +65,9 @@ class CMakeBuild(build_ext):
             # 3.15+.
             if not cmake_generator or cmake_generator == "Ninja":
                 try:
-                    import ninja
+                    import ninja  # noqa: F401
 
-                    ninja_executable_path = Path(ninja.BIN_DIR) / "ninja"
+                    ninja_executable_path = os.path.join(ninja.BIN_DIR, "ninja")
                     cmake_args += [
                         "-GNinja",
                         f"-DCMAKE_MAKE_PROGRAM:FILEPATH={ninja_executable_path}",
@@ -76,6 +76,7 @@ class CMakeBuild(build_ext):
                     pass
 
         else:
+
             # Single config generators are handled "normally"
             single_config = any(x in cmake_generator for x in {"NMake", "Ninja"})
 
@@ -110,16 +111,12 @@ class CMakeBuild(build_ext):
                 # CMake 3.12+ only.
                 build_args += [f"-j{self.parallel}"]
 
-        build_temp = Path(self.build_temp) / ext.name
-        if not build_temp.exists():
-            build_temp.mkdir(parents=True)
+        build_temp = os.path.join(self.build_temp, ext.name)
+        if not os.path.exists(build_temp):
+            os.makedirs(build_temp)
 
-        subprocess.run(
-            ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
-        )
-        subprocess.run(
-            ["cmake", "--build", ".", *build_args], cwd=build_temp, check=True
-        )
+        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=build_temp)
+        subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=build_temp)
 
 
 setup(
@@ -128,13 +125,55 @@ setup(
     version="0.1.0",
     author="Ishan Hegde",
     license="MIT",
-    home_page="https://github.com/IshanHegde/ElemSymPoly",
+    #home_page="https://github.com/IshanHegde/ElemSymPoly",
     install_requires=[
         "numpy >= 1.19.2"
     ],
-    description="ElemSymPoly is a high-performance C library with Python bindings that utilizes FFT and the GNU MPFR Library for precise computation of Elementary Symmetric Polynomials.",
+    url= "https://github.com/IshanHegde/ElemSymPoly",
+    description="Fast, arbitrary precision computation of Elementary Symmetric Polynomials.",
+    long_description = """
+    
+        ElemSymPoly is a high-performance C library with Python bindings that utilizes the GNU MPFR Library for 
+        precise computation of Elementary Symmetric Polynomials and a custom FFT implimentation. \n
+        
+        The Library is currently in development stage and not production ready. \n
+        
+        
+        The library is based on applying a divide and conquer approach to compute the elementary symmetric polynomials. \n
+        
+        First, the elementary symmetric polynomials of order N is expressed as a product of N order 1 polynomials. \n
+        
+        Next, using a divide and conquer approach, the product of N order 1 polynomials is computed by recursively. \n
+        
+        After a certain arbitrary threshold (currently set to 8), the polynomials of order 8 or above are computed using FFT. \n
+        
+        The FFT algorithm is a custom implementation of the classic recursive Cooley-Tukey FFT algorithm. \n
+        
+        This algorithim has a time complexity of O( N log^2 N ) compared to the naive approach of O( N^2 ) and also has
+        arbitrary precision support (currently up to 512 decimal places due to stack overflow concerns). \n
+        
+        The library also has a Python wrapper for ease of use, and only relies on NumPy, GNU MPFR which in turn relies on
+        GNU GMP, Python C headers, CMake, glibc and a C compiler (only tested with GCC). \n
+    """,
     ext_modules=[CMakeExtension('pyElemSymPoly')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    python_requires=">=3.6",
+    python_requires=">=3.8",
+    classifiers=[
+        "Intended Audience :: Science/Research",
+        "License :: MIT License",
+        "Programming Language :: C",
+        "Programming Language :: Python",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
+        "Operating System :: MacOS",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+    ]
+
 )
