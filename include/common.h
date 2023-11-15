@@ -4,8 +4,9 @@
 
 #include <gmp.h>
 #include <mpfr.h>
+#include <globals.h>
 
-#define PRECISION 256
+#define PRECISION global_precision
 
 #define ALLOC_ALIGNED(ptr, alignment, size) (void)posix_memalign((void **)&(ptr), alignment, (size))
 

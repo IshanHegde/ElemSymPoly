@@ -7,7 +7,7 @@
 
 
 
-extern double * compute_elem_sym_poly(double * elements, int N);
+extern double * compute_elem_sym_poly(double * elements, int N, int precision);
 
 extern void free_poly(double * poly);
 

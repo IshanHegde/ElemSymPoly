@@ -13,7 +13,7 @@
 typedef struct state_t *state_t;
 
 
-extern state_t  init_elementary_symmetric_state(int size);
+extern state_t  init_elementary_symmetric_state(int size, int precision);
 
 extern void update_elementary_symmetric_state(state_t state, double * elements, int size);
 
