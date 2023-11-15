@@ -8,7 +8,7 @@
 #define array_t data_t * restrict
 #define matrix_t data_t ** restrict
 
-#define PRECISION_FFT 128
+
 
 void mpfr_init_look_up_table(int N, matrix_t reals, matrix_t imags){
 
@@ -22,7 +22,7 @@ void mpfr_init_look_up_table(int N, matrix_t reals, matrix_t imags){
 		imags[i] = ALLOC(sizeof(data_t) * inner_array_size);
 
 		data_t op, aux_0, aux_1, pi;
-		mpfr_inits2(PRECISION_FFT, op, aux_0, aux_1, pi, (mpfr_ptr)NULL );
+		mpfr_inits2(PRECISION, op, aux_0, aux_1, pi, (mpfr_ptr)NULL );
 
 		mpfr_const_pi(pi, MPFR_RNDN);
 		mpfr_div_ui(aux_0, pi, aux_size, MPFR_RNDN);
@@ -30,8 +30,8 @@ void mpfr_init_look_up_table(int N, matrix_t reals, matrix_t imags){
 
 		for (int j =0;j < inner_array_size;j++){
 
-			mpfr_init2(reals[i][j], PRECISION_FFT);
-			mpfr_init2(imags[i][j], PRECISION_FFT);
+			mpfr_init2(reals[i][j], PRECISION);
+			mpfr_init2(imags[i][j], PRECISION);
 			mpfr_mul_ui(op, aux_1, j, MPFR_RNDN);
 
 			mpfr_cos(reals[i][j],op, MPFR_RNDN);
@@ -55,7 +55,7 @@ void mpfr_init_look_up_inverse(int N, matrix_t reals, matrix_t imags){
 		imags[i] = ALLOC(sizeof(data_t) * inner_array_size);
 
 		data_t op, aux_0, aux_1, pi;
-		mpfr_inits2(PRECISION_FFT, op, aux_0, aux_1, pi, (mpfr_ptr)NULL );
+		mpfr_inits2(PRECISION, op, aux_0, aux_1, pi, (mpfr_ptr)NULL );
 
 		mpfr_const_pi(pi, MPFR_RNDN);
 		mpfr_div_ui(aux_0, pi, aux_size, MPFR_RNDN);
@@ -63,8 +63,8 @@ void mpfr_init_look_up_inverse(int N, matrix_t reals, matrix_t imags){
 
 		for (int j =0;j < inner_array_size;j++){
 
-			mpfr_init2(reals[i][j], PRECISION_FFT);
-			mpfr_init2(imags[i][j], PRECISION_FFT);
+			mpfr_init2(reals[i][j], PRECISION);
+			mpfr_init2(imags[i][j], PRECISION);
 			mpfr_mul_ui(op, aux_1, j, MPFR_RNDN);
 
 			mpfr_cos(reals[i][j],op, MPFR_RNDN);
@@ -117,7 +117,7 @@ void mpfr_recursive_fft_half_zero(array_t in_reals, array_t in_imags, array_t ou
 		// twiddle factor outer array index
 		int aux_num = log2(n)-1;
 		mpfr_t t_real, t_imag, aux_0, aux_1, aux_2, aux_3;
-		mpfr_inits2(PRECISION_FFT, t_real, t_imag, aux_0, aux_1, aux_2, aux_3, (mpfr_ptr)NULL);
+		mpfr_inits2(PRECISION, t_real, t_imag, aux_0, aux_1, aux_2, aux_3, (mpfr_ptr)NULL);
 
 		for (int k =0; k < n/2; k++){
 
@@ -189,7 +189,7 @@ void mpfr_recursive_inverse_fft(array_t in_reals, array_t in_imags, array_t out_
 
 		int aux_num = log2(n)-1;
 		mpfr_t t_real, t_imag, aux_0, aux_1, aux_2, aux_3;
-		mpfr_inits2(PRECISION_FFT, t_real, t_imag, aux_0, aux_1, aux_2, aux_3, (mpfr_ptr)NULL);
+		mpfr_inits2(PRECISION, t_real, t_imag, aux_0, aux_1, aux_2, aux_3, (mpfr_ptr)NULL);
 
 		for (int k =0; k < n/2; k++){
 

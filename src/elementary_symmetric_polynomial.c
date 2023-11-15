@@ -3,16 +3,17 @@
 #include <elementary_symmetric_polynomial.h>
 #include <string.h>
 #include <math.h>
-#include <stdio.h>
 #include <common.h>
 #include <stdlib.h>
+#include <globals.h>
 
-
-# define data_t mpfr_t
+#define data_t mpfr_t
 #define array_t data_t *
 #define matrix_t data_t **
 
 #define state_t elementary_symmetric_state_t
+
+int global_precision;
 
 struct state_t {
 
@@ -26,8 +27,9 @@ struct state_t {
 };
 
 
-state_t  init_elementary_symmetric_state(int size){
+state_t  init_elementary_symmetric_state(int size, int precision){
 
+    global_precision = precision;
     if (size & (size - 1) != 0){
         size = pow(2,ceil(log2(size)));
     }
