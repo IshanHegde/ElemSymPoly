@@ -2,7 +2,7 @@
 // Created by ishan on 11/12/23.
 //
 
-#include <elem_sym_poly.h>
+
 #include <elementary_symmetric_polynomial.h>
 #include <stdlib.h>
 #define PY_SSIZE_T_CLEAN
@@ -23,9 +23,10 @@ static PyObject * py_compute_elem_sym_poly(PyObject * Py_UNUSED(self), PyObject 
 
 	PyObject * elements_lst;
 	int N;
+	int actual_size;
 	int precision = DEFAULT_PRECISION;
 
-	if (!PyArg_ParseTuple(args, "O!i", &PyList_Type, &elements_lst, &precision)){
+	if (!PyArg_ParseTuple(args, "O!ii", &PyList_Type, &elements_lst, &actual_size, &precision)){
 		return NULL;
 	}
 
@@ -55,9 +56,9 @@ static PyObject * py_compute_elem_sym_poly(PyObject * Py_UNUSED(self), PyObject 
 	free_elementary_symmetric_state(state);
 	mpfr_mp_memory_cleanup();
 
-	PyObject * poly_lst = PyList_New(N+1);
+	PyObject * poly_lst = PyList_New(actual_size+1);
 
-	for (int i = 0;i< N+1; i++){
+	for (int i = 0;i< actual_size+1; i++){
 		PyObject * item = PyFloat_FromDouble(poly[i]);
 
 		if (item == NULL){
@@ -90,7 +91,7 @@ static struct PyModuleDef ElemSymPolyDef = {
 		ElemSymPolyMethods,
 };
 
-PyMODINIT_FUNC PyInit_elem_sym_poly(void){
+PyMODINIT_FUNC PyInit_pyElemSymPoly(void){
 
 
 	PyObject * module = PyModule_Create(&ElemSymPolyDef);
@@ -112,3 +113,5 @@ PyMODINIT_FUNC PyInit_elem_sym_poly(void){
 
 	return module;
 }
+
+#undef DEFAULT_PRECISION

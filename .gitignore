@@ -10,7 +10,6 @@ src/test.c
 *.so
 *.whl
 /*.egg-info/
-.*
 !/docs/elementary.tex
 !/docs/elementary.pdf
 /docs/
