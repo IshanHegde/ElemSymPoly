@@ -17,6 +17,11 @@
 #define DEFAULT_PRECISION 53
 
 static PyObject * ElemSymPolyError;
+/*
+static int is_power_of_two(int n){
+	return ((n & (n - 1)) == 0) && n != 0;
+}
+*/
 
 // This assumes it is passed a list of python floats ( C doubles ) of length power of 2
 static PyObject * py_compute_elem_sym_poly(PyObject * Py_UNUSED(self), PyObject *args){
@@ -91,7 +96,7 @@ static struct PyModuleDef ElemSymPolyDef = {
 		ElemSymPolyMethods,
 };
 
-PyMODINIT_FUNC PyInit_pyElemSymPoly(void){
+PyMODINIT_FUNC PyInit_libpyElemSymPoly(void){
 
 
 	PyObject * module = PyModule_Create(&ElemSymPolyDef);

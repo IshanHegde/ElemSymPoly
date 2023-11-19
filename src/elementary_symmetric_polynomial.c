@@ -30,7 +30,7 @@ struct state_t {
 state_t  init_elementary_symmetric_state(int size, int precision){
 
     global_precision = precision;
-    if (size & (size - 1) != 0){
+    if ((size & (size - 1)) == 0){
         size = pow(2,ceil(log2(size)));
     }
 
@@ -58,7 +58,7 @@ state_t  init_elementary_symmetric_state(int size, int precision){
 
 void update_elementary_symmetric_state(state_t state, double * input_elements, int size){
 
-    if (size & (size - 1) != 0){
+    if ((size & (size - 1)) == 0){
 
         int current_size = size;
         size = pow(2,ceil(log2(size)));
