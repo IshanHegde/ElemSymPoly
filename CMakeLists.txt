@@ -35,7 +35,7 @@ add_library(pyElemSymPoly SHARED
 
 target_link_libraries(pyElemSymPoly m mpfr gmp)
 
-set_target_properties(pyElemSymPoly PROPERTIES PREFIX "" )
+set_target_properties(pyElemSymPoly PROPERTIES PREFIX "lib" )
 
 target_compile_options(pyElemSymPoly PUBLIC
         -O3

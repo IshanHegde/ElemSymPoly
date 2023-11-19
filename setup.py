@@ -3,7 +3,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-
+from setuptools import find_packages
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
@@ -121,9 +121,8 @@ class CMakeBuild(build_ext):
 
 setup(
     name="pyElemSymPoly",
-    py_modules=['pyElemSymPoly'],
-    version="0.1.0",
-    author="Ishan Hegde",
+    packages=find_packages(),
+    version="0.1.8",
     license="MIT",
     #home_page="https://github.com/IshanHegde/ElemSymPoly",
     install_requires=[
@@ -161,7 +160,8 @@ setup(
     python_requires=">=3.8",
     classifiers=[
         "Intended Audience :: Science/Research",
-        "License :: MIT License",
+        "Development Status :: 3 - Alpha",
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: C",
         "Programming Language :: Python",
         "Topic :: Scientific/Engineering :: Mathematics",

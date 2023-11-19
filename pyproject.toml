@@ -15,6 +15,12 @@ build-backend = "setuptools.build_meta"
 before-build = "rm -rf {project}/build"
 before-all = "yum install -y gmp-devel mpfr-devel python3-devel"
 
+[[tool.cibuildwheel.overrides]]
+select = "*musllinux*"
+before-all = [
+    "apk add gmp-dev mpfr-dev python3-dev"
+]
+
 [tool.cibuildwheel.windows]
 before-build = [
     "pip install delvewheel --no-cache-dir",
