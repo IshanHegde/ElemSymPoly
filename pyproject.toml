@@ -10,7 +10,6 @@ build-backend = "setuptools.build_meta"
 
 
 
-
 [tool.cibuildwheel.linux]
 before-build = "rm -rf {project}/build"
 before-all = "yum install -y gmp-devel mpfr-devel python3-devel"
@@ -33,6 +32,6 @@ before-all = [
     "brew install gmp mpfr"
 ]
 
-[[tool.cibuildwheel.overrides]]
 
+[[tool.cibuildwheel.overrides]]
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
