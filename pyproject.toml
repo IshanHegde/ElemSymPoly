@@ -26,4 +26,14 @@ before-build = [
     "pip install delvewheel --no-cache-dir",
     "if exist build rmdir /s /q build",
 ]
+
+[tool.cibuildwheel.macos]
+before-build = "rm -rf {project}/build"
+before-all = [
+    "brew install gmp mpfr"
+]
+
+[[tool.cibuildwheel.overrides]
+]
+
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
