@@ -1,0 +1,6 @@
+include README.md LICENSE.md requirements.txt setup.py
+global-include CMakeLists.txt  *.cmake
+recursive-include src *
+recursive-include include *
+recursive-include pyElemSymPoly *
+recursive-include cmake *

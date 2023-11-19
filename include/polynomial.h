@@ -1,5 +1,5 @@
-#ifndef PYRASCH_POLYNOMIAL_INCLUDED
-#define PYRASCH_POLYNOMIAL_INCLUDED
+#ifndef ELEM_SYM_POLY_POLYNOMIAL_INCLUDED
+#define ELEM_SYM_POLY_POLYNOMIAL_INCLUDED
 
 #include <stddef.h>
 #include <common.h>
@@ -26,5 +26,5 @@ extern void free_polynomial_mul_state(state_t state);
 #undef array_t
 #undef matrix_t
 
-#endif // PYRASCH_POLYNOMIAL_INCLUDED
+#endif // ELEM_SYM_POLY_POLYNOMIAL_INCLUDED
 

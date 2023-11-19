@@ -1,0 +1,29 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "ninja",
+    "cmake>=3.22",
+]
+build-backend = "setuptools.build_meta"
+
+
+
+
+
+[tool.cibuildwheel.linux]
+before-build = "rm -rf {project}/build"
+before-all = "yum install -y gmp-devel mpfr-devel python3-devel"
+
+[[tool.cibuildwheel.overrides]]
+select = "*musllinux*"
+before-all = [
+    "apk add gmp-dev mpfr-dev python3-dev"
+]
+
+[tool.cibuildwheel.windows]
+before-build = [
+    "pip install delvewheel --no-cache-dir",
+    "if exist build rmdir /s /q build",
+]
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"

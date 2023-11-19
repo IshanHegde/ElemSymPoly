@@ -1,17 +1,15 @@
-#ifndef RASCH_COMMON_H
-#define RASCH_COMMON_H
+#ifndef ELEM_SYM_POLY_COMMON_INCLUDED
+#define ELEM_SYM_POLY_COMMON_INCLUDED
 
 
-#include <panopticon.h>
-#include <math.h>
-#include <stdio.h>
 #include <gmp.h>
 #include <mpfr.h>
+#include <globals.h>
 
-#define PRECISION 256
+#define PRECISION global_precision
 
 #define ALLOC_ALIGNED(ptr, alignment, size) (void)posix_memalign((void **)&(ptr), alignment, (size))
 
 #define ALLOC(size) malloc((size))
 
-#endif // RASCH_COMMON_H
+#endif //ELEM_SYM_POLY_COMMON_INCLUDED

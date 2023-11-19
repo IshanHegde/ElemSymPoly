@@ -6,3 +6,11 @@ build
 *test*
 src/test.c
 /.idea
+*/env/
+*.so
+*.whl
+/*.egg-info/
+!/docs/elementary.tex
+!/docs/elementary.pdf
+/docs/
+/dist

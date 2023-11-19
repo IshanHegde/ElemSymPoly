@@ -3,16 +3,17 @@
 #include <elementary_symmetric_polynomial.h>
 #include <string.h>
 #include <math.h>
-#include <stdio.h>
 #include <common.h>
 #include <stdlib.h>
+#include <globals.h>
 
-
-# define data_t mpfr_t
+#define data_t mpfr_t
 #define array_t data_t *
 #define matrix_t data_t **
 
 #define state_t elementary_symmetric_state_t
+
+int global_precision;
 
 struct state_t {
 
@@ -26,9 +27,10 @@ struct state_t {
 };
 
 
-state_t  init_elementary_symmetric_state(int size){
+state_t  init_elementary_symmetric_state(int size, int precision){
 
-    if (size & (size - 1) != 0){
+    global_precision = precision;
+    if ((size & (size - 1)) == 0){
         size = pow(2,ceil(log2(size)));
     }
 
@@ -56,7 +58,7 @@ state_t  init_elementary_symmetric_state(int size){
 
 void update_elementary_symmetric_state(state_t state, double * input_elements, int size){
 
-    if (size & (size - 1) != 0){
+    if ((size & (size - 1)) == 0){
 
         int current_size = size;
         size = pow(2,ceil(log2(size)));
@@ -73,8 +75,8 @@ void update_elementary_symmetric_state(state_t state, double * input_elements, i
     }
 
     for (int i = 0;i < state->N;i++){
-		mpfr_init2(state->aux_polys[i][0],PRECISION);
-		mpfr_init2(state->aux_polys[i][1],PRECISION);
+		//mpfr_init2(state->aux_polys[i][0],PRECISION);
+		//mpfr_init2(state->aux_polys[i][1],PRECISION);
 		mpfr_set_d(state->aux_polys[i][0],1, MPFR_RNDN);
 		mpfr_set_d(state->aux_polys[i][1],input_elements[i], MPFR_RNDN);
 		//mpfr_printf("%Rf\n", state->aux_polys[i][1]);
@@ -183,7 +185,12 @@ void free_elementary_symmetric_state(state_t  state){
     
     free_polynomial_mul_state(state->poly_mul_state);
 
-    for (int i = 0;i < state->N; i++){
+    int size = state->N;
+
+    for (int i = 0;i < size; i++){
+        for (int j =0; j < 2*size;j++){
+            mpfr_clear(state->aux_polys[i][j]);
+        }
         free(state->aux_polys[i]);
     }
 
@@ -192,6 +199,8 @@ void free_elementary_symmetric_state(state_t  state){
     free(state->elements);
 
     free(state);
+
+    mpfr_free_cache();
 }
 
 
