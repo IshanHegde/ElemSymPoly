@@ -1,5 +1,5 @@
 # ElemSymPoly
-ElemSymPoly is a high-performance *C99* library with Python interface that utilizes the GNU MPFR Library for
+ElemSymPoly is a high-performance **C99** library with Python interface that utilizes the GNU MPFR Library for
 arbitrarily precise computation of Elementary Symmetric Polynomials making use of a custom FFT implimentation. 
 
 **The Library is currently in development stage and not production ready.**
