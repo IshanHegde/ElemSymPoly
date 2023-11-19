@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), "../"))
-import lib.pyElemSymPoly as lib
+import libpyElemSymPoly as lib
 
 
 def is_power_of_2(n):
@@ -47,4 +47,4 @@ def elem_sym_poly(input_array, precision=128):
     return polys_list
 
 
-print(elem_sym_poly([1]*19))
+#print(elem_sym_poly([1]*19))
