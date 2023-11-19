@@ -33,7 +33,6 @@ before-all = [
     "brew install gmp mpfr"
 ]
 
-[[tool.cibuildwheel.overrides]
-]
+[[tool.cibuildwheel.overrides]]
 
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
