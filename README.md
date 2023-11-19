@@ -4,6 +4,37 @@ arbitrarily precise computation of Elementary Symmetric Polynomials making use o
 
 **The Library is currently in development stage and not production ready.**
 
+### Usage
+
+```python
+import pyElemSymPoly as esp
+import numpy as np
+
+if __name__ == "__main__":
+    
+    # Create a numpy array of the coefficients of the polynomial
+    poly_lst = [4, 2, 9.8, -1.40, 8.9, 0.0]
+    poly_array = np.array(poly_lst, dtype=np.float64)
+    
+    # set the precision: a python float or a C double has 53 bits in the mantissa
+    precision = 128
+    # this argument means that the library will use floating point numbers with 128 bits in the mantissa
+    
+    # Compute the elementary symmetric polynomials
+    
+    # passing the list
+    result_1 = esp.elem_sym_poly(poly_lst, precision)
+    
+    # passing the numpy array
+    
+    result_2 = esp.elem_sym_poly(poly_array, precision)
+    
+    # print the result
+    print(result_1)
+    # [1.0, 23.3, 172.84, 382.53200000000004, -244.32799999999995, -976.864, 1.3299200427406689e-37]
+    
+```
+
 ### Installation
 
 Recommended installation is via `pip`:
@@ -49,3 +80,11 @@ arbitrary precision support (currently up to `512` decimal places due to stack o
 
 The library also has a Python wrapper for ease of use, and only relies on `NumPy`, `GNU MPFR` which in turn relies on
 `GNU GMP`, Python C headers, CMake, glibc and a C compiler (only tested with GCC). 
+
+### Acknowledgements
+
+- [GNU MPFR Library](https://www.mpfr.org/)
+
+- [GNU GMP Library](https://gmplib.org/)
+
+- [NumPy](https://numpy.org/)
