@@ -46,5 +46,3 @@ def elem_sym_poly(input_array, precision=128):
 
     return polys_list
 
-
-#print(elem_sym_poly([1]*19))
