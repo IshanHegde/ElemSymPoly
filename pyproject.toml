@@ -28,6 +28,7 @@ repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 [tool.cibuildwheel.macos]
 before-build = "rm -rf {project}/build"
 before-all = [
-    "brew install gmp mpfr"
+    "brew install mpfr",
+    "brew install gmp"
 ]
 
