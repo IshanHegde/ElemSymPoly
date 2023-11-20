@@ -32,7 +32,10 @@ add_library(pyElemSymPoly SHARED
         src/elem_sym_poly.c
 )
 
-target_link_libraries(pyElemSymPoly m mpfr gmp)
+if (APPLE)
+else()
+    target_link_libraries(pyElemSymPoly m mpfr gmp)
+endif ()
 
 set_target_properties(pyElemSymPoly PROPERTIES PREFIX "lib" )
 
@@ -42,8 +45,10 @@ target_compile_options(pyElemSymPoly PUBLIC
         -fomit-frame-pointer
         -fPIC
 )
-
-target_link_options(pyElemSymPoly PUBLIC -flto -fomit-frame-pointer -fPIC)
+if (APPLE)
+else()
+    target_link_options(pyElemSymPoly PUBLIC -flto -fomit-frame-pointer -fPIC)
+endif ()
 
 target_compile_definitions(pyElemSymPoly PUBLIC VERSION_INFO=${EXAMPLE_VERSION_INFO})
 
