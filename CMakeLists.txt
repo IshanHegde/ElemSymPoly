@@ -16,17 +16,13 @@ find_package(MPFR REQUIRED)
 find_package(Python3 COMPONENTS Development.Module REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Python3_INCLUDE_DIRS})
-message( STATUS ${Python3_INCLUDE_DIRS})
 
-message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
-message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
-message(STATUS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
 if(APPLE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
     include_directories(/usr/local/include)
+    link_libraries(/usr/local/lib)
 endif()
 
 add_library(pyElemSymPoly SHARED
