@@ -24,7 +24,9 @@ message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
-
+if(APPLE)
+    #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
+endif()
 
 add_library(pyElemSymPoly SHARED
         src/polynomial.c
