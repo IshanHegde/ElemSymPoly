@@ -26,7 +26,7 @@ message(STATUS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 if(APPLE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
-    include_directories(/opt/homebrew/include/)
+    include_directories(/usr/local/include)
 endif()
 
 add_library(pyElemSymPoly SHARED
