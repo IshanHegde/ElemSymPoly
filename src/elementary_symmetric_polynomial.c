@@ -103,10 +103,6 @@ static void elem_symm_poly_comp(poly_mul_state_t poly_mul_state, matrix_t poly_m
 
     if ( n == 2){
 
-
-        //data_t poly_matrix_0_1 = poly_matrix[0][1];
-        //poly_matrix[0][1] = poly_matrix_0_1 + poly_matrix[stride][1];
-        //poly_matrix[0][2] = poly_matrix_0_1 * poly_matrix[stride][1];
 		mpfr_set_d(poly_matrix[0][0],1, MPFR_RNDN);
 		mpfr_mul(poly_matrix[0][2],poly_matrix[0][1],poly_matrix[stride][1], MPFR_RNDN);
 		mpfr_add(poly_matrix[0][1],poly_matrix[0][1],poly_matrix[stride][1],MPFR_RNDN);
@@ -116,10 +112,6 @@ static void elem_symm_poly_comp(poly_mul_state_t poly_mul_state, matrix_t poly_m
 
         elem_symm_poly_comp(poly_mul_state, poly_matrix, 1, 2);
         elem_symm_poly_comp(poly_mul_state, poly_matrix + 2, 1 , 2);
-
-        //data_t poly_matrix_0_1 = poly_matrix[0][1];
-        //data_t poly_matrix_0_2 = poly_matrix[0][2];
-        //data_t poly_matrix_0_3 = poly_matrix[0][3];
 
 		data_t poly_matrix_0_1, poly_matrix_0_2, poly_matrix_0_3, aux_0, aux_1, aux_2;
 		mpfr_inits2(PRECISION, poly_matrix_0_1, poly_matrix_0_2, poly_matrix_0_3,aux_0,aux_1,aux_2, (mpfr_ptr)NULL);
@@ -155,12 +147,6 @@ static void elem_symm_poly_comp(poly_mul_state_t poly_mul_state, matrix_t poly_m
 		mpfr_set_d(poly_matrix[0][7],0,MPFR_RNDN);
 
 		mpfr_clears(poly_matrix_0_1, poly_matrix_0_2, poly_matrix_0_3,aux_0,aux_1,aux_2, (mpfr_ptr)NULL);
-        //poly_matrix[0][1] = poly_matrix_0_1 + poly_matrix[stride][1];
-        //poly_matrix[0][2] = poly_matrix_0_1 * poly_matrix[stride][1] + poly_matrix_0_2 + poly_matrix[stride][2];
-        //poly_matrix[0][3] = poly_matrix_0_1 * poly_matrix[stride][2] + poly_matrix_0_2 * poly_matrix[stride][1] + poly_matrix_0_3 + poly_matrix[stride][3];
-        //poly_matrix[0][4] = poly_matrix_0_1 * poly_matrix[stride][3] + poly_matrix_0_2 * poly_matrix[stride][2] + poly_matrix_0_3 * poly_matrix[stride][1];
-        //poly_matrix[0][5] = poly_matrix_0_2 * poly_matrix[stride][3] + poly_matrix_0_3 * poly_matrix[stride][2];
-        //poly_matrix[0][6] = poly_matrix_0_3 * poly_matrix[stride][3];
 
 
     } else{

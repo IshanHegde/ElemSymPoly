@@ -99,8 +99,6 @@ state_t init_polynomial_mul_state(int poly_size){
 		mpfr_set_d(state->A_imags[i], 0, MPFR_RNDN);
 		mpfr_set_d(state->B_imags[i], 0, MPFR_RNDN);
     }
-    //memset(state->C_out_reals, 0, sizeof(data_t) * N);
-    //memset(state->C_out_imags, 0,  sizeof(data_t) * N);
 
     state->w_reals = ALLOC(sizeof(array_t) * log2(N));
     state->w_imags = ALLOC(sizeof(array_t) * log2(N));

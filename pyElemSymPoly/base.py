@@ -1,9 +1,10 @@
 import os
 import sys
 import numpy as np
-
+import importlib
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), "../"))
-import libpyElemSymPoly as lib
+
+lib = importlib.import_module("pyElemSymPoly","libpyElemSymPoly")
 
 
 def is_power_of_2(n):

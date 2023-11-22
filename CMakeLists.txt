@@ -4,7 +4,7 @@ option(ASAN "Enable AddressSanitizer" OFF)
 option(UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
 
 
-set(CMAKE_C_COMPILER "gcc")
+#set(CMAKE_C_COMPILER "gcc")
 
 project(pyElemSymPoly C)
 
