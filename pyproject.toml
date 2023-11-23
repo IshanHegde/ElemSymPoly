@@ -23,6 +23,11 @@ before-build = [
     "pip install delvewheel --no-cache-dir",
     "if exist build rmdir /s /q build",
 ]
+before-all=[
+    "choco install mingw",
+    "choco install mpfr",
+    "choco install cmake"
+]
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
