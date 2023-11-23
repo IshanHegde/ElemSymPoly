@@ -46,6 +46,7 @@ target_compile_options(pyElemSymPoly PUBLIC
         -fPIC
 )
 if (APPLE)
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 else()
     target_link_options(pyElemSymPoly PUBLIC -flto -fomit-frame-pointer -fPIC)
 endif ()
