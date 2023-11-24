@@ -27,7 +27,7 @@ before-all=[
     "choco install mingw",
     "choco install msys2",
     "choco install cmake",
-    "pacman -S mingw-w64-x86_64-toolchain",
+    #"pacman -S mingw-w64-x86_64-toolchain",
     "choco install git",
     "choco install wget",
     "wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz",
