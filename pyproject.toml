@@ -25,8 +25,13 @@ before-build = [
 ]
 before-all=[
     "choco install mingw",
-    "choco install mpfr",
-    "choco install cmake"
+    "choco install msys2",
+    "choco install cmake",
+    "pacman -S mingw-w64-x86_64-toolchain",
+    "choco install git",
+    "choco install wget",
+    "wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz",
+    "tar -xvzf gmp-6.3.0.tar.xz && cd gmp-6.3.0 && ./configure && make && make check"
 ]
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
@@ -37,3 +42,6 @@ before-all = [
     "brew install gmp"
 ]
 
+#https://github.com/ryepdx/gmp.git
+
+#choco install msys2
