@@ -30,8 +30,8 @@ before-all=[
     #"pacman -S mingw-w64-x86_64-toolchain",
     "choco install git",
     "choco install wget",
-    "wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz",
-    "tar -xvzf gmp-6.3.0.tar.xz && cd gmp-6.3.0 && ./configure && make && make check"
+    "git clone https://github.com/IshanHegde/GMP-6.30-Clone.git",
+    "cd GMP-6.30-Clone && ./configure && make && make check"
 ]
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
