@@ -24,14 +24,13 @@ before-build = [
     "if exist build rmdir /s /q build",
 ]
 before-all=[
-    "cd %userprofile% && git clone https://github.com/IshanHegde/GMP_clone.git",
+    #"cd %userprofile% && git clone https://github.com/IshanHegde/GMP_clone.git",
     "choco install mingw",
     "choco install msys2",
+    "msys2",
+    "pacman -S gcc make m4 -y",
     "choco install cmake",
-    #"pacman -S mingw-w64-x86_64-toolchain",
-    "choco install git",
-    "choco install wget",
-    "cd GMP-6.30-Clone && ./configure && make && make check"
+    "cd C:/ && git clone vcpkg "
 ]
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
