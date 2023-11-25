@@ -25,9 +25,6 @@ before-build = [
 ]
 before-all=[
     #"cd %userprofile% && git clone https://github.com/IshanHegde/GMP_clone.git",
-    "choco install mingw --no-progress",
-    "choco install msys2 --no-progress",
-    "msys2",
     "pacman -S gcc make m4 -y",
     "choco install cmake",
     "cd C:/ && git clone vcpkg "
