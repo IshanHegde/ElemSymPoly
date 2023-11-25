@@ -11,8 +11,8 @@ project(pyElemSymPoly C)
 set(CMAKE_C_STANDARD 99)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-find_package(GMP REQUIRED)
-find_package(MPFR REQUIRED)
+find_package(GMP CONFIG REQUIRED)
+find_package(MPFR CONFIG REQUIRED)
 find_package(Python3 COMPONENTS Development.Module REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Python3_INCLUDE_DIRS})
