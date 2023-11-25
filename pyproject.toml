@@ -25,9 +25,11 @@ before-build = [
 ]
 before-all=[
     #"cd %userprofile% && git clone https://github.com/IshanHegde/GMP_clone.git",
+    "ls",
+    "choco install cmake --no-progress",
     "pacman -S gcc make m4 --noconfirm",
-    "choco install cmake",
-    "cd C:/ && git clone vcpkg "
+    "git clone https://github.com/IshanHegde/GMP_clone.git && cd GMP_clone && ./configure --enable-shared --disable-static && make && make install",
+    "git clone "
 ]
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
