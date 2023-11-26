@@ -22,12 +22,15 @@ else()
     find_package(GMP REQUIRED)
     find_package(MPFR REQUIRED)
 endif ()
-find_package(Python3 COMPONENTS Development.Module REQUIRED)
+find_package(Python3 COMPONENTS Development Interpreter REQUIRED)
 
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Python3_INCLUDE_DIRS})
 
-
+message("Python_FOUND:${Python3_FOUND}")
+message("Python_VERSION:${Python3_VERSION}")
+message("Python_Development_FOUND:${Python3_Development_FOUND}")
+message("Python_LIBRARIES:${Python3_LIBRARIES}")
 
 if(APPLE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
@@ -44,7 +47,7 @@ add_library(pyElemSymPoly SHARED
 
 if (APPLE)
 elseif(WIN32)
-    target_link_libraries(pyElemSymPoly PkgConfig::mpfr PkgConfig::gmp)
+    target_link_libraries(pyElemSymPoly PkgConfig::mpfr PkgConfig::gmp ${Python3_LIBRARIES})
 else()
     target_link_libraries(pyElemSymPoly m mpfr gmp)
 endif ()
