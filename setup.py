@@ -122,7 +122,7 @@ class CMakeBuild(build_ext):
 setup(
     name="pyElemSymPoly",
     packages=find_packages(),
-    version="0.1.13",
+    version="0.1.14",
     license="MIT",
     #home_page="https://github.com/IshanHegde/ElemSymPoly",
     install_requires=[
@@ -136,7 +136,6 @@ setup(
         precise computation of Elementary Symmetric Polynomials and a custom FFT implimentation. \n
         
         The Library is currently in development stage and not production ready. \n
-        
         
         The library is based on applying a divide and conquer approach to compute the elementary symmetric polynomials. \n
         

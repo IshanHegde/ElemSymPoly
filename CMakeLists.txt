@@ -65,7 +65,7 @@ endif ()
 
 target_compile_definitions(pyElemSymPoly PUBLIC VERSION_INFO=${EXAMPLE_VERSION_INFO})
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+
 
 if (ASAN)
     message("ADDRESS SANITIZER")
