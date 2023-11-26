@@ -81,3 +81,4 @@ if (UBSAN)
 endif()
 
 #cibuildwheel --platform linux --archs all
+#-DCMAKE_TOOLCHAIN_FILE=D:/a/ElemSymPoly/ElemSymPoly/vcpkg/scripts/buildsystems/vcpkg.cmake

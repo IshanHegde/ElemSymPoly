@@ -122,7 +122,7 @@ class CMakeBuild(build_ext):
 setup(
     name="pyElemSymPoly",
     packages=find_packages(),
-    version="0.1.11",
+    version="0.1.12",
     license="MIT",
     #home_page="https://github.com/IshanHegde/ElemSymPoly",
     install_requires=[
