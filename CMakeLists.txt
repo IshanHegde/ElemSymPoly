@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 3.4...3.18)
 option(ASAN "Enable AddressSanitizer" OFF)
 option(UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
 
-
-#set(CMAKE_C_COMPILER "gcc")
-
 project(pyElemSymPoly C)
 
 set(CMAKE_C_STANDARD 99)
@@ -59,6 +56,7 @@ target_compile_options(pyElemSymPoly PUBLIC
         -fomit-frame-pointer
         -fPIC
 )
+
 if (APPLE)
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 else()
