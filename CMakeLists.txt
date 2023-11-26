@@ -44,7 +44,7 @@ add_library(pyElemSymPoly SHARED
 
 if (APPLE)
 elseif(WIN32)
-    target_link_libraries(pyElemSymPoly m PkgConfig::mpfr PkgConfig::gmp)
+    target_link_libraries(pyElemSymPoly PkgConfig::mpfr PkgConfig::gmp)
 else()
     target_link_libraries(pyElemSymPoly m mpfr gmp)
 endif ()
