@@ -13,16 +13,15 @@ set(CMAKE_C_STANDARD 99)
 if (WIN32)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)
-    #target_link_libraries(main PkgConfig::gmp)
-
     pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
-    #target_link_libraries(main PRIVATE PkgConfig::mpfr)
+    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 else()
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
     find_package(GMP REQUIRED)
     find_package(MPFR REQUIRED)
+    find_package(Python3 COMPONENTS Development.Module REQUIRED)
 endif ()
-find_package(Python3 COMPONENTS Development Interpreter REQUIRED)
+
 
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Python3_INCLUDE_DIRS})
