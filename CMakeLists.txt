@@ -10,10 +10,20 @@ project(pyElemSymPoly C)
 
 set(CMAKE_C_STANDARD 99)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-find_package(GMP REQUIRED)
-find_package(MPFR REQUIRED)
+if (WIN32)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)
+    target_link_libraries(main PkgConfig::gmp)
+
+    pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
+    target_link_libraries(main PRIVATE PkgConfig::mpfr)
+else()
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+    find_package(GMP REQUIRED)
+    find_package(MPFR REQUIRED)
+endif ()
 find_package(Python3 COMPONENTS Development.Module REQUIRED)
+
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Python3_INCLUDE_DIRS})
 
@@ -33,6 +43,8 @@ add_library(pyElemSymPoly SHARED
 )
 
 if (APPLE)
+elseif(WIN32)
+    target_link_directories(pyElemSymPoly m PkgConfig::mpfr PkgConfig::gmp)
 else()
     target_link_libraries(pyElemSymPoly m mpfr gmp)
 endif ()
