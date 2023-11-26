@@ -32,7 +32,8 @@ before-all=[
 #    "git clone "
     "cd C:\\ && git clone https://github.com/microsoft/vcpkg",
     ".\\vcpkg\\bootstrap-vcpkg.bat",
-    ".\\vcpkg\\vcpkg.exe install gmp && .\\vcpkg\\vcpkg.exe install mpfr"
+    ".\\vcpkg\\vcpkg.exe install gmp && .\\vcpkg\\vcpkg.exe install mpfr",
+    ".\\vcpkg\\vcpkg.exe integrate install"
 
 ]
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
