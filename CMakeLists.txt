@@ -11,27 +11,19 @@ if (WIN32)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)
     pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
-    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 else()
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
     find_package(GMP REQUIRED)
     find_package(MPFR REQUIRED)
-    find_package(Python3 COMPONENTS Development.Module REQUIRED)
 endif ()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+include(FindPython)
 
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Python3_INCLUDE_DIRS})
-
-message("Python_FOUND:${Python3_FOUND}")
-message("Python_VERSION:${Python3_VERSION}")
-message("Python_Development_FOUND:${Python3_Development_FOUND}")
-message("Python_LIBRARIES:${Python3_LIBRARIES}")
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${PYTHON_INCLUDE_DIR})
 
 if(APPLE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
-    include_directories(/usr/local/include)
-    link_libraries(/usr/local/lib)
 endif()
 
 add_library(pyElemSymPoly SHARED
@@ -42,10 +34,11 @@ add_library(pyElemSymPoly SHARED
 )
 
 if (APPLE)
+    target_link_libraries(pyElemSymPoly m mpfr gmp ${Python_Library})
 elseif(WIN32)
-    target_link_libraries(pyElemSymPoly PkgConfig::mpfr PkgConfig::gmp ${Python3_LIBRARIES})
+    target_link_libraries(pyElemSymPoly PkgConfig::mpfr PkgConfig::gmp ${Python_Library})
 else()
-    target_link_libraries(pyElemSymPoly m mpfr gmp)
+    target_link_libraries(pyElemSymPoly m mpfr gmp ${Python_Library})
 endif ()
 
 set_target_properties(pyElemSymPoly PROPERTIES PREFIX "lib" )
@@ -57,6 +50,8 @@ target_compile_options(pyElemSymPoly PUBLIC
         -fPIC
 )
 
+# Apple Platforms by default use the .dylib extension for shared libraries.
+# Python can only load .so files as modules on Linux and MacOS platforms
 if (APPLE)
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 else()
