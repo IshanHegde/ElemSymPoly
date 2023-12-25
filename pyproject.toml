@@ -24,12 +24,8 @@ before-build = [
     "if exist build rmdir /s /q build",
 ]
 before-all=[
-    #"cd %userprofile% && git clone https://github.com/IshanHegde/GMP_clone.git",
-    "ls",
     "choco install cmake --no-progress",
     "pacman -S gcc make m4 base-devel mingw-w64-x86_64-toolchain --noconfirm",
-#    "cd C:\\ && git clone https://github.com/IshanHegde/GMP_clone.git && cd GMP_clone && configure --enable-shared --disable-static && make && make install",
-#    "git clone "
     "cd C:\\ && git clone https://github.com/microsoft/vcpkg",
     ".\\vcpkg\\bootstrap-vcpkg.bat",
     ".\\vcpkg\\vcpkg.exe install gmp && .\\vcpkg\\vcpkg.exe install mpfr",

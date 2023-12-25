@@ -2,10 +2,15 @@ cmake_minimum_required(VERSION 3.4...3.18)
 
 option(ASAN "Enable AddressSanitizer" OFF)
 option(UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
+option(DEBUG "Debug mode" OFF)
 
 project(pyElemSymPoly C)
 
 set(CMAKE_C_STANDARD 99)
+
+if (DEBUG)
+    SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+endif ()
 
 if (WIN32)
     find_package(PkgConfig REQUIRED)
@@ -54,6 +59,7 @@ target_compile_options(pyElemSymPoly PUBLIC
 # Python can only load .so files as modules on Linux and MacOS platforms
 if (APPLE)
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+    target_link_options(pyElemSymPoly PUBLIC -flto -fomit-frame-pointer -fPIC)
 else()
     target_link_options(pyElemSymPoly PUBLIC -flto -fomit-frame-pointer -fPIC)
 endif ()
