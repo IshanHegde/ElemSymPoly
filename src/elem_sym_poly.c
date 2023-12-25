@@ -60,9 +60,9 @@ static PyObject * py_compute_elem_sym_poly(PyObject * Py_UNUSED(self), PyObject 
 			free(elements);
 			return NULL;
 		}
-		else{
-			elements[i] = PyFloat_AsDouble(item);
-		}
+
+		elements[i] = PyFloat_AsDouble(item);
+
 	}
 
 	elementary_symmetric_state_t  state = init_elementary_symmetric_state(N, precision);
