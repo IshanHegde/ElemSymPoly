@@ -59,6 +59,7 @@ target_compile_options(pyElemSymPoly PUBLIC
 # Python can only load .so files as modules on Linux and MacOS platforms
 if (APPLE)
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+    target_link_options(pyElemSymPoly PUBLIC -flto -fomit-frame-pointer -fPIC)
 else()
     target_link_options(pyElemSymPoly PUBLIC -flto -fomit-frame-pointer -fPIC)
 endif ()
