@@ -147,7 +147,7 @@ setup(
         
         The FFT algorithm is a custom implementation of the classic recursive Cooley-Tukey FFT algorithm. \n
         
-        This algorithim has a time complexity of O( N log^2 N ) compared to the naive approach of O( N^2 ) and also has
+        This algorithm has a time complexity of O( N log^2 N ) compared to the naive approach of O( N^2 ) and also has
         arbitrary precision support (currently up to 512 decimal places due to stack overflow concerns). \n
         
         The library also has a Python wrapper for ease of use, and only relies on NumPy, GNU MPFR which in turn relies on
