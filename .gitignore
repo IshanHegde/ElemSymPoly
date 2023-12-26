@@ -3,8 +3,6 @@
 /.vscode/
 build
 !CMakeLists.txt
-*test*
-src/test.c
 /.idea
 */env/
 *.so
