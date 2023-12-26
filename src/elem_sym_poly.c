@@ -64,7 +64,12 @@ static PyObject * py_compute_elem_sym_poly(PyObject * Py_UNUSED(self), PyObject 
 		elements[i] = PyFloat_AsDouble(item);
 
 	}
-
+	/*	Main computation loop:
+	 *	- Initalize the state (i.e. all the auxuliary data structures, memory and precomputed data)
+	 *	- Update the state (i.e. make the state conform to the input. Repeat this step as many times as needed)
+	 *	- Computation (Repeat this step as many times as needed)
+	 *	- Free the state (i.e. clean up all the memory used by the state)
+	 */
 	elementary_symmetric_state_t  state = init_elementary_symmetric_state(N, precision);
 
 	update_elementary_symmetric_state(state, elements, N);

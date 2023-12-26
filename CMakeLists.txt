@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.4...3.18)
 
+# All options are for development/testing purpose
 option(ASAN "Enable AddressSanitizer" OFF)
 option(UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
 option(DEBUG "Debug mode" OFF)
@@ -9,6 +10,7 @@ project(pyElemSymPoly C)
 
 set(CMAKE_C_STANDARD 99)
 
+# For testing
 if (DEBUG)
     SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 endif ()
@@ -57,8 +59,8 @@ target_compile_options(pyElemSymPoly PUBLIC
         -fPIC
 )
 
-# Apple Platforms by default use the .dylib extension for shared libraries.
-# Python can only load .so files as modules on Linux and MacOS platforms
+# Apple Platforms, by default, use the .dylib extension for shared libraries.
+# CPython can only load .so files as modules on Linux and MacOS platforms.
 if (APPLE)
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
     target_link_options(pyElemSymPoly PUBLIC -flto -fomit-frame-pointer -fPIC)
