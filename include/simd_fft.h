@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA *
 #ifndef ELEM_SYM_POLY_SIMD_FFT_H
 #define ELEM_SYM_POLY_SIMD_FFT_H
 
-#include <common.h>
+#include "common.h"
 
 #define data_t double
 #define array_t data_t * restrict

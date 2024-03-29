@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA *
 
 #include <stdint.h>
 #include <stdio.h>
-#include <common.h>
+#include "common.h"
 
 #define data_t mpfr_t
 #define array_t data_t * restrict
