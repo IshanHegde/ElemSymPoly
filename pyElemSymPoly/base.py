@@ -50,5 +50,5 @@ def elem_sym_poly(input_array, precision=128):
 
     polys_list = lib.compute_elem_sym_poly(new_array, array_len_, precision)
 
-    return polys_list
+    return polys_list[1:]
 
