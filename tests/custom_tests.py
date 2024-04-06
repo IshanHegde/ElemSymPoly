@@ -1,8 +1,12 @@
 import sys
 import os
+import time
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 import pyElemSymPoly as esp
 import random
+from itertools import combinations
+from functools import reduce
+from decimal import Decimal
 
 random.seed()
 
@@ -17,7 +21,20 @@ def reference_esp(lst):
 
     ret_lst = []
 
-    pass
+    for i in range(1,len(lst)+1):
+
+        combs = list(combinations(lst, i))
+
+        value = Decimal(0)
+
+        for comb in combs:
+
+            product = reduce(lambda x, y: x * y, comb)
+            value += Decimal(product)
+        
+        ret_lst.append(float(value))
+    
+    return ret_lst
 
 # ------------- [ Input different lengths from 0 to 65536 ] -------------
 
@@ -25,7 +42,7 @@ input_len_null = []
 
 input_len_dict = {}
 
-for num in range(0,4):
+for num in range(1,10):
 
     max_len = 2**num
     cur_lst = []
@@ -38,6 +55,11 @@ for num in range(0,4):
 
 for key, value in input_len_dict.items():
 
-    print(key)
+    print(len(value))
+    lib_time_start = time.time()
+    esp_values = esp.elem_sym_poly(value, precision = 256)
 
-    print(esp.elem_sym_poly(value))
+    ref_values = reference_esp(value)
+
+    for esp_val, ref_val in zip(esp_values, ref_values):
+        print(abs(esp_val - ref_val) < FLOAT_64_EPS)
