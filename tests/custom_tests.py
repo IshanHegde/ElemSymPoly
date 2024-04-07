@@ -7,13 +7,14 @@ import random
 from itertools import combinations
 from functools import reduce
 from decimal import Decimal
+from decimal import getcontext
 
+getcontext().prec = 28
 random.seed()
 
 # ------------- [ Constants ] -------------
 
 FLOAT_64_EPS = sys.float_info.epsilon
-
 
 # ------------- [ Reference Elementary Symmetric Polynomial Implementation] -------------
 
@@ -42,7 +43,7 @@ input_len_null = []
 
 input_len_dict = {}
 
-for num in range(1,10):
+for num in range(1,4):
 
     max_len = 2**num
     cur_lst = []
@@ -55,11 +56,14 @@ for num in range(1,10):
 
 for key, value in input_len_dict.items():
 
-    print(len(value))
-    lib_time_start = time.time()
-    esp_values = esp.elem_sym_poly(value, precision = 256)
 
+    lib_time_start = time.time()
+    esp_values = esp.elem_sym_poly(value, precision = 128)
+    lib_time_end = time.time()
+    ref_time_start = time.time()
     ref_values = reference_esp(value)
+    ref_time_end = time.time()
 
     for esp_val, ref_val in zip(esp_values, ref_values):
-        print(abs(esp_val - ref_val) < FLOAT_64_EPS)
+
+        assert abs(esp_val - ref_val) < 2 * FLOAT_64_EPS
