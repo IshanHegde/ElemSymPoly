@@ -7,7 +7,6 @@ option(DEBUG "Debug mode" OFF)
 
 project(pyElemSymPoly C)
 
-
 set(CMAKE_C_STANDARD 99)
 
 # For testing
@@ -90,6 +89,8 @@ if (UBSAN)
         message("UB SANITIZER is currently only supported for Linux in this project")
     endif ()
 endif()
+
+message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
 
 #cibuildwheel --platform linux --archs all
 #-DCMAKE_TOOLCHAIN_FILE=D:/a/ElemSymPoly/ElemSymPoly/vcpkg/scripts/buildsystems/vcpkg.cmake
